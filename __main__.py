@@ -1,4 +1,6 @@
 from agents import *
+from model import *
+from excel_import import *
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -7,6 +9,8 @@ if __name__ == "__main__":
     N = 20 #number of steps
     for i in range(N):
         model.step()
+
+"""
     agent_counts = np.zeros((model.grid.width, model.grid.height))
     for cell in model.grid.coord_iter():
         cell_content, x, y = cell
@@ -15,3 +19,4 @@ if __name__ == "__main__":
     plt.imshow(agent_counts, interpolation='nearest')
     plt.colorbar()
     plt.show()
+"""
