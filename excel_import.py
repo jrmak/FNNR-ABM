@@ -50,7 +50,9 @@ def assign_variable_per_hh(x, y):
                         var = str(CellObj.value)
                 elif x!= y:
                     if CellObj.value != -3 and CellObj.value != -1:
-                        var.append(CellObj.value)
+                        #var.append(CellObj.value) #last parcel only
+                        var = str(CellObj.value)
+                        pass
                 else:
                     pass
     return var
@@ -63,4 +65,14 @@ def return_values(x,y):
     #print(variable_per_hh) #Example: returns genders of individuals in the first hh as a list
     return variable_per_hh
 
-print(return_values(9, 'GTGP_longitude'))
+def convert_lat_long(coord):
+    """Converts coordinates from format 27,59,30.747 to 27.99184177"""
+    coordlist = coord.strip("[]").split(",")
+    try:
+        degree = int(coordlist[0])
+        minutes = int(coordlist[1])
+        seconds = float(coordlist[2])
+        converted = degree + (minutes / 60) + (seconds / 3600)
+        return converted
+    except:
+        pass
