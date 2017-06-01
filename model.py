@@ -1,8 +1,8 @@
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
-from agents import HouseholdAgent
-from excel_import import *
+from FNNR_ABM.agents import HouseholdAgent
+from FNNR_ABM.excel_import import *
 
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
@@ -32,8 +32,21 @@ class ABM(Model):
         """Create the household agents"""
         #first land parcel only for now
         for i in hh_id_list: #from excel_import
-            x = convert_lat_long(str(return_values(i, 'GTGP_latitude')))
-            y = convert_lat_long(str(return_values(i, 'GTGP_longitude')))
+
+            try:
+                x = convert_fraction_lat(
+                    convert_lat_long(
+                        str(return_values(i, 'GTGP_latitude'))
+                    )
+                ) * self.space.x_max
+
+                y = convert_fraction_long(
+                    convert_lat_long(
+                        str(return_values(i, 'GTGP_longitude'))
+                    )
+                ) * self.space.y_max
+            except:
+                pass
             pos = (x,y)
             try:
                 f_age = float(return_values(i, 'age'))

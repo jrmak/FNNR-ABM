@@ -1,6 +1,6 @@
 from mesa import Agent
 import random
-from excel_import import *
+from FNNR_ABM.excel_import import *
 
 class HouseholdAgent(Agent): #child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
@@ -39,7 +39,7 @@ class HouseholdAgent(Agent): #child class of Mesa's generic Agent class
         self.mig_prob = mig_prob #migration probability: will need to calc later, preset 0.5
         self.num_labor = num_labor #people in hh who can work, preset to 15-65
         self.min_req_labor = min_req_labor #preset
-        self.comp_sign = comp_sign #compensation
+        self.comp_sign = comp_sign #binary: does GTGP income have a significant influence towards migration decisions?
         #more attributes will be added later on
 
     def gtgp_change(self):
@@ -52,8 +52,12 @@ class HouseholdAgent(Agent): #child class of Mesa's generic Agent class
                     self.num_labor -= 1
                     self.num_mig += 1 #migration
 
-        if self.num_labor < self.min_req_labor:
+        chance = random.random()
+        if chance > 0.95:
             self.GTGP_part = 1
+
+        #if self.num_labor < self.min_req_labor:
+        #    self.GTGP_part = 1
 
     def step(self):
         """See pseudo-code document"""

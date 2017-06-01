@@ -76,3 +76,28 @@ def convert_lat_long(coord):
         return converted
     except:
         pass
+
+def convert_fraction_lat(coord):
+    """Converts coordinates into fractions to fit into continuous space"""
+    #print(coord, ' latitude')
+    lowerbound = 27.95
+    upperbound = 28
+    try:
+        result = (coord - lowerbound) / (upperbound - lowerbound)
+        #print(result, ' lat result')
+        if result < 1: #some errant latitudes at 27.65
+            return result
+    except:
+        pass
+
+def convert_fraction_long(coord):
+    """Converts coordinates into fractions to fit into continuous space"""
+    #print(coord,' longitude')
+    lowerbound = 108.65
+    upperbound = 108.83
+    try:
+        result = (coord - lowerbound) / (upperbound - lowerbound)
+        #print(result, 'long result')
+        return result
+    except:
+        pass
