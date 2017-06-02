@@ -13,9 +13,10 @@ def assign_sheet_parameters(hh_id, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
     parameters = []
     row = str(hh_id + 2)
-    if variable.lower() == 'gender':
-        parameters.append(str('X'+ row))
-        parameters.append(str('AF' + row))
+    #all lowercase!
+    if variable.lower() == 'gtgp_area':
+        parameters.append(str('DM'+ row))
+        parameters.append(str('DQ' + row))
     elif variable.lower() == 'age':
         parameters.append(str('AG'+ row))
         parameters.append(str('AO' + row))
@@ -36,7 +37,7 @@ def assign_sheet_parameters(hh_id, variable):
         parameters.append(str('JT' + row))
     #add more later
     else:
-        print('Sorry, that is not a valid variable category.')
+        print('Sorry,', variable, 'is not a valid variable category.')
         pass
     return parameters
 
@@ -48,12 +49,14 @@ def assign_variable_per_hh(x, y):
                 if x == y:
                     if CellObj.value != -3 and CellObj.value != -1:
                         var = str(CellObj.value)
+                        print(var)
                 elif x!= y:
                     if CellObj.value != -3 and CellObj.value != -1:
                         #var.append(CellObj.value) #last parcel only
                         var = str(CellObj.value)
                         pass
                 else:
+                    print('this is it')
                     pass
     return var
 
@@ -64,6 +67,8 @@ def return_values(x,y):
     variable_per_hh = assign_variable_per_hh(hh_id_variable[0], hh_id_variable[1])
     #print(variable_per_hh) #Example: returns genders of individuals in the first hh as a list
     return variable_per_hh
+
+#Example: return_valies(1,'gender')
 
 def convert_lat_long(coord):
     """Converts coordinates from format 27,59,30.747 to 27.99184177"""

@@ -6,10 +6,8 @@ def agent_draw(agent):
     draw = {"Shape": "circle",
             "r": 1,
             "Filled": "true"}
-#    settings = {
-#        "static_path": os.path.join(os.path.dirname('Users\jmak4\PycharmProjects\FNNR_ABM\FNNR_ABM'), "static")}
 
-    if agent.GTGP_part == 1:
+    if agent.GTGP_part_flag == 1:
         draw["Color"] = "green"
         draw["Layer"] = 0
         draw["r"] = 3
@@ -21,7 +19,7 @@ def agent_draw(agent):
 
 agent_canvas = SimpleCanvas(agent_draw, 700, 700)
 
-server = ModularServer(ABM, [agent_canvas], "GTGP Participation Over Time",
+server = ModularServer(ABM, [agent_canvas], "GTGP Enrollment of Land Over Time",
                        100, 10, 10)
 
 server.launch()

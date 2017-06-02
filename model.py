@@ -8,7 +8,7 @@ class ABM(Model):
     """Handles agent creation, placement, and value changes"""
     def __init__(self, n_agents, width, height, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
                  num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, GTGP_part = 0,
-                 GTGP_coef = 0):
+                 GTGP_coef = 0, GTGP_part_flag = 0):
         #default values set for now, will define when model runs agents
         self.num_agents = n_agents
         self.GTGP_land = GTGP_land
@@ -20,6 +20,7 @@ class ABM(Model):
         self.num_labor = num_labor
         self.GTGP_part = GTGP_part
         self.GTGP_coef = GTGP_coef
+        self.GTGP_part_flag = GTGP_part_flag
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         #class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
         #methods: get_distance, get_neighbors, move_agent, out_of_bounds, place_agent
@@ -32,7 +33,6 @@ class ABM(Model):
         """Create the household agents"""
         #first land parcel only for now
         for i in hh_id_list: #from excel_import
-
             try:
                 x = convert_fraction_lat(
                     convert_lat_long(
