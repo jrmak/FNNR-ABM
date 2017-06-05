@@ -1,4 +1,6 @@
-v1.2 (planned) - 6/5/2017 - Simulation running with data values clarified. Code comments added.
+<h1>Version History</h1>
+
+v1.2 - 6/5/2017 - Simulation running with some data values clarified. Restructured agents to new pseudo-code instructions.
 v1.1 - 6/2/2017 - Simulation running with Excel data (some dummy values) imported into simulation.
 v1.0 - 6/1/2017 - ABM dummy simulation and server running.
 5/31/2017 - day off (requested)
@@ -6,3 +8,11 @@ v0.5 - 5/30/2017 - Code setup; data imported from Excel to Python variables
 5/19/17 - day off (Memorial Day)
 5/24 - 5/26/17 - Data structure, classes, and variables formed
 5/23/17 - Initial meeting
+
+<h1>To-do List:</h1>
+
+- Update all self values with imported data values
+- Add simlulation map/window axis labels (coordinates)
+- Add simulation map/window legend
+- Implement BatchRunner (Mesa) for automated trials/testing
+- Implement DataCollector (Mesa) for step-by-step data collection
