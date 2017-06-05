@@ -1,7 +1,7 @@
 from openpyxl import *
 
-os.chdir(r'C:\Users\jmak4\Desktop\FNNR-ABM\2016-Survey-Data')
-currentbook = 'FNNR_2016_Survey_data_request_4-14.xlsx'
+os.chdir(r'C:\Users\jmak4\PycharmProjects\FNNR_ABM\FNNR_ABM')
+currentbook = 'FNNR_2016_Survey_psuedo_0602.xlsx'
 
 wbglobal = load_workbook(currentbook)
 sheet = wbglobal.active
@@ -23,6 +23,12 @@ def assign_sheet_parameters(hh_id, variable):
     elif variable.lower() == 'education':
         parameters.append(str('AY'+ row))
         parameters.append(str('BG' + row))
+    elif variable.lower() == 'house_longitude':
+        parameters.append(str('CA' + row))
+        parameters.append(str('CA' + row))
+    elif variable.lower() == 'house_latitude':
+        parameters.append(str('CB' + row))
+        parameters.append(str('CB' + row))
     elif variable.lower() == 'gtgp_longitude':
         parameters.append(str('DW' + row))
         parameters.append(str('EA' + row))
@@ -47,17 +53,13 @@ def assign_variable_per_hh(x, y):
     for Column in sheet[x:y]:
             for CellObj in Column:
                 if x == y:
-                    if CellObj.value != -3 and CellObj.value != -1:
+                    if CellObj.value not in [-1, -3, '-,1', '-3']:
                         var = str(CellObj.value)
-                        print(var)
                 elif x!= y:
-                    if CellObj.value != -3 and CellObj.value != -1:
-                        #var.append(CellObj.value) #last parcel only
-                        var = str(CellObj.value)
+                    if CellObj.value not in [-1, -3, '-,1', '-3']:
+                        var.append(CellObj.value)
+                        #var = str(CellObj.value)
                         pass
-                else:
-                    print('this is it')
-                    pass
     return var
 
 def return_values(x,y):
@@ -65,7 +67,7 @@ def return_values(x,y):
     hh_id_variable = assign_sheet_parameters(x,y)
     #print(hh_id_variable) #Example: ['A3', 'AF3'] if argument is (1, 'gender')
     variable_per_hh = assign_variable_per_hh(hh_id_variable[0], hh_id_variable[1])
-    #print(variable_per_hh) #Example: returns genders of individuals in the first hh as a list
+    #print(variable_per_hh) #Example: ['1', '2', '1'] for genders in a household
     return variable_per_hh
 
 #Example: return_valies(1,'gender')
@@ -80,7 +82,7 @@ def convert_lat_long(coord):
         converted = degree + (minutes / 60) + (seconds / 3600)
         return converted
     except:
-        pass
+        pass #skips over instances where coordinates are empty
 
 def convert_fraction_lat(coord):
     """Converts coordinates into fractions to fit into continuous space"""

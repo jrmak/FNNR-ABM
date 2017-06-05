@@ -1,7 +1,7 @@
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
-from FNNR_ABM.agents import HouseholdAgent
+from FNNR_ABM.agents import *
 from FNNR_ABM.excel_import import *
 
 class ABM(Model):
@@ -25,35 +25,35 @@ class ABM(Model):
         #class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
         #methods: get_distance, get_neighbors, move_agent, out_of_bounds, place_agent
         self.schedule = RandomActivation(self)
-        self.make_agents()
+        self.make_hh_agents()
+        self.make_land_agents()
         self.running = True
 
     #Create agents
-    def make_agents(self):
+    def make_hh_agents(self):
         """Create the household agents"""
-        #first land parcel only for now
         for i in hh_id_list: #from excel_import
             try:
                 x = convert_fraction_lat(
                     convert_lat_long(
-                        str(return_values(i, 'GTGP_latitude'))
+                        str(return_values(i, 'house_latitude'))
                     )
                 ) * self.space.x_max
 
                 y = convert_fraction_long(
                     convert_lat_long(
-                        str(return_values(i, 'GTGP_longitude'))
+                        str(return_values(i, 'house_longitude'))
                     )
                 ) * self.space.y_max
             except:
                 pass
-            pos = (x,y)
+            pos = (x, y)
             try:
                 f_age = float(return_values(i, 'age'))
             except:
                 pass
                 #ignores if household has no land parcels
-            hh = HouseholdAgent(i, self, pos, self.GTGP_part, f_age, self.GTGP_land,
+            hh = HouseholdAgent(i, self, pos, self.GTGP_part, self.GTGP_land,
                             self.GTGP_coef, self.mig_prob, self.num_mig, self.min_req_labor,
                             self.num_labor)
             try:
@@ -61,6 +61,32 @@ class ABM(Model):
             except:
                 pass
             self.schedule.add(hh)
+
+    def make_land_agents(self):
+        """Create the land agents on the map"""
+        #add non-GTGP land parcels
+        for i in hh_id_list: #from excel_import
+            try:
+                x = convert_fraction_lat(
+                    convert_lat_long(
+                        str(return_values(i, 'non_GTGP_latitude'))
+                    )
+                ) * self.space.x_max
+
+                y = convert_fraction_long(
+                    convert_lat_long(
+                        str(return_values(i, 'non_GTGP_longitude'))
+                    )
+                ) * self.space.y_max
+            except:
+                pass
+            try:
+                pos = (x, y)
+                lp = LandParcelAgent(i, self, pos, self.area)
+                self.space.place_agent(lp, pos)
+                self.schedule.add(lp)
+            except:
+                pass
 
     def step(self):
         """Advance the model by one step"""

@@ -11,8 +11,16 @@ def agent_draw(agent):
         draw["Color"] = "green"
         draw["Layer"] = 0
         draw["r"] = 3
-    else:
+    elif agent.GTGP_part_flag == 0:
         draw["Color"] = "black"
+        draw["Layer"] = 0
+        draw["r"] = 3
+    elif agent.area == 1:
+        draw["Color"] = "red"
+        draw["Layer"] = 0
+        draw["r"] = 3
+    else:
+        draw["Color"] = "blue"
         draw["Layer"] = 1
         draw["r"] = 3
     return draw
