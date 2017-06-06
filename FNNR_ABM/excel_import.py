@@ -59,30 +59,32 @@ def assign_variable_per_hh(x, y):
                     if CellObj.value not in [-1, -3, '-,1', '-3']:
                         var.append(CellObj.value)
                         #var = str(CellObj.value)
-                        pass
     return var
 
-def return_values(x,y):
+def return_values(hh_id, var):
     """Returns values given hh_id and variable (combines previous functions)"""
-    hh_id_variable = assign_sheet_parameters(x,y)
+    #Example: return_values(1,'gender')
+    hh_id_variable = assign_sheet_parameters(hh_id, var)
     #print(hh_id_variable) #Example: ['A3', 'AF3'] if argument is (1, 'gender')
     variable_per_hh = assign_variable_per_hh(hh_id_variable[0], hh_id_variable[1])
     #print(variable_per_hh) #Example: ['1', '2', '1'] for genders in a household
     return variable_per_hh
 
-#Example: return_valies(1,'gender')
-
 def convert_lat_long(coord):
     """Converts coordinates from format 27,59,30.747 to 27.99184177"""
     coordlist = coord.strip("[]").split(",")
-    try:
-        degree = int(coordlist[0])
+    for coordx in coordlist:
+        coordx.replace(coordx, coordx.strip("'").strip(" "))
+        #print(coordlist)
+    if coordlist[0] != None and coordlist[0] != '':
+        degree = int(coordlist[0].strip("'"))
         minutes = int(coordlist[1])
-        seconds = float(coordlist[2])
+        seconds = float(coordlist[2].strip("'"))
         converted = degree + (minutes / 60) + (seconds / 3600)
         return converted
-    except:
-        pass #skips over instances where coordinates are empty
+
+    #except:
+        #pass  #skips over instances where coordinates are empty
 
 def convert_fraction_lat(coord):
     """Converts coordinates into fractions to fit into continuous space"""

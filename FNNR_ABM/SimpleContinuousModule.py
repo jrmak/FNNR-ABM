@@ -1,8 +1,7 @@
 from mesa.visualization.ModularVisualization import VisualizationElement
 
-
 class SimpleCanvas(VisualizationElement):
-    package_includes = ["simple_continuous_canvas.js"]
+    local_includes = ["simple_continuous_canvas.js"]
     portrayal_method = None
     canvas_height = 700
     canvas_width = 700
@@ -28,9 +27,9 @@ class SimpleCanvas(VisualizationElement):
                  (model.space.x_max - model.space.x_min))
                 y = ((y - model.space.y_min) /
                  (model.space.y_max - model.space.y_min))
+                portrayal["x"] = x
+                portrayal["y"] = y
+                space_state.append(portrayal)
             except:
                 pass
-            portrayal["x"] = x
-            portrayal["y"] = y
-            space_state.append(portrayal)
         return space_state
