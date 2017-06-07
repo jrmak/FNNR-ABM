@@ -10,11 +10,11 @@ Openpyxl - Helps import data values into Python code from Excel files
 
 ## Files
 
-* [FNNR_2016_Survey_pseudo_0602.zip](FNNR_2016_Survey_pseudo_0602.zip): Password-protected to protect research. Excel file containing data for import.
-* [Version History.txt](Version History.txt): Describes daily updates and changes (commit notes are usually blank).
-* [FNNR-ABM User's Manual.docx](FNNR-ABM User's Manual.docx): A comprehensive guide for a beginner to Python who may need to use these files. In progress.
+* FNNR_2016_Survey_psuedo_0602.zip: (typo: pseudo, sp) Password-protected to protect research. Excel file containing data for import.
+* Version History.txt: Describes daily updates and changes (commit notes are usually blank).
+* FNNR-ABM User's Manual.docx: A comprehensive guide for a beginner to Python who may need to use these files. In progress.
 
-   within FNNR_ABM:
+  within FNNR_ABM:
 
 * [FNNR_ABM/model.py](FNNR_ABM/model.py): Core model file; places agents on the simulation.
 * [FNNR_ABM/agents.py](FNNR_ABM/agents.py): Contains the agent classes (HouseholdAgent and child classes IndividualAgent/LandParcelAgent, as well as PESAgent, a policy agent that will be activated later), and defines agent behavior at each step of the simulation. 
