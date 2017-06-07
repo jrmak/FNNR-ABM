@@ -1,3 +1,10 @@
+# !/usr/bin/python
+
+"""
+This document uses the javascript file "simple_continuous_canvas.js"
+to render the map/simulation visualization space.
+"""
+
 from mesa.visualization.ModularVisualization import VisualizationElement
 
 class SimpleCanvas(VisualizationElement):
@@ -7,9 +14,7 @@ class SimpleCanvas(VisualizationElement):
     canvas_width = 700
 
     def __init__(self, portrayal_method, canvas_height=700, canvas_width=700):
-        '''
-        Instantiate a new SimpleCanvas
-        '''
+        """Instantiate a new SimpleCanvas"""
         self.portrayal_method = portrayal_method
         self.canvas_height = canvas_height
         self.canvas_width = canvas_width
@@ -23,10 +28,14 @@ class SimpleCanvas(VisualizationElement):
             portrayal = self.portrayal_method(obj)
             x, y = obj.pos
             try:
-                x = ((x - model.space.x_min) /
-                 (model.space.x_max - model.space.x_min))
-                y = ((y - model.space.y_min) /
-                 (model.space.y_max - model.space.y_min))
+                x = (
+                        (x - model.space.x_min) /
+                        (model.space.x_max - model.space.x_min)
+                    )
+                y = (
+                        (y - model.space.y_min) /
+                        (model.space.y_max - model.space.y_min)
+                    )
                 portrayal["x"] = x
                 portrayal["y"] = y
                 space_state.append(portrayal)
