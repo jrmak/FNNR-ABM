@@ -13,10 +13,13 @@ v0.5 - 5/30/2017 - Code setup; data imported from Excel to Python variables
 Other Activity History
 6/6/2017 - Began document: 'FNNR-ABM User Manual'
 
-To-do List:
+To-do List
 
 - Update all self values with imported data values *IN PROGRESS
 - Add simlulation map/window axis labels (coordinates)
 - Add simulation map/window legend
 - Implement BatchRunner (Mesa) for automated trials/testing
 - Implement DataCollector (Mesa) for step-by-step data collection
+
+Bug Fixes Needed
+- tornado WARNING:404 favicon.ico missing (safe to ignore)
