@@ -7,9 +7,18 @@ This document runs the main model, placing agents into the ABM.
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import ContinuousSpace
+from mesa.datacollection import DataCollector
 from agents import *
 from excel_import import *
 
+
+def show_num_mig(model):
+    """Returns the average # of migrants / year in each household"""
+    num_mig = [agent.num_mig for agent in model.schedule.agents]
+    X = sorted(num_mig)
+    num_agents = model.num_agents
+    B = sum(X) / num_agents  # 17: 1999-2016
+    return B
 
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
@@ -39,6 +48,11 @@ class ABM(Model):
         self.make_hh_agents()
         self.make_land_agents()
         self.running = True
+
+        self.datacollector = DataCollector(
+            model_reporters={'Average Number of Migrants': show_num_mig},
+            agent_reporters={'Number of Migrants': lambda a: a.num_mig}
+        )
 
     def determine_pos(self, hh_id, latitude, longitude):
         """Determine position of agent on map"""
@@ -101,6 +115,7 @@ class ABM(Model):
 
     def step(self):
         """Advance the model by one step"""
+        self.datacollector.collect(self)
         self.schedule.step()
         #for i in range(10):
         #    self.schedule.step()  # run 10 steps at once
