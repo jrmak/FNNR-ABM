@@ -11,12 +11,12 @@ from excel_import import *
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
-    def __init__(self, hh_id, model, pos, admin_village = 1, nat_village = 1, land_area = 100,
+    def __init__(self, unique_id, model, pos, admin_village = 1, nat_village = 1, land_area = 100,
                  charcoal = 10, GTGP_dry = 50, GTGP_rice = 50, total_dry = 50, total_rice = 50,
-                 NCFP = 1, num_mig = 1, income = 100, mig_prob = 0.5, num_labor = 20,
+                 NCFP = 1, num_mig = 0, income = 100, mig_prob = 0.5, num_labor = 0,
                  min_req_labor = 1, comp_sign = 0.1, GTGP_coef = 0, GTGP_part = 0):
 
-        super().__init__(hh_id, model)
+        super().__init__(unique_id, model)  # unique_id = household id
         self.pos = pos  # resident location
         self.admin_village = admin_village
         self.nat_village = nat_village
@@ -68,30 +68,42 @@ class LandParcelAgent(HouseholdAgent):
 
     def gtgp_change(self):
         """See pseudo-code document: predicts GTGP participation per household"""
-        for hh in hh_id_list:  # for each household,
-            self.num_mig = convert_num_mig(return_values(hh, 'num_mig')) / 17  # sets num_mig in hh
+        for hh in agents: # for each household,
+            #self.num_mig = convert_num_mig(return_values(hh, 'num_mig')) / 17  # sets num_mig in hh
             # 17: 1999-2016, so num_mig is average yearly number of migrants per household
-            agelist = return_values(hh, 'age')  # find the ages of people in hh
-            if agelist[0] is not None:
-                self.num_labor = 0
-                for age in agelist:  # for each person,
-                    try:
-                        if 15 < float(age) < 65:  # if at least one person is 15-65 years old,
-                            # if return_values(i,'GTGP_area') != 'None' and return_values(i, 'GTGP_area') != '[]':
-                            self.num_labor += 1  # defines number of laborers as people aged 15 < x < 65
-                            self.GTGP_part = 1  # enroll them
-                            break  # avoid redundant flagging
-                    except:
-                        pass  # covers situations in which age is 'NoneType'
-            if self.GTGP_part_flag == 0:  # test
-                self.GTGP_coef = uniform(0, 0.51)  # random coefficient
-                self.GTGP_comp = 15  # calculated later
+            if self.num_labor == 0 and self.income == 100:
+                laborchance = randint(1,6)
+                self.num_labor = laborchance  # initialize number of laborers
+            #agelist = return_values(hh, 'age')  # find the ages of people in hh
+            #if agelist[0] is not None:  # if there are people in the household,
+            #    for age in agelist:  # for each person,
+            #        try:
+            #            if 15 < float(age) < 59:  # if the person is 15-65 years old,
+            #                # if return_values(i,'GTGP_area') != 'None' and return_values(i, 'GTGP_area') != '[]':
+            #                self.num_labor += 1  # defines number of laborers as people aged 15 < x < 65
+            #        except:
+            #            pass  # covers situations in which age is 'NoneType'
+            #print(self.num_labor, 'laborers')  # test
+            try:
+                if return_values(hh, 'GTGP_area')[0] is not '' or None:
+                    self.GTGP_part = 1
+                    # break  # avoid redundant flagging
+            except:
+                pass
+            self.GTGP_coef = uniform(0, 0.55)  # random coefficient
+            compchance = randint(500, 2000)
+            self.GTGP_comp = compchance  # calculated later
+            incomechance = randint(5000, 20000)
+            self.income = incomechance
+            # later: depends on plant type and land area and PES policy
             if (self.GTGP_coef * self.GTGP_part) > self.mig_prob and (self.GTGP_comp / self.income) > self.comp_sign:
                 if self.num_labor > 0:
                     self.num_labor -= 1
                     self.num_mig += 1  # migration occurs
-            if self.num_labor < self.min_req_labor:
-                self.GTGP_part_flag = 1  # sets flag for enrollment of more land
+                    # print(hh, ' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
+                    break
+                if self.num_labor < self.min_req_labor:
+                    self.GTGP_part_flag = 1  # sets flag for enrollment of more land
 
     def gtgp_test(self):
         """Basic formula for testing web browser simulation; each step, 5% of agents change flags"""

@@ -6,7 +6,7 @@ This document runs the server and helps visualize the agents.
 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
-from model import ABM
+from model import *
 from SimpleContinuousModule import SimpleCanvas
 
 def agent_draw(agent):
@@ -49,13 +49,8 @@ def agent_draw(agent):
 
 agent_canvas = SimpleCanvas(agent_draw, 700, 700)
 
-
 chart = ChartModule([{"Label": 'Average Number of Migrants',
-                      "Color": "Black"}])
-                    #data_collector_name='datacollector')
-
-# migrants = datacollector.get_agent_vars_dataframe()
-# migrants.head()
+                    "Color": "Black"}], data_collector_name='datacollector')
 
 # set webpage header here
 server = ModularServer(ABM, [agent_canvas, chart], "GTGP Enrollment of Land Over Time",

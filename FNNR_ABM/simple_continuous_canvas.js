@@ -1,6 +1,3 @@
-/**
- * Created by Judy on 6/1/2017.
- */
 var ContinuousVisualization = function(height, width, context) {
 	var height = height;
 	var width = width;

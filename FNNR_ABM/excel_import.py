@@ -16,7 +16,7 @@ wbglobal = load_workbook(currentbook)
 sheet = wbglobal.active
 
 # a list of 96 hh_ids; hardcoded since number from excel file not likely to change
-hh_id_list = list(range(1, 97))
+agents = list(range(1, 97))
 
 
 def assign_sheet_parameters(hh_id, variable):

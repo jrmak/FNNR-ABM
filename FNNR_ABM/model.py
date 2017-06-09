@@ -50,9 +50,13 @@ class ABM(Model):
         self.running = True
 
         self.datacollector = DataCollector(
-            model_reporters={'Average Number of Migrants': show_num_mig},
-            agent_reporters={'Number of Migrants': lambda a: a.num_mig}
-        )
+            model_reporters={'Average Migrants': show_num_mig},
+            agent_reporters={'Migrants': lambda a: a.num_mig})
+        self.return_df()
+
+    def return_df(self):
+        migrants = self.datacollector.get_agent_vars_dataframe()
+        migrants.head()
 
     def determine_pos(self, hh_id, latitude, longitude):
         """Determine position of agent on map"""
@@ -76,7 +80,7 @@ class ABM(Model):
     # Create agents
     def make_hh_agents(self):
         """Create the household agents"""
-        for hh_id in hh_id_list:  # from excel_import
+        for hh_id in agents:  # from excel_import
             pos = self.determine_pos(hh_id, 'house_latitude', 'house_longitude')
             try:
                 hh = HouseholdAgent(hh_id, self, pos, self.admin_village, self.GTGP_part, self.GTGP_land,
@@ -91,7 +95,7 @@ class ABM(Model):
     def make_land_agents(self):
         """Create the land agents on the map"""
         # add non-GTGP land parcels
-        for hh_id in hh_id_list:  # from excel_import
+        for hh_id in agents:  # from excel_import
             pos = self.determine_pos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
             try:
                 lp = LandParcelAgent(hh_id, self, pos, self.area, self.GTGP_part_flag)
@@ -101,7 +105,7 @@ class ABM(Model):
             except:
                 pass
         # add GTGP land parcels
-        for hh_id in hh_id_list:  # from excel_import
+        for hh_id in agents:  # from excel_import
             pos = self.determine_pos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
             try:
                 lp = LandParcelAgent(hh_id, self, pos, self.area, self.GTGP_part_flag)
@@ -109,8 +113,8 @@ class ABM(Model):
                 self.space.place_agent(lp, pos)
                 self.schedule.add(lp)
             except:
-                # hh_id_list.remove(hh_id)
-                # print(hh_id_list)
+                # agents.remove(hh_id)
+                # print(agents)
                 pass
 
     def step(self):
