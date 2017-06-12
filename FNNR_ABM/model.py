@@ -18,16 +18,17 @@ def show_num_mig(model):
     X = sorted(num_mig)
     num_agents = model.num_agents
     B = sum(X) / num_agents  # 17: 1999-2016
+    #print(B)
     return B
 
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
-    def __init__(self, n_agents, width, height, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
+    def __init__(self, num_agents, width, height, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
                  num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, GTGP_part = 0,
-                 GTGP_coef = 0, GTGP_part_flag = 0, area = 1, admin_village = 1):
+                 GTGP_coef = 0, GTGP_part_flag = 0, area = 1, admin_village = 1, GTGP_enrolled = 0):
         # default values set for now, will define when model runs agents
 
-        self.num_agents = n_agents
+        self.num_agents = num_agents
         self.GTGP_land = GTGP_land
         self.GTGP_latitude = GTGP_latitude
         self.GTGP_longitude = GTGP_longitude
@@ -40,6 +41,7 @@ class ABM(Model):
         self.GTGP_part_flag = GTGP_part_flag
         self.area = area
         self.admin_village = admin_village
+        self.GTGP_enrolled = 0
 
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
@@ -50,13 +52,9 @@ class ABM(Model):
         self.running = True
 
         self.datacollector = DataCollector(
-            model_reporters={'Average Migrants': show_num_mig},
+            model_reporters={'Average Number of Migrants': show_num_mig},
             agent_reporters={'Migrants': lambda a: a.num_mig})
-        self.return_df()
 
-    def return_df(self):
-        migrants = self.datacollector.get_agent_vars_dataframe()
-        migrants.head()
 
     def determine_pos(self, hh_id, latitude, longitude):
         """Determine position of agent on map"""
@@ -81,14 +79,16 @@ class ABM(Model):
     def make_hh_agents(self):
         """Create the household agents"""
         for hh_id in agents:  # from excel_import
-            pos = self.determine_pos(hh_id, 'house_latitude', 'house_longitude')
+            hhpos = self.determine_pos(hh_id, 'house_latitude', 'house_longitude')
             try:
-                hh = HouseholdAgent(hh_id, self, pos, self.admin_village, self.GTGP_part, self.GTGP_land,
+                global a
+                a = HouseholdAgent(hh_id, self, hhpos, self.admin_village, self.GTGP_part, self.GTGP_land,
                                     self.GTGP_coef, self.mig_prob, self.num_mig, self.min_req_labor,
                                     self.num_labor)
-                hh.admin_village = 1
-                self.space.place_agent(hh, pos)  # admin_village placeholder
-                self.schedule.add(hh)
+                a.admin_village = 1
+                self.space.place_agent(a, hhpos)  # admin_village placeholder
+                self.schedule.add(a)
+
             except:
                 pass
 
@@ -96,22 +96,22 @@ class ABM(Model):
         """Create the land agents on the map"""
         # add non-GTGP land parcels
         for hh_id in agents:  # from excel_import
-            pos = self.determine_pos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
+            landpos = self.determine_pos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
             try:
-                lp = LandParcelAgent(hh_id, self, pos, self.area, self.GTGP_part_flag)
-                lp.GTGP_part_flag = 0
-                self.space.place_agent(lp, pos)
+                lp = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
+                lp.GTGP_enrolled = 0
+                self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
             except:
                 pass
         # add GTGP land parcels
         for hh_id in agents:  # from excel_import
-            pos = self.determine_pos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
+            landpos = self.determine_pos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
             try:
-                lp = LandParcelAgent(hh_id, self, pos, self.area, self.GTGP_part_flag)
-                lp.GTGP_part_flag = 1
-                self.space.place_agent(lp, pos)
-                self.schedule.add(lp)
+                lp2 = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
+                lp2.GTGP_enrolled = 1
+                self.space.place_agent(lp2, landpos)
+                self.schedule.add(lp2)
             except:
                 # agents.remove(hh_id)
                 # print(agents)

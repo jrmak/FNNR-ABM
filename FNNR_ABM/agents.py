@@ -11,13 +11,13 @@ from excel_import import *
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
-    def __init__(self, unique_id, model, pos, admin_village = 1, nat_village = 1, land_area = 100,
+    def __init__(self, unique_id, model, hhpos, admin_village = 1, nat_village = 1, land_area = 100,
                  charcoal = 10, GTGP_dry = 50, GTGP_rice = 50, total_dry = 50, total_rice = 50,
                  NCFP = 1, num_mig = 0, income = 100, mig_prob = 0.5, num_labor = 0,
-                 min_req_labor = 1, comp_sign = 0.1, GTGP_coef = 0, GTGP_part = 0):
+                 min_req_labor = 1, comp_sign = 0.1, GTGP_coef = 0, GTGP_part = 0, GTGP_part_flag = 0):
 
         super().__init__(unique_id, model)  # unique_id = household id
-        self.pos = pos  # resident location
+        self.hhpos = hhpos  # resident location
         self.admin_village = admin_village
         self.nat_village = nat_village
         self.charcoal = charcoal # consumption
@@ -36,37 +36,10 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.min_req_labor = min_req_labor  # preset
         self.comp_sign = comp_sign  # influence of GTGP income on migration decisions
         self.GTGP_coef = GTGP_coef  # randomly generated
+        self.GTGP_part_flag = GTGP_part_flag #binary; further enrollment of GTGP
         # more attributes will be added later on
 
-    def step(self):
-        """Step behavior for household agents; see pseudo-code document"""
-        self.admin_village = 1
-
-# class CommunityAgent(Agent):
-    # will set attributes later on
-
-class IndividualAgent(HouseholdAgent):
-    """Sets Individual agents; superclass is HouseholdAgent"""
-    def __init__(self, individual_id, model):
-        super().__init__(self, individual_id, model, age = 20, gender = 1, education = 1)
-        self.age = age
-        self.gender = gender
-        self.education = education
-
-class LandParcelAgent(HouseholdAgent):
-    """Sets land parcel agents; superclass is HouseholdAgent"""
-    def __init__(self, land_id, model, pos, GTGP_part_flag = 0, area = 1, latitude = 0,
-                    longitude = 0, plant_type = 1):
-
-        super().__init__(self, land_id, model)
-        self.pos = pos
-        self.GTGP_part_flag = GTGP_part_flag  # binary (GTGP status of land parcel)
-        self.area = area
-        self.latitude = latitude
-        self.longitude = longitude
-        self.plant_type = plant_type
-
-    def gtgp_change(self):
+    def gtgp_enroll(self):
         """See pseudo-code document: predicts GTGP participation per household"""
         for hh in agents: # for each household,
             #self.num_mig = convert_num_mig(return_values(hh, 'num_mig')) / 17  # sets num_mig in hh
@@ -112,8 +85,45 @@ class LandParcelAgent(HouseholdAgent):
             self.GTGP_part_flag = 1
 
     def step(self):
+        """Step behavior for household agents; see pseudo-code document"""
+        self.admin_village = 1
+        self.gtgp_enroll()
+
+# class CommunityAgent(Agent):
+    # will set attributes later on
+
+class IndividualAgent(HouseholdAgent):
+    """Sets Individual agents; superclass is HouseholdAgent"""
+    def __init__(self, unique_id, model):
+        super().__init__(self, unique_id, model, age = 20, gender = 1, education = 1)
+        self.age = age
+        self.gender = gender
+        self.education = education
+
+class LandParcelAgent(HouseholdAgent):
+    """Sets land parcel agents; superclass is HouseholdAgent"""
+    def __init__(self, unique_id, model, landpos, GTGP_part_flag, GTGP_enrolled = 0,
+                 area = 1, latitude = 0, longitude = 0, plant_type = 1):
+
+        super().__init__(self, unique_id, model)
+        self.landpos = landpos
+        self.GTGP_enrolled = GTGP_enrolled
+        self.area = area
+        self.latitude = latitude
+        self.longitude = longitude
+        self.plant_type = plant_type
+        self.GTGP_part_flag = GTGP_part_flag  # inherited from parent class
+
+    def gtgp_convert(self):
+        if self.GTGP_part_flag == 1:  # if the household is set to enroll in GTGP,
+            print(self.hhpos, ';')
+            print(self.landpos,'!')
+          # calculate distance from parcel to household
+            #GTGP_part = 1
+
+    def step(self):
         """Step behavior for LandParcelAgent"""
-        self.gtgp_change()
+        self.gtgp_convert()
 
 class PESAgent(Agent):
     """Sets PES policy agents"""
