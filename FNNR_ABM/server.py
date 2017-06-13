@@ -5,7 +5,7 @@ This document runs the server and helps visualize the agents.
 """
 
 from mesa.visualization.ModularVisualization import ModularServer
-from mesa.visualization.modules import ChartModule
+from mesa.visualization.modules import ChartModule, TextElement
 from model import *
 from SimpleContinuousModule import SimpleCanvas
 
@@ -29,12 +29,12 @@ def agent_draw(agent):
     except:
         pass
     try:
-        if agent.GTGP_part_flag == 0:
+        if agent.GTGP_enrolled == 0:
             draw["Shape"] = "circle"
             draw["Color"] = "black"
             draw["Layer"] = 1
             draw["r"] = 3
-        if agent.GTGP_part_flag == 1:
+        if agent.GTGP_enrolled == 1:
             draw["Shape"] = "circle"
             draw["Color"] = "gold"
             draw["Layer"] = 2
@@ -52,8 +52,22 @@ agent_canvas = SimpleCanvas(agent_draw, 700, 700)
 chart = ChartModule([{"Label": 'Average Number of Migrants',
                     "Color": "Black"}], data_collector_name='datacollector')
 
-# set webpage header here
-server = ModularServer(ABM, [agent_canvas, chart], "GTGP Enrollment of Land Over Time",
+
+migrants = ABM(100, 10, 10)
+migrants.datacollector.get_model_vars_dataframe().head()
+
+class Text(TextElement):
+    def __init__(self):
+        pass
+    def render(self, model):
+        return ("X-axis: migrants | Y-axis; steps (years) | ",
+               "Average # of Migrants per Household: " + str(show_num_mig(model))
+                )
+
+text = Text()
+
+server = ModularServer(ABM, [agent_canvas, chart, text], "GTGP Enrollment of Land Over Time",
                        100, 10, 10)
+
 
 server.launch()  # actual run line

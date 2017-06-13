@@ -18,7 +18,6 @@ sheet = wbglobal.active
 # a list of 96 hh_ids; hardcoded since number from excel file not likely to change
 agents = list(range(1, 97))
 
-
 def assign_sheet_parameters(hh_id, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
     parameters = []
