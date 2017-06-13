@@ -5,13 +5,14 @@ This document runs the main model, placing agents into the ABM.
 """
 
 from mesa import Model
-from mesa.time import RandomActivation
+from mesa.time import StagedActivation
 from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 from agents import *
 from excel_import import *
 
 
+maxlist = []
 def show_num_mig(model):
     """Returns the average # of migrants / year in each household"""
     num_mig = [agent.num_mig for agent in model.schedule.agents]
@@ -46,7 +47,7 @@ class ABM(Model):
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
         # methods: get_distance, get_neighbors, move_agent, out_of_bounds, place_agent
-        self.schedule = RandomActivation(self)
+        self.schedule = StagedActivation(self)
         self.make_hh_agents()
         self.make_land_agents()
         self.running = True
@@ -58,6 +59,9 @@ class ABM(Model):
 
     def determine_pos(self, hh_id, latitude, longitude):
         """Determine position of agent on map"""
+        #print(convert_lat_long(
+        #            str(return_values(hh_id, latitude))
+        #        ))
         try:
             x = convert_fraction_lat(
                 convert_lat_long(
@@ -96,9 +100,24 @@ class ABM(Model):
         """Create the land agents on the map"""
         # add non-GTGP land parcels
         for hh_id in agents:  # from excel_import
-            landpos = self.determine_pos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
             try:
-                lp = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
+                landpos = self.determine_pos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
+                #right now, each household only returns 1 land parcel (first?)
+                #fix that first, then calculate distance
+                hhpos = self.determine_pos(hh_id, 'house_latitude', 'house_longitude')
+                #right now, distance is between each hh and their first lp
+                distance = sqrt(
+                        (landpos[0] - hhpos[0])**2 + (landpos[1] - hhpos[1])**2
+                            )
+                maxlist.append(distance)
+                    # mindex = maxlist.index(max(maxlist))
+                    # print(self.landpos[mindex], hhpos[mindex])
+                    # calculate distance from parcel to household
+                 #distance = 1
+            except:
+                pass
+            try:
+                lp = LandParcelAgent(hh_id, self, landpos, distance, self.area, self.GTGP_enrolled)
                 lp.GTGP_enrolled = 0
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
@@ -107,8 +126,9 @@ class ABM(Model):
         # add GTGP land parcels
         for hh_id in agents:  # from excel_import
             landpos = self.determine_pos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
+            distance = 1
             try:
-                lp2 = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
+                lp2 = LandParcelAgent(hh_id, self, landpos, distance, self.area, self.GTGP_enrolled)
                 lp2.GTGP_enrolled = 1
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)

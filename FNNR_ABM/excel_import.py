@@ -86,43 +86,49 @@ def return_values(hh_id, var):
 
 def convert_lat_long(coord):
     """Converts coordinates from format 27,59,30.747 to 27.99184177"""
+    convertedlist = []
     coordlist = coord.strip("[]").split(",")
     for coordx in coordlist:
         coordx.replace(coordx, coordx.strip("'").strip(" "))
-        # print(coordlist)
-    if coordlist[0] is not None and coordlist[0] != '':
-        degree = int(coordlist[0].strip("'"))
-        minutes = int(coordlist[1])
-        seconds = float(coordlist[2].strip("'"))
-        converted = degree + (minutes / 60) + (seconds / 3600)
-        return converted
+    if coordlist[0] is not None and coordlist[0] != '' and coordlist[0] != -4:
+        indexlist = [0, 3, 6, 9, 12, 15]
+        for i in indexlist:
+            degree = int(coordlist[i].strip("'"))
+            minutes = int(coordlist[i + 1])
+            seconds = float(coordlist[i + 2].strip("'"))
+            converted = degree + (minutes / 60) + (seconds / 3600)
+            convertedlist.append(converted)
+            #fix later
+            return (convertedlist)
 
-def convert_fraction_lat(coord):
+def convert_fraction_lat(coordlist):
     """Converts coordinates into fractions to fit into continuous space"""
     # print(coord, ' latitude')
     # degrees North; determines x-axis bounds of map area on simulation
     lowerbound = 27.95
     upperbound = 28
-    try:
-        result = (coord - lowerbound) / (upperbound - lowerbound)
-        # print(result, ' lat result')
-        if result < 1:  # some errant latitudes at 27.65
-            return result
-    except:
-        pass  # skips over instances where coordinate is empty
+    for coord in coordlist:
+        try:
+            result = (coord - lowerbound) / (upperbound - lowerbound)
+            # print(result, ' lat result')
+            if result < 1:  # some errant latitudes at 27.65
+                return result
+        except:
+            pass  # skips over instances where coordinate is empty
 
-def convert_fraction_long(coord):
+def convert_fraction_long(coordlist):
     """Converts coordinates into fractions to fit into continuous space"""
     # print(coord,' longitude')
     # degrees East; determines y-axis bounds of map area on simulation
     lowerbound = 108.65
     upperbound = 108.83
-    try:
-        result = (coord - lowerbound) / (upperbound - lowerbound)
-        # print(result, 'long result')
-        return result
-    except:
-        pass  # skips over instances where coordinate is empty
+    for coord in coordlist:
+        try:
+            result = (coord - lowerbound) / (upperbound - lowerbound)
+            # print(result, 'long result')
+            return result
+        except:
+            pass  # skips over instances where coordinate is empty
 
 def convert_num_mig(mig_value_list):
     """Converts excel values to actual numbers"""

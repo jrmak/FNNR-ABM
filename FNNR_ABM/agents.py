@@ -8,6 +8,8 @@ It also defines what occurs to the agents at each 'step' of the ABM.
 from mesa import Agent  # Agent superclass from mesa
 from random import *
 from excel_import import *
+from math import sqrt
+
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
@@ -78,6 +80,19 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                 if self.num_labor < self.min_req_labor:
                     self.GTGP_part_flag = 1  # sets flag for enrollment of more land
 
+    def distance_identify(self):
+        """Identify the land parcel furthest away from each hh"""
+        for hh_id in agents:
+            if self.GTGP_part_flag == 1:
+        # calculate distance between that hh and all land parcels
+                for l in landparcels:
+                    distance = sqrt(
+                        (self.landpos[0] - hhpos[0])**2 + (self.landpos[1] - hhpos[1])**2
+                           )
+                    maxlist.append(distance)
+                    mindex = max(maxlist)
+                    #if distance =
+
     def gtgp_test(self):
         """Basic formula for testing web browser simulation; each step, 5% of agents change flags"""
         chance = random()
@@ -87,6 +102,8 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     def step(self):
         """Step behavior for household agents; see pseudo-code document"""
         self.admin_village = 1
+        global hhpos
+        hhpos = self.hhpos
         self.gtgp_enroll()
 
 # class CommunityAgent(Agent):
@@ -116,10 +133,7 @@ class LandParcelAgent(HouseholdAgent):
 
     def gtgp_convert(self):
         if self.GTGP_part_flag == 1:  # if the household is set to enroll in GTGP,
-            print(self.hhpos, ';')
-            print(self.landpos,'!')
-          # calculate distance from parcel to household
-            #GTGP_part = 1
+            GTGP_part = 1 # placeholder
 
     def step(self):
         """Step behavior for LandParcelAgent"""
