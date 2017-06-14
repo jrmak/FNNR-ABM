@@ -53,8 +53,9 @@ chart = ChartModule([{"Label": 'Average Number of Migrants',
                     "Color": "Black"}], data_collector_name='datacollector')
 
 
-migrants = ABM(100, 10, 10)
-migrants.datacollector.get_model_vars_dataframe().head()
+#migrants = ABM(100, 10, 10)
+#step
+# migrants.datacollector.get_model_vars_dataframe().plot()
 
 class Text(TextElement):
     def __init__(self):
