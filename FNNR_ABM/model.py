@@ -5,7 +5,7 @@ This document runs the main model, placing agents into the ABM.
 """
 
 from mesa import Model
-from mesa.time import RandomActivation
+from mesa.time import StagedActivation
 from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 from agents import *
@@ -46,7 +46,7 @@ class ABM(Model):
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
         # methods: get_distance, get_neighbors, move_agent, out_of_bounds, place_agent
-        self.schedule = RandomActivation(self)
+        self.schedule = StagedActivation(self)
         self.make_hh_agents()
         self.make_land_agents()
         self.running = True
@@ -56,30 +56,101 @@ class ABM(Model):
             agent_reporters={'Migrants': lambda a: a.num_mig})
 
 
-    def determine_pos(self, hh_id, latitude, longitude):
+    def return_x(self, hh_id, latitude):
+        """Returns latitudes of land parcels for a given household"""
+        #print(convert_lat_long(
+        #            str(return_values(hh_id, latitude))
+        #        ))
+        convertedlist = []
+        try:
+            xlist = convert_fraction_lat(
+                    convert_lat_long(
+                        str(return_values(hh_id, latitude))
+                    ))
+            teststr = str(return_values(hh_id, latitude))
+            #print(convert_lat_long(teststr),'!')
+            if type(xlist) is not None:
+                for i in range(len(xlist)):
+                    x = xlist[i] * self.space.x_max
+                    convertedlist.append(x)
+        except TypeError:
+            pass
+        return convertedlist
+
+    def return_y(self, hh_id, longitude):
+        """Returns longitudes of land parcels for a given household"""
+        # print(convert_lat_long(
+        #            str(return_values(hh_id, longitude))
+        #        ))
+        convertedlist = []
+        try:
+            ylist = convert_fraction_long(
+                convert_lat_long(
+                    str(return_values(hh_id, longitude))
+                ))
+            #print(ylist)
+            for i in range(len(ylist)):
+                y = ylist[i] * self.space.y_max
+                convertedlist.append(y)
+        except TypeError:
+            pass
+        return convertedlist
+
+    def return_lp_pos_list(self, xlist, ylist):
+        """Returns a list of tuples containing coordinates of land parcels"""
+        convertedlist = []
+        # print(xlist)
+        # print(ylist)
+        for i in range(len(xlist)):
+            x = xlist[i]
+            y = ylist[i]
+            pos = (x, y)
+            convertedlist.append(pos)
+        return convertedlist
+
+    def determine_hhpos(self, hh_id, latitude, longitude):
         """Determine position of agent on map"""
         try:
             x = convert_fraction_lat(
                 convert_lat_long(
                     str(return_values(hh_id, latitude))
                 )
-            ) * self.space.x_max
+            )[0] * self.space.x_max
 
             y = convert_fraction_long(
                 convert_lat_long(
                     str(return_values(hh_id, longitude))
                 )
-            ) * self.space.y_max
+            )[0] * self.space.y_max
             pos = (x, y)
             return pos
-        except:
+        except TypeError:
             pass
+
+    def determine_landpos(self, hh_id, latitude, longitude):
+        """Combines previous functions to return a list of land parcel coordinates"""
+        latlist = self.return_x(hh_id, latitude)
+        longlist = self.return_y(hh_id, longitude)
+        return self.return_lp_pos_list(latlist, longlist)
+
+    def calc_distance(self, hh_id):
+        """Given a household id, return the distances between household and parcels"""
+        # 6/14/2017 currently working on
+        # maxlist = []
+        for hh_id in agents:
+            hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
+            landposlist = self.determine_landpos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
+            for landpos in landposlist:
+                distance = sqrt(
+                    (landpos[0] - hhpos[0]) ** 2 + (landpos[1] - hhpos[1]) ** 2
+                    )
+            maxlist.append(distance)
 
     # Create agents
     def make_hh_agents(self):
         """Create the household agents"""
-        for hh_id in agents:  # from excel_import
-            hhpos = self.determine_pos(hh_id, 'house_latitude', 'house_longitude')
+        for hh_id in agents:  # agents is a list of ints 1-97 from excel_import
+            hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
             try:
                 global a
                 a = HouseholdAgent(hh_id, self, hhpos, self.admin_village, self.GTGP_part, self.GTGP_land,
@@ -89,33 +160,35 @@ class ABM(Model):
                 self.space.place_agent(a, hhpos)  # admin_village placeholder
                 self.schedule.add(a)
 
-            except:
+            except TypeError:
                 pass
 
     def make_land_agents(self):
         """Create the land agents on the map"""
         # add non-GTGP land parcels
         for hh_id in agents:  # from excel_import
-            landpos = self.determine_pos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
-            try:
-                lp = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
-                lp.GTGP_enrolled = 0
-                self.space.place_agent(lp, landpos)
-                self.schedule.add(lp)
-            except:
-                pass
+            landposlist = self.determine_landpos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
+            for landpos in landposlist:
+                try:
+                    lp = LandParcelAgent(hh_id, self, landpos, distance, self.area, self.GTGP_enrolled)
+                    lp.GTGP_enrolled = 0
+                    self.space.place_agent(lp, landpos)
+                    self.schedule.add(lp)
+                except TypeError:
+                    pass
         # add GTGP land parcels
         for hh_id in agents:  # from excel_import
-            landpos = self.determine_pos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
-            try:
-                lp2 = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
-                lp2.GTGP_enrolled = 1
-                self.space.place_agent(lp2, landpos)
-                self.schedule.add(lp2)
-            except:
-                # agents.remove(hh_id)
-                # print(agents)
-                pass
+            landposlist = self.determine_landpos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
+            for landpos in landposlist:
+                try:
+                    lp2 = LandParcelAgent(hh_id, self, landpos, distance, self.area, self.GTGP_enrolled)
+                    lp2.GTGP_enrolled = 1
+                    self.space.place_agent(lp2, landpos)
+                    self.schedule.add(lp2)
+                except TypeError:
+                    # agents.remove(hh_id)
+                    # print(agents)
+                    pass
 
     def step(self):
         """Advance the model by one step"""
