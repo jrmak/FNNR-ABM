@@ -9,6 +9,7 @@ from mesa import Agent  # Agent superclass from mesa
 from random import *
 from excel_import import *
 
+
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
     def __init__(self, unique_id, model, hhpos, admin_village = 1, nat_village = 1, land_area = 100,
@@ -77,6 +78,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                     break
                 if self.num_labor < self.min_req_labor:
                     self.GTGP_part_flag = 1  # sets flag for enrollment of more land
+        return self.GTGP_part_flag
 
     def gtgp_test(self):
         """Basic formula for testing web browser simulation; each step, 5% of agents change flags"""
@@ -87,7 +89,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     def step(self):
         """Step behavior for household agents; see pseudo-code document"""
         self.admin_village = 1
-        self.gtgp_enroll()
+#        self.gtgp_enroll()
 
 # class CommunityAgent(Agent):
     # will set attributes later on
@@ -102,8 +104,8 @@ class IndividualAgent(HouseholdAgent):
 
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
-    def __init__(self, unique_id, model, landpos, GTGP_part_flag, GTGP_enrolled = 0,
-                 area = 1, latitude = 0, longitude = 0, plant_type = 1):
+    def __init__(self, unique_id, model, landpos, GTGP_enrolled = 0,
+                 area = 1, latitude = 0, longitude = 0, maximum = 0, plant_type = 1):
 
         super().__init__(self, unique_id, model)
         self.landpos = landpos
@@ -112,14 +114,17 @@ class LandParcelAgent(HouseholdAgent):
         self.latitude = latitude
         self.longitude = longitude
         self.plant_type = plant_type
-        self.GTGP_part_flag = GTGP_part_flag  # inherited from parent class
+        self.maximum = maximum
 
     def gtgp_convert(self):
+        super(LandParcelAgent, self).gtgp_enroll()
         if self.GTGP_part_flag == 1:  # if the household is set to enroll in GTGP,
-            print(self.hhpos, ';')
-            print(self.landpos,'!')
-          # calculate distance from parcel to household
-            #GTGP_part = 1
+            if self.maximum == 1:
+                #print('this is the case')
+                self.GTGP_enrolled = 1
+            else:
+                pass
+                #print('work on it')
 
     def step(self):
         """Step behavior for LandParcelAgent"""

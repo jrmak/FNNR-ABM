@@ -9,7 +9,7 @@ from openpyxl import *
 
 # Directory in which source file is located, exact name of source file + extension
 os.chdir(r'C:\Users\jmak4\PycharmProjects\FNNR_ABM\FNNR_ABM')  #will need to replace
-currentbook = 'FNNR_2016_Survey_psuedo_0602.xlsx'
+currentbook = 'FNNR_2016_Survey_psuedo_0615.xlsx'
 
 # openpyxl commands
 wbglobal = load_workbook(currentbook)
@@ -120,7 +120,8 @@ def convert_fraction_lat(coordlist):
                 convertedlist.append(result)
         except:
             pass  # skips over instances where coordinate is empty
-        return convertedlist
+        # print(convertedlist)
+    return convertedlist
 
 def convert_fraction_long(coordlist):
     """Converts coordinates into fractions to fit into continuous space"""
@@ -135,7 +136,7 @@ def convert_fraction_long(coordlist):
             convertedlist.append(result)
         except:
             pass  # skips over instances where coordinate is empty
-        return convertedlist
+    return convertedlist
 
 def convert_num_mig(mig_value_list):
     """Converts excel values to actual numbers"""
