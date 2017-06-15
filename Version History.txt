@@ -1,14 +1,18 @@
 Version History
 
-Pseudocode Version 2
-v1.26 - 6/14/2017 - Distance calculation/household linking to each land parcel (last part of pseudocode)
+Pseucode Version 3
+v1.31 - 6/16/2017 - TBD
+
+Pseudocode Version 2 (0612)
+v1.26 - 6/15/2017 - Completed last part of pseudocode, simulation running again
+v1.25 - 6/14/2017 - Distance calculation/household linking to each land parcel (last part of pseudocode)
 v1.24 - 6/13/2017 - Table put on hold, working on linking each household to all land parcels vs. first one only (last part of pseudocode)
 v1.23 - 6/9 and 6/12/2017 - Collaborated with Shuang and drastically changed agent step formula (main loop of pseudocode). Currently working on adding a table; running into issues with pandas.
 v1.22 - 6/8/2017 - Changed agent step formula (self.num_mig). Added migration chart to web simulation.
 v1.21 - 6/7/2017 - Clarified further data values (self.num_mig and self.num_laborers in pseudocode agent step formula). Comments added. Code updated to PEP8 style guidelines.
 v1.2 - 6/5 - 6/6/2017 - Simulation running with some data values clarified (Land Parcel longitude and latitude for GTGP and non-GTGP parcels). Restructured agents to new pseudo-code instructions (now features Land Parcel and Individual agents).
 
-Pseudocode Version 1
+Pseudocode Version 1 (0609)
 v1.1 - 6/2/2017 - Simulation running with Excel data (some dummy values) imported into simulation.
 v1.0 - 6/1/2017 - ABM dummy simulation and server running.
 5/31/2017 - day off (requested)
