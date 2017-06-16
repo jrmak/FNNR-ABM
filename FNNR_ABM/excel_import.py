@@ -6,10 +6,13 @@ It also converts the imported data into workable values.
 """
 
 from openpyxl import *
+import inspect
 
 # Directory in which source file is located, exact name of source file + extension
-os.chdir(r'C:\Users\jmak4\PycharmProjects\FNNR_ABM\FNNR_ABM')  #will need to replace
+currentpath = str(inspect.getfile(inspect.currentframe()))[:-16] #'remove excel_import.py' at end
+os.chdir(currentpath)  #will need to replace
 currentbook = 'FNNR_2016_Survey_psuedo_0615.xlsx'
+
 
 # openpyxl commands
 wbglobal = load_workbook(currentbook)
@@ -138,10 +141,10 @@ def convert_fraction_long(coordlist):
             pass  # skips over instances where coordinate is empty
     return convertedlist
 
-def convert_num_mig(mig_value_list):
+def real_value_counter(value_list):
     """Converts excel values to actual numbers"""
-    num_mig_counter = 0
-    for value in mig_value_list:
+    counter = 0
+    for value in value_list:
         if value is not 'None':
-            num_mig_counter += 1
-    return num_mig_counter
+            counter += 1
+    return counter
