@@ -25,7 +25,8 @@ class ABM(Model):
     """Handles agent creation, placement, and value changes"""
     def __init__(self, num_agents, width, height, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
                  num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, GTGP_part = 0,
-                 GTGP_coef = 0, GTGP_part_flag = 0, area = 1, maximum = 0, admin_village = 1, GTGP_enrolled = 0):
+                 GTGP_coef = 0, GTGP_part_flag = 0, area = 1, maximum = 0, admin_village = 1,
+                 GTGP_enrolled = 0, income = 0, GTGP_comp = 0):
         # default values set for now, will define when model runs agents
 
         self.num_agents = num_agents
@@ -43,6 +44,8 @@ class ABM(Model):
         self.admin_village = admin_village
         self.GTGP_enrolled = GTGP_enrolled
         self.maximum = maximum
+        self.income = income
+        self.GTGP_comp = GTGP_comp
 
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
@@ -148,11 +151,10 @@ class ABM(Model):
         for hh_id in agents:  # agents is a list of ints 1-97 from excel_import
             hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
             try:
-                global a
                 a = HouseholdAgent(hh_id, self, hhpos, self.admin_village, self.GTGP_part, self.GTGP_land,
                                     self.GTGP_coef, self.mig_prob, self.num_mig, self.min_req_labor,
-                                    self.num_labor)
-                a.admin_village = 1
+                                    self.num_labor, self.income, self.GTGP_comp)
+                #a.admin_village = 1
                 self.space.place_agent(a, hhpos)  # admin_village placeholder
                 self.schedule.add(a)
 
