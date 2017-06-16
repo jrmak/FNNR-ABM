@@ -1,7 +1,7 @@
 Version History
 
-Pseucode Version 3 (0612)
-v1.31 - 6/16/2017 - TBD
+Pseudocode Version 3 (0612)
+v1.31 - 6/16/2017 - Edited main loop formula (testing real data value imports)
 
 Pseudocode Version 2 (0609)
 v1.26 - 6/15/2017 - Completed last part of pseudocode, simulation running again
