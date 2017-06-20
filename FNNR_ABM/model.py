@@ -18,9 +18,10 @@ def show_num_mig(model):
     X = sorted(num_mig)
     num_agents = model.num_agents
     B = sum(X) / num_agents  # 17: 1999-2016
-    #print(B)
+    # print(B)
     return B
 
+formermax = []
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
     def __init__(self, num_agents, width, height, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
@@ -138,7 +139,6 @@ class ABM(Model):
 
     def calc_distance(self, landpos, hhpos):
         """Given a household id, return the distances between household and parcels"""
-        # 6/14/2017 currently working on
         distance = sqrt(
             (landpos[0] - hhpos[0]) ** 2 + (landpos[1] - hhpos[1]) ** 2
             )
@@ -154,7 +154,7 @@ class ABM(Model):
                 a = HouseholdAgent(hh_id, self, hhpos, self.admin_village, self.GTGP_part, self.GTGP_land,
                                     self.GTGP_coef, self.mig_prob, self.num_mig, self.min_req_labor,
                                     self.num_labor, self.income, self.GTGP_comp)
-                #a.admin_village = 1
+                a.admin_village = 1
                 self.space.place_agent(a, hhpos)  # admin_village placeholder
                 self.schedule.add(a)
 
@@ -171,25 +171,17 @@ class ABM(Model):
             # print(landposlist) #list should have multiple tuples
             for landpos in landposlist:
                 distance = self.calc_distance(hhpos, landpos)
-                maxlist.append(distance)
-            # print(hh_id, maxlist)
-#            try:
-#                if maxlist != ['']:
-#                    max_index = maxlist.index(max(maxlist))
-#                    #print(max_index, 'index')
-#            except:
-#                pass
-            for landpos in landposlist:
+                if distance not in formermax:
+                    maxlist.append(distance)
+                    formermax.append(distance)
                 lp = LandParcelAgent(hh_id, self, landpos, self.maximum, self.area, self.GTGP_enrolled)
-                if maxlist != [''] and maxlist[0] != None:
+                if maxlist != ['']:
                     try:
                         max_index = maxlist.index(max(maxlist))
                         if landpos == landposlist[max_index]:
                             lp.maximum = 1
-                            # print(lp.maximum, 'lp.maximum')
                         else:
                             lp.maximum = 0
-                            #print(lp.maximum, 'else1')
                     except:
                         pass
                 else:
