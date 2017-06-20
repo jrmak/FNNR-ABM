@@ -1,6 +1,10 @@
 Version History
 
+Pseudocode Version 4 (0619)
+v1.33 - 6/20/2017 - Edited main loop formula (same as yesterday), initialized indiviudal attributes
+
 Pseudocode Version 3 (0612)
+v1.32 - 6/19/2017 - Edited main loop formula (max distance of land parcel per household calculation for each step)
 v1.31 - 6/16/2017 - Edited main loop formula (testing real data value imports)
 
 Pseudocode Version 2 (0609)
@@ -27,7 +31,8 @@ Other Activity History
 
 To-do List
 
-- Finish last part of pseudocode (identify farthest land parcel from household) *IN PROGRESS
+- Finish last part of pseudocode (identify farthest land parcel from each household) *IN PROGRESS
+- Finish individual (household demography) processes *IN PROGRESS
 - Update all self values with imported data values *IN PROGRESS
 - Add a table with listed data values, updated each step *IN PROGRESS
 - Add simlulation map/window axis labels (coordinates) using matplotlib/JavaScript
@@ -35,4 +40,4 @@ To-do List
 - Implement BatchRunner (Mesa) for automated trials/testing
 
 Bug Fixes Needed
-- tornado WARNING:404 favicon.ico missing (safe to ignore
+- tornado WARNING:404 favicon.ico missing (safe to ignore)
