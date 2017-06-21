@@ -26,7 +26,10 @@ class SimpleCanvas(VisualizationElement):
         space_state = []
         for obj in model.schedule.agents:
             portrayal = self.portrayal_method(obj)
-            x, y = obj.pos
+            try:
+                x, y = obj.pos
+            except:
+                pass
             try:
                 x = (
                         (x - model.space.x_min) /

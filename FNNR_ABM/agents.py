@@ -11,14 +11,14 @@ from excel_import import *
 from math import sqrt
 
 formermax = []
+single_male_list = []
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
     def __init__(self, unique_id, model, hhpos, hh_id, admin_village = 1, nat_village = 1, land_area = 100,
                  charcoal = 10, GTGP_dry = 50, GTGP_rice = 50, total_dry = 50, total_rice = 50,
                  NCFP = 1, num_mig = 0, income = 0, mig_prob = 0.5, num_labor = 0,
                  min_req_labor = 1, comp_sign = 0.1, GTGP_coef = 0, GTGP_part = 0, GTGP_part_flag = 0,
-                 num_non_labor = 0, GTGP_comp = 0, first_step_flag = 0, birth_rate = 1, birth_interval = 2,
-                 death_rate = 0.1, marriage_rate = 0.1, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03):
+                 num_non_labor = 0, GTGP_comp = 0, first_step_flag = 0):
 
         super().__init__(unique_id, model)  # unique_id = household id
         self.hhpos = hhpos  # resident location
@@ -47,14 +47,6 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.first_step_flag = first_step_flag
         # more attributes will be added later on
 
-        self.birth_rate = birth_rate
-        self.birth_interval = birth_interval
-        self.death_rate = death_rate
-        self.marriage_rate = marriage_rate
-        self.marriage_flag = marriage_flag
-        self.match_prob = match_prob
-        self.immi_marriage_rate = immi_marriage_rate
-
     def initialize_labor(self, hh):
         num_labor = 0
         agelist = return_values(hh, 'age')  # find the ages of people in hh
@@ -68,7 +60,6 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                         # self.num_non_labor += 1
                 except:
                     pass  # covers situations in which age is 'NoneType'
-            print(num_labor,'num_labor')
             return num_labor
 
     def gtgp_enroll(self):
@@ -80,14 +71,14 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
        #     laborchance = randint(1,6)
        #     self.num_labor = laborchance  # initialize number of laborers randomly
         if self.first_step_flag == 0:
-            if type(self.unique_id) == int:
+            if type(self.unique_id) == int and 0 < self.unique_id < 96:
                 # initialize number of laborers
                 self.hh_id = self.unique_id
                 if self.hh_id > 0:
                     self.num_labor = self.initialize_labor(self.hh_id)
                     #except:
                     #    pass
-        print(self.hh_id,'hhid',self.num_labor,'!') #current prob: num_labor outside loop for hh not landparcel
+        #print(self.hh_id,'hhid',self.num_labor,'!') #current prob: num_labor outside loop for hh not landparcel
         self.first_step_flag = 1
         try:
             self.GTGP_part = 1
@@ -97,6 +88,9 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
         # later: depends on plant type and land area and PES policy
         if type(self.unique_id) == int:
+            self.GTGP_coef = uniform(0, 0.55)
+            #elf.GTGP_comp = randint(500, 2000)
+            #self.income = randint(5000, 20000)
             if (self.GTGP_coef * self.GTGP_part) > self.mig_prob and (self.GTGP_comp / self.income) > self.comp_sign:
                 try:
                     if self.num_labor > 0:
@@ -141,14 +135,51 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
-    def __init__(self, unique_id, model):
-        super().__init__(self, unique_id, model, hh, age = 20, gender = 1, education = 1,
-                         labor = 0, marriage = 0)
+    def __init__(self, unique_id, model, hhpos, hh_id, individual_id = 0, age = 20, gender = 1, education = 1,
+                         labor = 0, marriage = 0, birth_rate = 1, birth_interval = 2,
+                         death_rate = 0.1, marriage_rate = 0.1, marriage_flag = 0,
+                         match_prob = 0.05, immi_marriage_rate = 0.03):
+
+        super().__init__(self, unique_id, model, hhpos, hh_id)
         self.age = age
         self.gender = gender
         self.education = education
         self.labor = labor
+        self.individual_id = individual_id
+
         self.marriage = marriage
+        self.birth_rate = birth_rate
+        self.birth_interval = birth_interval
+        self.death_rate = death_rate
+        self.marriage_rate = marriage_rate
+        self.marriage_flag = marriage_flag
+        self.match_prob = match_prob
+        self.immi_marriage_rate = immi_marriage_rate
+
+    def determine_individual_id(self):
+        self.individual_id = str(self.hh_id)+'_'+str(self.unique_id)
+        # print(self.individual_id)
+        pass
+
+    def single_male_list(self):
+        """Returns a list of single males in the reserve"""
+        for hh in agents:
+            agelist = return_values(hh, 'age')  # find the ages of people in hh
+            genderlist = return_values(hh, 'gender')
+            #try:
+            if agelist is not None and genderlist is not None:  # if there are people in the household,
+                for i in range(len(agelist)):  # for each person,
+                    if 15 < float(agelist[i]) < 59 and int(genderlist[i]) == 1:
+                        single_male_list.append(self.individual_id)
+        # print(single_male_list)
+        return single_male_list
+            #except:
+            #    pass
+
+    def step(self):
+        """Step behavior for individual agents; see pseudo-code document"""
+        self.single_male_list()
+        self.determine_individual_id()
 
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""

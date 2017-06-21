@@ -26,7 +26,9 @@ class ABM(Model):
     def __init__(self, num_agents, width, height, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
                  num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, GTGP_part = 0,
                  GTGP_coef = 0, GTGP_part_flag = 0, area = 1, maximum = 0, admin_village = 1,
-                 GTGP_enrolled = 0, income = 0, GTGP_comp = 0):
+                 GTGP_enrolled = 0, income = 0, GTGP_comp = 0, age = 21, gender = 1, marriage = 0,
+                 education = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
+                 birth_interval = 2, marriage_flag = 0, match_prob = 0.5, immi_marriage_rate = 0.03):
         # default values set for now, will define when model runs agents
 
         self.num_agents = num_agents
@@ -40,6 +42,7 @@ class ABM(Model):
         self.GTGP_part = GTGP_part
         self.GTGP_coef = GTGP_coef
         self.GTGP_part_flag = GTGP_part_flag
+
         self.area = area
         self.admin_village = admin_village
         self.GTGP_enrolled = GTGP_enrolled
@@ -47,12 +50,25 @@ class ABM(Model):
         self.income = income
         self.GTGP_comp = GTGP_comp
 
+        self.age = age
+        self.gender = gender
+        self.education = education
+        self.marriage = marriage
+        self.birth_rate = birth_rate
+        self.birth_interval = birth_interval
+        self.death_rate = death_rate
+        self.marriage_rate = marriage_rate
+        self.marriage_flag = marriage_flag
+        self.match_prob = match_prob
+        self.immi_marriage_rate = immi_marriage_rate
+
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
         # methods: get_distance, get_neighbors, move_agent, out_of_bounds, place_agent
         self.schedule = StagedActivation(self)
         self.make_hh_agents()
         self.make_land_agents()
+        self.make_individual_agents()
         self.running = True
 
         self.datacollector = DataCollector(
@@ -202,6 +218,20 @@ class ABM(Model):
                 lp2.hh_id = hh_id
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
+
+    def make_individual_agents(self):
+        """Create the individual agents"""
+        for hh_id in agents:  # agents is a list of ints 1-97 from excel_import
+            try:
+                a = IndividualAgent(hh_id, self, hh_id, self.age, self.gender, self.education,
+                         self.marriage, self.birth_rate, self.birth_interval,
+                         self.death_rate, self.marriage_rate, self.marriage_flag,
+                         self.match_prob, self.immi_marriage_rate)
+                self.schedule.add(a)
+
+            except TypeError:
+                pass
+
     def step(self):
         """Advance the model by one step"""
         self.datacollector.collect(self)
