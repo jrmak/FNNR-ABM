@@ -1,7 +1,8 @@
 Version History
 
 Pseudocode Version 4 (0619)
-v1.33 - 6/20/2017 - Edited main loop formula (same as yesterday), initialized indiviudal attributes
+v1.34 - 6/21/2017 - Edited main loop formula, created individual ids, worked on single male listing
+v1.33 - 6/20/2017 - Edited main loop formula (same as yesterday), initialized individual attributes
 
 Pseudocode Version 3 (0612)
 v1.32 - 6/19/2017 - Edited main loop formula (max distance of land parcel per household calculation for each step)
