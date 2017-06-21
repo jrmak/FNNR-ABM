@@ -68,12 +68,12 @@ def assign_variable_per_hh(x, y):
     for Column in sheet[x:y]:
             for CellObj in Column:
                 if x == y:
-                    if CellObj.value not in ['-1', '-3', '-4']:
+                    if CellObj.value not in ['-1', '-3', '-4', -1, -3, -4, None]:
                         # if the value is not null
                         var = str(CellObj.value)
                 elif x != y:
                     # in this case, var is a list, not a str, because it has multiple items
-                    if CellObj.value not in ['-1', '-3', '-4']:
+                    if CellObj.value not in ['-1', '-3', '-4', -1, -3, -4, None]:
                         var.append(CellObj.value)
                         # var = str(CellObj.value)
     return var
@@ -85,7 +85,8 @@ def return_values(hh_id, var):
     # print(hh_id_variable) # Example: ['A3', 'AF3'] if argument is (1, 'gender')
     variable_per_hh = assign_variable_per_hh(hh_id_variable[0], hh_id_variable[1])
     # print(variable_per_hh) # Example: ['1', '2', '1'] for genders in a household
-    return variable_per_hh
+    if variable_per_hh != []:
+        return variable_per_hh
 
 def convert_lat_long(coord):
     """Converts coordinates from format 27,59,30.747 to 27.99184177"""

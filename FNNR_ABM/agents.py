@@ -13,7 +13,7 @@ from math import sqrt
 formermax = []
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
-    def __init__(self, unique_id, model, hhpos, hh_id = 3, admin_village = 1, nat_village = 1, land_area = 100,
+    def __init__(self, unique_id, model, hhpos, hh_id, admin_village = 1, nat_village = 1, land_area = 100,
                  charcoal = 10, GTGP_dry = 50, GTGP_rice = 50, total_dry = 50, total_rice = 50,
                  NCFP = 1, num_mig = 0, income = 0, mig_prob = 0.5, num_labor = 0,
                  min_req_labor = 1, comp_sign = 0.1, GTGP_coef = 0, GTGP_part = 0, GTGP_part_flag = 0,
@@ -68,7 +68,8 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                         # self.num_non_labor += 1
                 except:
                     pass  # covers situations in which age is 'NoneType'
-        return num_labor
+            print(num_labor,'num_labor')
+            return num_labor
 
     def gtgp_enroll(self):
         """See pseudo-code document: predicts GTGP participation per household"""
@@ -81,31 +82,51 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         if self.first_step_flag == 0:
             if type(self.unique_id) == int:
                 # initialize number of laborers
-                self.num_labor = self.initialize_labor(self.unique_id)
-        else:
-            pass
+                self.hh_id = self.unique_id
+                if self.hh_id > 0:
+                    self.num_labor = self.initialize_labor(self.hh_id)
+                    #except:
+                    #    pass
+        print(self.hh_id,'hhid',self.num_labor,'!') #current prob: num_labor outside loop for hh not landparcel
         self.first_step_flag = 1
         try:
             self.GTGP_part = 1
                 # break  # avoid redundant flagging
         except:
             pass
+
         # later: depends on plant type and land area and PES policy
         if type(self.unique_id) == int:
             if (self.GTGP_coef * self.GTGP_part) > self.mig_prob and (self.GTGP_comp / self.income) > self.comp_sign:
-                if self.num_labor > 0:
-                    self.num_labor -= 1
-                    self.num_mig += 1  # migration occurs
-                    print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
+                try:
+                    if self.num_labor > 0:
+                        self.num_labor -= 1
+                        self.num_mig += 1  # migration occurs
+                        print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
                     #pass
                 #if self.num_labor == 0 and self.num_non_labor == 0:
                     #break
+                except:
+                    pass
                 if self.num_labor < self.min_req_labor:
                     self.GTGP_part_flag = 1  # sets flag for enrollment of more land
             return self.GTGP_part_flag
 
     def gtgp_test(self):
         """Basic formula for testing web browser simulation; each step, 5% of agents change flags"""
+        try:
+            if self.first_step_flag == 0:
+                self.num_labor = self.initialize_labor(self.unique_id)
+        except:
+            pass
+        self.first_step_flag = 1
+        try:
+            if self.num_labor > 0:
+                self.num_labor -= 1
+                self.num_mig += 1
+                print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
+        except:
+            pass
         chance = random()
         if chance > 0.95:
             self.GTGP_part_flag = 1
@@ -131,10 +152,10 @@ class IndividualAgent(HouseholdAgent):
 
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
-    def __init__(self, unique_id, model, landpos, GTGP_enrolled = 0,
+    def __init__(self, unique_id, model, hhpos, hh_id, landpos, GTGP_enrolled = 0,
                  area = 1, latitude = 0, longitude = 0, maximum = 0, plant_type = 1):
 
-        super().__init__(self, unique_id, model)
+        super().__init__(self, unique_id, model, hhpos, hh_id)
         self.landpos = landpos
         self.GTGP_enrolled = GTGP_enrolled
         self.area = area
@@ -147,11 +168,17 @@ class LandParcelAgent(HouseholdAgent):
         """Given a household id, return the distances between household and parcels"""
         landpos = self.landpos
         if hhpos is not None:
-            distance = sqrt(
-                (landpos[0] - hhpos[0]) ** 2 + (landpos[1] - hhpos[1]) ** 2
-                )
-        if distance < 10:
-            return distance
+            try:
+                distance = sqrt(
+                    (landpos[0] - hhpos[0]) ** 2 + (landpos[1] - hhpos[1]) ** 2
+                    )
+            except:
+                pass
+        try:
+            if distance < 10:
+                return distance
+        except:
+            pass
 
     def determine_hhpos_agents(self, hh_id, latitude, longitude):
         """Determine position of agent on map"""
@@ -169,7 +196,7 @@ class LandParcelAgent(HouseholdAgent):
             )[0] * 10
             pos = (x, y)
             return pos
-        except TypeError:
+        except:
             pass
 
     def recalculate_max(self):
@@ -198,7 +225,7 @@ class LandParcelAgent(HouseholdAgent):
 
     def gtgp_convert(self):
         super(LandParcelAgent, self).gtgp_enroll()
-        #print(self.GTGP_part_flag,'flag')
+        # print(self.GTGP_part_flag,'flag')
         if self.GTGP_part_flag == 1:  # if the household is set to enroll in GTGP,
             if self.maximum == 1:
                 self.GTGP_enrolled = 1

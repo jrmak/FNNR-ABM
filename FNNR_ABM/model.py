@@ -18,7 +18,6 @@ def show_num_mig(model):
     X = sorted(num_mig)
     num_agents = model.num_agents
     B = sum(X) / num_agents  # 17: 1999-2016
-    # print(B)
     return B
 
 formermax = []
@@ -188,6 +187,7 @@ class ABM(Model):
                     lp.maximum = 0
                     #print(lp.maximum, 'else2')
                 lp.GTGP_enrolled = 0
+                lp.hh_id = hh_id
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
 
@@ -199,6 +199,7 @@ class ABM(Model):
             for landpos in landposlist:
                 lp2 = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
                 lp2.GTGP_enrolled = 1
+                lp2.hh_id = hh_id
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
     def step(self):
