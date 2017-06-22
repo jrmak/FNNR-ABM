@@ -19,7 +19,7 @@ wbglobal = load_workbook(currentbook)
 sheet = wbglobal.active
 
 # a list of 96 hh_ids; hardcoded since number from excel file not likely to change
-agents = list(range(1, 97))
+agents = list(range(1, 95))
 
 def assign_sheet_parameters(hh_id, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
@@ -29,6 +29,9 @@ def assign_sheet_parameters(hh_id, variable):
     if variable.lower() == 'gtgp_area':
         parameters.append(str('DM' + row))
         parameters.append(str('DQ' + row))
+    elif variable.lower() == 'name':
+        parameters.append(str('F' + row))
+        parameters.append(str('N' + row))
     elif variable.lower() == 'age':
         parameters.append(str('AG' + row))
         parameters.append(str('AO' + row))
@@ -38,6 +41,9 @@ def assign_sheet_parameters(hh_id, variable):
     elif variable.lower() == 'education':
         parameters.append(str('AY' + row))
         parameters.append(str('BG' + row))
+    elif variable.lower() == 'marriage':
+        parameters.append(str('BH' + row))
+        parameters.append(str('BP' + row))
     elif variable.lower() == 'house_longitude':
         parameters.append(str('CA' + row))
         parameters.append(str('CA' + row))

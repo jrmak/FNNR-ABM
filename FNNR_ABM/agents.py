@@ -22,6 +22,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
         super().__init__(unique_id, model)  # unique_id = household id
         self.hhpos = hhpos  # resident location
+        #print(self.hhpos)
         self.hh_id = hh_id
         self.admin_village = admin_village
         self.nat_village = nat_village
@@ -135,17 +136,17 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
-    def __init__(self, unique_id, model, hhpos, hh_id, individual_id = 0, age = 20, gender = 1, education = 1,
+    def __init__(self, unique_id, model, hhpos, hh_id, individual_id, age = 20, gender = 1, education = 1,
                          labor = 0, marriage = 0, birth_rate = 1, birth_interval = 2,
                          death_rate = 0.1, marriage_rate = 0.1, marriage_flag = 0,
                          match_prob = 0.05, immi_marriage_rate = 0.03):
 
         super().__init__(self, unique_id, model, hhpos, hh_id)
+        self.individual_id = individual_id
         self.age = age
         self.gender = gender
         self.education = education
         self.labor = labor
-        self.individual_id = individual_id
 
         self.marriage = marriage
         self.birth_rate = birth_rate
@@ -157,29 +158,46 @@ class IndividualAgent(HouseholdAgent):
         self.immi_marriage_rate = immi_marriage_rate
 
     def determine_individual_id(self):
-        self.individual_id = str(self.hh_id)+'_'+str(self.unique_id)
+        #print(self.individual_id,'selfi')
+        #print(individual_id,'i')
+        #self.individual_id = str(self.hh_id)+'_'+str(self.unique_id)
         # print(self.individual_id)
         pass
 
     def single_male_list(self):
         """Returns a list of single males in the reserve"""
-        for hh in agents:
-            agelist = return_values(hh, 'age')  # find the ages of people in hh
-            genderlist = return_values(hh, 'gender')
-            #try:
-            if agelist is not None and genderlist is not None:  # if there are people in the household,
-                for i in range(len(agelist)):  # for each person,
-                    if 15 < float(agelist[i]) < 59 and int(genderlist[i]) == 1:
-                        single_male_list.append(self.individual_id)
-        # print(single_male_list)
+        agelist = return_values(self.hh_id, 'age')  # find the ages of people in hh
+        genderlist = return_values(self.hh_id, 'gender')
+        #try:
+        if agelist is not None and genderlist is not None:  # if there are people in the household,
+            for i in range(len(agelist)):  # for each person,
+                if 20 < float(agelist[i]) and int(genderlist[i]) == 1 and self.marriage == 0:
+                    single_male_list.append(self.individual_id)
+        #print(single_male_list)
         return single_male_list
             #except:
             #    pass
 
+    def match_female(self):
+        """Loops through single females and matches to single males"""
+        self.marriage_flag = 0
+        agelist = return_values(self.hh_id, 'age')  # find the ages of people in hh
+        genderlist = return_values(self.hh_id, 'gender')
+        # try:
+        if agelist is not None and genderlist is not None:  # if there are people in the household,
+            for i in range(len(agelist)):  # for each person,
+                if 20 < float(agelist[i]) and int(genderlist[i]) == 2 and self.marriage == 0:
+                    if random() < self.marriage_rate:
+                        single_male_list = single_male_list()
+                        for male in single_male_list:
+                            if random() < self.match_prob:
+                                self.marriage_flag = 1
+                                self.marriage = 1
+
     def step(self):
         """Step behavior for individual agents; see pseudo-code document"""
-        self.single_male_list()
         self.determine_individual_id()
+        self.single_male_list()
 
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
@@ -198,6 +216,7 @@ class LandParcelAgent(HouseholdAgent):
     def calc_distance(self, hhpos, landpos):
         """Given a household id, return the distances between household and parcels"""
         landpos = self.landpos
+        #print(landpos,'landpos')
         if hhpos is not None:
             try:
                 distance = sqrt(
@@ -234,7 +253,7 @@ class LandParcelAgent(HouseholdAgent):
         """Every step, returns new max-distance land parcel for each household given households and land parcels"""
         maxlist = []
         hhpos = self.determine_hhpos_agents(self.hh_id, 'house_latitude', 'house_longitude')
-        # print(hhpos,';;', self.landpos,'!!')
+        #print(hhpos,';;', self.landpos,'!!')
         #try:
         distance = self.calc_distance(hhpos, self.landpos)
         if distance not in formermax:
