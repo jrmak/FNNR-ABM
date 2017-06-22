@@ -133,17 +133,17 @@ class ABM(Model):
             x = convert_fraction_lat(
                 convert_lat_long(
                     str(return_values(hh_id, latitude))
-                )
-            )[0] * self.space.x_max
+                    )
+                )[0] * self.space.x_max
 
             y = convert_fraction_long(
                 convert_lat_long(
                     str(return_values(hh_id, longitude))
-                )
-            )[0] * self.space.y_max
+                    )
+                )[0] * self.space.y_max
             pos = (x, y)
             return pos
-        except TypeError:
+        except:
             pass
 
     def determine_landpos(self, hh_id, latitude, longitude):
@@ -221,16 +221,27 @@ class ABM(Model):
 
     def make_individual_agents(self):
         """Create the individual agents"""
-        for hh_id in agents:  # agents is a list of ints 1-97 from excel_import
-            try:
-                a = IndividualAgent(hh_id, self, hh_id, self.age, self.gender, self.education,
+        single_male_list = []
+        for hh_id in agents:  # agents is a list of ints 1-96 from excel_import
+            individual_id_list = return_values(hh_id, 'name')
+            if individual_id_list is not None and individual_id_list is not []:
+                for individual in individual_id_list:
+                    self.individual_id = str(hh_id) + str(individual)
+                    ind = IndividualAgent(hh_id, self, self.individual_id, self.age, self.gender, self.education,
                          self.marriage, self.birth_rate, self.birth_interval,
                          self.death_rate, self.marriage_rate, self.marriage_flag,
                          self.match_prob, self.immi_marriage_rate)
-                self.schedule.add(a)
-
-            except TypeError:
-                pass
+                    agelist = return_values(hh_id, 'age')  # find the ages of people in hh
+                    genderlist = return_values(hh_id, 'gender')
+                    if agelist is not None and genderlist is not None:  # if there are people in the household,
+                        for i in range(len(agelist)):
+                            if 20 < float(agelist[i]) and int(genderlist[i]) == 1 and self.marriage == 0:
+                                 single_male_list.append(self.individual_id)
+                    ind.hh_id = hh_id
+                    self.schedule.add(ind)
+        return single_male_list
+            # except:
+            #    pass
 
     def step(self):
         """Advance the model by one step"""
