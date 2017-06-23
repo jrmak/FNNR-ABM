@@ -11,7 +11,7 @@ from excel_import import *
 from math import sqrt
 
 formermax = []
-single_male_list = []
+
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
     def __init__(self, unique_id, model, hhpos, hh_id, admin_village = 1, nat_village = 1, land_area = 100,
@@ -157,26 +157,25 @@ class IndividualAgent(HouseholdAgent):
         self.match_prob = match_prob
         self.immi_marriage_rate = immi_marriage_rate
 
-    def determine_individual_id(self):
-        #print(self.individual_id,'selfi')
-        #print(individual_id,'i')
-        #self.individual_id = str(self.hh_id)+'_'+str(self.unique_id)
-        # print(self.individual_id)
-        pass
-
-    def single_male_list(self):
-        """Returns a list of single males in the reserve"""
-        agelist = return_values(self.hh_id, 'age')  # find the ages of people in hh
-        genderlist = return_values(self.hh_id, 'gender')
-        #try:
-        if agelist is not None and genderlist is not None:  # if there are people in the household,
-            for i in range(len(agelist)):  # for each person,
-                if 20 < float(agelist[i]) and int(genderlist[i]) == 1 and self.marriage == 0:
-                    single_male_list.append(self.individual_id)
-        #print(single_male_list)
+    def make_single_male_list(self):
+        single_male_list = []
+        for hh_id in agents:  # agents is a list of ints 1-96 from excel_import
+            agelist = return_values(hh_id, 'age')  # find the ages of people in hh
+            genderlist = return_values(hh_id, 'gender')
+            individual_id_list = return_values(hh_id, 'name')
+            if individual_id_list is not None and individual_id_list is not []:
+                for individual in individual_id_list:
+                    self.individual_id = str(hh_id) + str(individual)
+                    indlist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+                    for i in indlist:
+                        if i == individual[-1]:
+                            try:
+                                if 20 < float(agelist[indlist.index(i)]) and int(genderlist[indlist.index(i)]) == 1:
+                                    single_male_list.append(self.individual_id)
+                            except:
+                                pass
+        # print(single_male_list)
         return single_male_list
-            #except:
-            #    pass
 
     def match_female(self):
         """Loops through single females and matches to single males"""
@@ -196,8 +195,7 @@ class IndividualAgent(HouseholdAgent):
 
     def step(self):
         """Step behavior for individual agents; see pseudo-code document"""
-        self.determine_individual_id()
-        self.single_male_list()
+        pass
 
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""

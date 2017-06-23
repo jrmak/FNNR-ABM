@@ -69,6 +69,7 @@ class ABM(Model):
         self.make_hh_agents()
         self.make_land_agents()
         self.make_individual_agents()
+        IndividualAgent.make_single_male_list(self)
         self.running = True
 
         self.datacollector = DataCollector(
@@ -210,7 +211,6 @@ class ABM(Model):
         # add GTGP land parcels
         for hh_id in agents:  # from excel_import
             hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
-            maxlist = []
             landposlist = self.determine_landpos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
             for landpos in landposlist:
                 lp2 = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
@@ -226,20 +226,14 @@ class ABM(Model):
             individual_id_list = return_values(hh_id, 'name')
             if individual_id_list is not None and individual_id_list is not []:
                 for individual in individual_id_list:
-                    self.individual_id = str(hh_id) + str(individual)
+                    self.individual_id = str(hh_id) + str(individual)  # example: 2c
                     ind = IndividualAgent(hh_id, self, self.individual_id, self.age, self.gender, self.education,
                          self.marriage, self.birth_rate, self.birth_interval,
                          self.death_rate, self.marriage_rate, self.marriage_flag,
                          self.match_prob, self.immi_marriage_rate)
-                    agelist = return_values(hh_id, 'age')  # find the ages of people in hh
-                    genderlist = return_values(hh_id, 'gender')
-                    if agelist is not None and genderlist is not None:  # if there are people in the household,
-                        for i in range(len(agelist)):
-                            if 20 < float(agelist[i]) and int(genderlist[i]) == 1 and self.marriage == 0:
-                                 single_male_list.append(self.individual_id)
                     ind.hh_id = hh_id
                     self.schedule.add(ind)
-        return single_male_list
+        # print(single_male_list)
             # except:
             #    pass
 
