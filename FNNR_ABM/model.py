@@ -27,8 +27,8 @@ class ABM(Model):
                  num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, GTGP_part = 0,
                  GTGP_coef = 0, GTGP_part_flag = 0, area = 1, maximum = 0, admin_village = 1,
                  GTGP_enrolled = 0, income = 0, GTGP_comp = 0, age = 21, gender = 1, marriage = 0,
-                 education = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
-                 birth_interval = 2, marriage_flag = 0, match_prob = 0.5, immi_marriage_rate = 0.03):
+                 education = 1, labor = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
+                 birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03):
         # default values set for now, will define when model runs agents
 
         self.num_agents = num_agents
@@ -53,6 +53,7 @@ class ABM(Model):
         self.age = age
         self.gender = gender
         self.education = education
+        self.labor = labor
         self.marriage = marriage
         self.birth_rate = birth_rate
         self.birth_interval = birth_interval
@@ -227,8 +228,8 @@ class ABM(Model):
             if individual_id_list is not None and individual_id_list is not []:
                 for individual in individual_id_list:
                     self.individual_id = str(hh_id) + str(individual)  # example: 2c
-                    ind = IndividualAgent(hh_id, self, self.individual_id, self.age, self.gender, self.education,
-                         self.marriage, self.birth_rate, self.birth_interval,
+                    ind = IndividualAgent(hh_id, self, individual, self.individual_id, self.age, self.gender, self.education,
+                         self.labor, self.marriage, self.birth_rate, self.birth_interval,
                          self.death_rate, self.marriage_rate, self.marriage_flag,
                          self.match_prob, self.immi_marriage_rate)
                     ind.hh_id = hh_id

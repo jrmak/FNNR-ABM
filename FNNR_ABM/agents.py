@@ -136,12 +136,12 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
-    def __init__(self, unique_id, model, hhpos, hh_id, individual_id, age = 20, gender = 1, education = 1,
+    def __init__(self, unique_id, model, hh_id, individual_id, age = 20, gender = 1, education = 1,
                          labor = 0, marriage = 0, birth_rate = 1, birth_interval = 2,
                          death_rate = 0.1, marriage_rate = 0.1, marriage_flag = 0,
                          match_prob = 0.05, immi_marriage_rate = 0.03):
 
-        super().__init__(self, unique_id, model, hhpos, hh_id)
+        super().__init__(self, unique_id, model, hh_id)
         self.individual_id = individual_id
         self.age = age
         self.gender = gender
@@ -180,22 +180,77 @@ class IndividualAgent(HouseholdAgent):
     def match_female(self):
         """Loops through single females and matches to single males"""
         self.marriage_flag = 0
+        if self.first_step_flag == 0:
+            single_male_list = self.make_single_male_list()
+            married_male_list = []
         agelist = return_values(self.hh_id, 'age')  # find the ages of people in hh
         genderlist = return_values(self.hh_id, 'gender')
-        # try:
         if agelist is not None and genderlist is not None:  # if there are people in the household,
             for i in range(len(agelist)):  # for each person,
+                if self.marriage != 1:
+                    self.marriage = 0  # otherwise default is 0.1, not sure why
                 if 20 < float(agelist[i]) and int(genderlist[i]) == 2 and self.marriage == 0:
+                    # if person is a woman,
                     if random() < self.marriage_rate:
-                        single_male_list = single_male_list()
+                        self.first_step_flag = 1
                         for male in single_male_list:
                             if random() < self.match_prob:
                                 self.marriage_flag = 1
                                 self.marriage = 1
+                                married_male_list.append(male)
+                                single_male_list.remove(male)
+                                self.hh_id = male.strip(male[-1])
+                                print(self.hh_id, self.individual_id)
+                                self.individual_id = self.hh_id + 'j'
+                                pass
+        if agelist is not None and genderlist is not None:  # if there are people in the household,
+            for i in range(len(agelist)):  # for each person,
+                if 20 < float(agelist[i]) and int(genderlist[i]) == 1:
+                    if self.individual_id in married_male_list:
+                        self.marriage = 1
+
+    def immigration_marriage(self):
+        if self.marriage_flag == 1 and random() < self.immi_marriage_rate:
+            ind = IndividualAgent(hh_id, self, individual, self.individual_id, self.age, self.gender, self.education,
+                                  self.labor, self.marriage, self.birth_rate, self.birth_interval,
+                                  self.death_rate, self.marriage_rate, self.marriage_flag,
+                                  self.match_prob, self.immi_marriage_rate)
+            ind.gender = 2
+            age_random = normal(22.1, 2.6)
+            if age_random >= 20.0:
+                ind.age = age_random
+            else:
+                ind.age = 20
+            ind.education = normal(8.7, 1.3)
+            ind.marriage = 1
+            random_male = choice(single_male_list)
+            if self.individual_id == random_male:
+                self.marriage = 1
+                ind.hh_id = random_male.strip(random_male[-1])
+                ind.individual_id = ind.hh_id + 'j'
+            ind.labor = 1
+
+    def birth(self):
+        if self.marriage == 1 and self.gender == 2 and self.age < 55 and random() < self.birth_date:
+            #if current_time = ?? see pseudocode
+            ind = IndividualAgent(hh_id, self, individual, self.individual_id, self.age, self.gender, self.education,
+                                  self.labor, self.marriage, self.birth_rate, self.birth_interval,
+                                  self.death_rate, self.marriage_rate, self.marriage_flag,
+                                  self.match_prob, self.immi_marriage_rate)
+            ind.age = 0
+            ind.gender = choice([0, 1])
+            ind.education = 0
+            ind.marriage = 0
+            ind.individual_id = self.hh_id + 'k'
+            ind.labor = 6
+
+    def death(self):
+        if self.age > 65 and random() < death_rate:
+            pass
 
     def step(self):
         """Step behavior for individual agents; see pseudo-code document"""
-        pass
+        self.match_female()
 
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
