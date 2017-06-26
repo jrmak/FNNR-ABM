@@ -1,7 +1,7 @@
 Version History
 
 Pseudocode Version 4 (0619)
-v1.37 - 6/26/2017 - TBD 
+v1.37 - 6/26/2017 - Changes to class object attribute assignments to help organize/debug functions
 v1.36 - 6/23/2017 - Debugging on marriage match function, creation of birth/death functions
 v1.35 - 6/22/2017 - Debugging on marriage match function
 v1.34 - 6/21/2017 - Edited main loop formula, created individual ids, worked on single male listing
@@ -25,23 +25,30 @@ v1.1 - 6/2/2017 - Simulation running with Excel data (some dummy values) importe
 v1.0 - 6/1/2017 - ABM dummy simulation and server running.
 5/31/2017 - day off (requested)
 v0.5 - 5/30/2017 - Code setup; data imported from Excel to Python variables (Household first individual age, position)
-5/19/17 - day off (Memorial Day)
+5/29/17 - day off (Memorial Day)
 5/24 - 5/26/17 - Data structure, classes, and variables formed
 5/23/17 - Initial meeting
 
 Other Activity History
+6/26/2017 - 'FNNR-ABM User Manual' updated (Github acess & download instructions)
 6/8/2017 - 'FNNR-ABM User Manual' updated (Mesa installation instructions)
 6/7/2017 - Began document: 'FNNR-ABM User Manual' (Python installation instructions)
 
-To-do List
+Hours/Days of Work Reported
+Days of work completed - 24
+Days submitted on SDSURF EMP timesheet so far - 10 (6/19 - 6/30)
+Maximum paid days of work to report - 45 (2 months, 5 days/week, 4 hours/day from 10am - 2pm)
+*If project is unfinished by the end of the paid cycle, future work on the project will continue on a volunteer basis for the summer.
 
-- Finish last part of pseudocode (identify farthest land parcel from each household) *IN PROGRESS
+To-do List
 - Finish individual (household demography) processes *IN PROGRESS
 - Update all self values with imported data values *IN PROGRESS
-- Add a table with listed data values, updated each step *IN PROGRESS
+- Start modeling immigration behaviors from newest version of pseudocode
+- Add a table with listed data values, updated each step
 - Add simlulation map/window axis labels (coordinates) using matplotlib/JavaScript
 - Add simulation map/window legend using matplotlib/JavaScript
 - Implement BatchRunner (Mesa) for automated trials/testing
+- Identify furthest land parcel from household, recalculating each step (does not currently affect simulation/numbers)
 
 Bug Fixes Needed
 - tornado WARNING:404 favicon.ico missing (safe to ignore)
