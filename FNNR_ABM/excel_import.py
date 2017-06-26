@@ -23,12 +23,16 @@ agents = list(range(1, 95))
 
 def assign_sheet_parameters(hh_id, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
+    """Will create a new function when this list gets long enough"""
     parameters = []
     row = str(hh_id + 2)
     # all lowercase!
     if variable.lower() == 'gtgp_area':
         parameters.append(str('DM' + row))
         parameters.append(str('DQ' + row))
+    elif variable.lower() == 'hh_id':
+        parameters.append(str('A' + row))
+        parameters.append(str('A' + row))
     elif variable.lower() == 'name':
         parameters.append(str('F' + row))
         parameters.append(str('N' + row))
@@ -151,10 +155,12 @@ def convert_fraction_long(coordlist):
             pass  # skips over instances where coordinate is empty
     return convertedlist
 
+"""
 def real_value_counter(value_list):
-    """Converts excel values to actual numbers"""
+    #Converts excel values to actual numbers
     counter = 0
     for value in value_list:
         if value is not 'None':
             counter += 1
     return counter
+"""
