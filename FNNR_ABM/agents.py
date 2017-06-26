@@ -11,6 +11,7 @@ from excel_import import *
 from math import sqrt
 
 formermax = []
+year = 2000
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
@@ -75,6 +76,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
             if type(self.unique_id) == int and 0 < self.unique_id < 96:
                 # initialize number of laborers
                 self.hh_id = self.unique_id
+                print(self.unique_id)
                 if self.hh_id > 0:
                     self.num_labor = self.initialize_labor(self.hh_id)
                     #except:
@@ -159,13 +161,14 @@ class IndividualAgent(HouseholdAgent):
 
     def make_single_male_list(self):
         single_male_list = []
-        for hh_id in agents:  # agents is a list of ints 1-96 from excel_import
-            agelist = return_values(hh_id, 'age')  # find the ages of people in hh
-            genderlist = return_values(hh_id, 'gender')
-            individual_id_list = return_values(hh_id, 'name')
+        for hh_row in agents:  # agents is a list of ints 1-96 from excel_import
+            agelist = return_values(hh_row, 'age')  # find the ages of people in hh
+            genderlist = return_values(hh_row, 'gender')
+            individual_id_list = return_values(hh_row, 'name')
+            print(self.individual_id)
             if individual_id_list is not None and individual_id_list is not []:
                 for individual in individual_id_list:
-                    self.individual_id = str(hh_id) + str(individual)
+                    self.individual_id = str(hh_row) + str(individual)
                     indlist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
                     for i in indlist:
                         if i == individual[-1]:
@@ -233,7 +236,7 @@ class IndividualAgent(HouseholdAgent):
     def birth(self):
         if self.marriage == 1 and self.gender == 2 and self.age < 55 and random() < self.birth_date:
             #if current_time = ?? see pseudocode
-            ind = IndividualAgent(hh_id, self, individual, self.individual_id, self.age, self.gender, self.education,
+            ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender, self.education,
                                   self.labor, self.marriage, self.birth_rate, self.birth_interval,
                                   self.death_rate, self.marriage_rate, self.marriage_flag,
                                   self.match_prob, self.immi_marriage_rate)
@@ -243,14 +246,23 @@ class IndividualAgent(HouseholdAgent):
             ind.marriage = 0
             ind.individual_id = self.hh_id + 'k'
             ind.labor = 6
+            #self.
 
     def death(self):
         if self.age > 65 and random() < death_rate:
-            pass
+            self.hh_id == 0
+            self.individual_id == 0
+
+    def youth(self):
+        if 7 < self.age < 19:
+            self.labor = 5
+            #*5 for student education + 1
 
     def step(self):
         """Step behavior for individual agents; see pseudo-code document"""
         self.match_female()
+        year += 1
+        self.age += 1
 
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""

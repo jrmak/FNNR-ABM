@@ -220,18 +220,13 @@ class ABM(Model):
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
 
-    def set_individual_attributes(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
     def make_individual_agents(self):
-        #hh 45
         """Create the individual agents"""
-        single_male_list = []
         for hh_row in agents:  # agents is a list of ints 1-96 from excel_import
             individual_id_list = return_values(hh_row, 'name')
             agelist = return_values(hh_row, 'age')  # find the ages of people in hh
             genderlist = return_values(hh_row, 'gender')
+            marriagelist = return_values(hh_row, 'marriage')
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
                     hh_id = return_values(hh_row, 'hh_id')
@@ -241,18 +236,17 @@ class ABM(Model):
                     self.age = agelist[i]
                     #if genderlist is not None and genderlist is not []:
                     self.gender = genderlist[i]
-                    print(self.individual_id)
-                    print(self.age)
-                    print(self.gender)
-                    ind = IndividualAgent(self.hh_id, self, self.individual_id, self.individual_id, self.age, self.gender, self.education,
+                    self.marriage = marriagelist[i]
+                    if 15 < self.age < 59:
+                        self.labor == 1
+                    else:
+                        self.labor == 0
+                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender, self.education,
                          self.labor, self.marriage, self.birth_rate, self.birth_interval,
                          self.death_rate, self.marriage_rate, self.marriage_flag,
                          self.match_prob, self.immi_marriage_rate)
-            #print(ind.hh_id)
-            self.schedule.add(ind)
-        # print(single_male_list)
-            # except:
-            #    pass
+                    #hh_id twice as placeholder
+                    self.schedule.add(ind)
 
     def step(self):
         """Advance the model by one step"""
