@@ -8,9 +8,10 @@ It also defines what occurs to the agents at each 'step' of the ABM.
 from mesa import Agent  # Agent superclass from mesa
 from random import *
 from excel_import import *
-from math import sqrt
+from math import sqrt, exp
 
 formermax = []
+out_migrants_list = []
 year = 2000
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
@@ -76,7 +77,6 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
             if type(self.unique_id) == int and 0 < self.unique_id < 96:
                 # initialize number of laborers
                 self.hh_id = self.unique_id
-                print(self.unique_id)
                 if self.hh_id > 0:
                     self.num_labor = self.initialize_labor(self.hh_id)
                     #except:
@@ -140,8 +140,8 @@ class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
     def __init__(self, unique_id, model, hh_id, individual_id, age = 20, gender = 1, education = 1,
                          labor = 0, marriage = 0, birth_rate = 1, birth_interval = 2,
-                         death_rate = 0.1, marriage_rate = 0.1, marriage_flag = 0,
-                         match_prob = 0.05, immi_marriage_rate = 0.03):
+                         death_rate = 0.1, marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0,
+                         match_prob = 0.05, immi_marriage_rate = 0.03, past_hh_id = 0):
 
         super().__init__(self, unique_id, model, hh_id)
         self.individual_id = individual_id
@@ -158,6 +158,8 @@ class IndividualAgent(HouseholdAgent):
         self.marriage_flag = marriage_flag
         self.match_prob = match_prob
         self.immi_marriage_rate = immi_marriage_rate
+        self.mig_flag = mig_flag
+        self.past_hh_id = past_hh_id
 
     def make_single_male_list(self):
         single_male_list = []
@@ -165,7 +167,6 @@ class IndividualAgent(HouseholdAgent):
             agelist = return_values(hh_row, 'age')  # find the ages of people in hh
             genderlist = return_values(hh_row, 'gender')
             individual_id_list = return_values(hh_row, 'name')
-            print(self.individual_id)
             if individual_id_list is not None and individual_id_list is not []:
                 for individual in individual_id_list:
                     self.individual_id = str(hh_row) + str(individual)
@@ -197,6 +198,7 @@ class IndividualAgent(HouseholdAgent):
                     if random() < self.marriage_rate:
                         self.first_step_flag = 1
                         for male in single_male_list:
+                            print(male, 'single male')
                             if random() < self.match_prob:
                                 self.marriage_flag = 1
                                 self.marriage = 1
@@ -216,8 +218,8 @@ class IndividualAgent(HouseholdAgent):
         if self.marriage_flag == 1 and random() < self.immi_marriage_rate:
             ind = IndividualAgent(hh_id, self, individual, self.individual_id, self.age, self.gender, self.education,
                                   self.labor, self.marriage, self.birth_rate, self.birth_interval,
-                                  self.death_rate, self.marriage_rate, self.marriage_flag,
-                                  self.match_prob, self.immi_marriage_rate)
+                                  self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
+                                  self.match_prob, self.immi_marriage_rate, self.past_hh_id)
             ind.gender = 2
             age_random = normal(22.1, 2.6)
             if age_random >= 20.0:
@@ -238,8 +240,8 @@ class IndividualAgent(HouseholdAgent):
             #if current_time = ?? see pseudocode
             ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender, self.education,
                                   self.labor, self.marriage, self.birth_rate, self.birth_interval,
-                                  self.death_rate, self.marriage_rate, self.marriage_flag,
-                                  self.match_prob, self.immi_marriage_rate)
+                                  self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
+                                  self.match_prob, self.immi_marriage_rate, self.past_hh_id)
             ind.age = 0
             ind.gender = choice([0, 1])
             ind.education = 0
@@ -249,18 +251,48 @@ class IndividualAgent(HouseholdAgent):
             #self.
 
     def death(self):
-        if self.age > 65 and random() < death_rate:
-            self.hh_id == 0
-            self.individual_id == 0
+        """Removes an object from reference"""
+        if self.age > 65 and random() < self.death_rate:
+            self.hh_id = 0
+            self.individual_id = 0
 
     def youth(self):
+        """Assigns student working status to those who are young"""
         if 7 < self.age < 19:
             self.labor = 5
             #*5 for student education + 1
 
+    def out_migration(self):
+        self.mig_flag = 0
+        mig_prob = 0
+        while mig_prob != 1:
+            prob = exp(2.07 + 0.65 * self.num_labor + 4.35 * migration_network +
+                0.11 * self.land + 0.36 * self.GTGP_participation - 0.12 * age +
+                0.25 * self.gender + 0.13 * self.education + 0.96 * self.marriage)
+        mig_prob = prob / (prob + 1)
+        if random() < mig_prob:
+            self.mig_flag = 1
+            self.past_hh_id = self.hh_id
+            self.hh_id = 0
+            #year_mig from step counter
+            out_migrants_list.append(self.individual_id)
+
+    def re_migration(self):
+        if self.individual_id in out_migrants_list:
+            prob = exp(5.31 - 0.12 * self.age + 0.14 * mig_years)
+        re_mig_prob =  prob / (prob + 1)
+        if random() < re_mig_prob:
+            self.hh_id = self.past_hh_id
+            self.labor = 1
+            out_migrants_list.remove(self.individual_id)
+
     def step(self):
         """Step behavior for individual agents; see pseudo-code document"""
         self.match_female()
+        self.birth()
+        self.death()
+        self.youth()
+        self.out_migration()
         year += 1
         self.age += 1
 

@@ -28,7 +28,8 @@ class ABM(Model):
                  GTGP_coef = 0, GTGP_part_flag = 0, area = 1, maximum = 0, admin_village = 1,
                  GTGP_enrolled = 0, income = 0, GTGP_comp = 0, age = 21, gender = 1, marriage = 0,
                  education = 1, labor = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
-                 birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03):
+                 birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
+                 mig_flag = 0, past_hh_id = 0):
         # default values set for now, will define when model runs agents
 
         self.num_agents = num_agents
@@ -62,6 +63,8 @@ class ABM(Model):
         self.marriage_flag = marriage_flag
         self.match_prob = match_prob
         self.immi_marriage_rate = immi_marriage_rate
+        self.mig_flag = mig_flag
+        self.past_hh_id = past_hh_id
 
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
@@ -181,17 +184,17 @@ class ABM(Model):
     def make_land_agents(self):
         """Create the land agents on the map"""
         # add non-GTGP land parcels
-        for hh_id in agents:  # from excel_import
-            hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
+        for hh_row in agents:  # from excel_import
+            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             maxlist = []
-            landposlist = self.determine_landpos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
+            landposlist = self.determine_landpos(hh_row, 'non_GTGP_latitude', 'non_GTGP_longitude')
             # print(landposlist) #list should have multiple tuples
             for landpos in landposlist:
                 distance = self.calc_distance(hhpos, landpos)
                 if distance not in formermax:
                     maxlist.append(distance)
                     formermax.append(distance)
-                lp = LandParcelAgent(hh_id, self, landpos, self.maximum, self.area, self.GTGP_enrolled)
+                lp = LandParcelAgent(hh_row, self, landpos, self.maximum, self.area, self.GTGP_enrolled)
                 if maxlist != ['']:
                     try:
                         max_index = maxlist.index(max(maxlist))
@@ -205,18 +208,18 @@ class ABM(Model):
                     lp.maximum = 0
                     #print(lp.maximum, 'else2')
                 lp.GTGP_enrolled = 0
-                lp.hh_id = hh_id
+                lp.hh_id = hh_row
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
 
         # add GTGP land parcels
-        for hh_id in agents:  # from excel_import
-            hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
-            landposlist = self.determine_landpos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
+        for hh_row in agents:  # from excel_import
+            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
+            landposlist = self.determine_landpos(hh_row, 'GTGP_latitude', 'GTGP_longitude')
             for landpos in landposlist:
-                lp2 = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
+                lp2 = LandParcelAgent(hh_row, self, landpos, self.area, self.GTGP_enrolled)
                 lp2.GTGP_enrolled = 1
-                lp2.hh_id = hh_id
+                lp2.hh_id = hh_row
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
 
@@ -229,22 +232,25 @@ class ABM(Model):
             marriagelist = return_values(hh_row, 'marriage')
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
-                    hh_id = return_values(hh_row, 'hh_id')
-                    self.hh_id = hh_id
-                    self.individual_id = str(self.hh_id) + str(individual_id_list[i])                        # example: 2c
-                    #if agelist is not None and agelist is not []:
-                    self.age = agelist[i]
-                    #if genderlist is not None and genderlist is not []:
-                    self.gender = genderlist[i]
-                    self.marriage = marriagelist[i]
+                    try:
+                        hh_id = return_values(hh_row, 'hh_id')
+                        self.hh_id = hh_id
+                        self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
+                        #if agelist is not None and agelist is not []:
+                        self.age = agelist[i]
+                        #if genderlist is not None and genderlist is not []:
+                        self.gender = genderlist[i]
+                        self.marriage = marriagelist[i]
+                    except:
+                        pass
                     if 15 < self.age < 59:
                         self.labor == 1
                     else:
                         self.labor == 0
-                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender, self.education,
-                         self.labor, self.marriage, self.birth_rate, self.birth_interval,
-                         self.death_rate, self.marriage_rate, self.marriage_flag,
-                         self.match_prob, self.immi_marriage_rate)
+                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
+                                          self.education, self.labor, self.marriage, self.birth_rate, self.birth_interval,
+                                          self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
+                                          self.match_prob, self.immi_marriage_rate, self.past_hh_id)
                     #hh_id twice as placeholder
                     self.schedule.add(ind)
 
