@@ -25,7 +25,10 @@ def assign_sheet_parameters(hh_id, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
     """Will create a new function when this list gets long enough"""
     parameters = []
-    row = str(hh_id + 2)
+    try:
+        row = str(hh_id + 2)
+    except:
+        pass
     # all lowercase!
     if variable.lower() == 'gtgp_area':
         parameters.append(str('DM' + row))
@@ -91,12 +94,12 @@ def assign_variable_per_hh(x, y):
                         # var = str(CellObj.value)
     return var
 
-def return_values(hh_id, var):
+def return_values(hh_row, var):
     """Returns values given hh_id and variable (combines previous functions)"""
     # Example: return_values(1,'gender')
-    hh_id_variable = assign_sheet_parameters(hh_id, var)
+    hh_row_variable = assign_sheet_parameters(hh_row, var)
     # print(hh_id_variable) # Example: ['A3', 'AF3'] if argument is (1, 'gender')
-    variable_per_hh = assign_variable_per_hh(hh_id_variable[0], hh_id_variable[1])
+    variable_per_hh = assign_variable_per_hh(hh_row_variable[0], hh_row_variable[1])
     # print(variable_per_hh) # Example: ['1', '2', '1'] for genders in a household
     if variable_per_hh != []:
         return variable_per_hh

@@ -57,7 +57,9 @@ chart = ChartModule([{"Label": 'Average Number of Migrants',
 #step
 # migrants.datacollector.get_model_vars_dataframe().plot()
 
-class Text(TextElement):
+# The text elements below update with every step.
+
+class Migrants(TextElement):
     def __init__(self):
         pass
     def render(self, model):
@@ -65,10 +67,18 @@ class Text(TextElement):
                "Average # of Migrants per Household: " + str(show_num_mig(model))
                 )
 
-text = Text()
+class Individuals(TextElement):
+    def __init__(self):
+        pass
+    def render(self, model):
+        return ("Number of Marriages:" + ""  # to be replaced later with actual value
+                )
 
-server = ModularServer(ABM, [agent_canvas, chart, text], "GTGP Enrollment of Land Over Time",
+text1 = Migrants()
+text2 = Individuals()
+
+server = ModularServer(ABM, [agent_canvas, chart, text1, text2], "GTGP Enrollment of Land Over Time",
                        100, 10, 10)
 
-
+# if __name__ == "__main__":
 server.launch()  # actual run line

@@ -1,5 +1,8 @@
 Version History
 
+Pseudocode Version 5 (0621)
+v1.41 - 6/27/2017 - Further debugging, added immigration functions
+
 Pseudocode Version 4 (0619)
 v1.37 - 6/26/2017 - Changes to class object attribute assignments to help organize/debug functions
 v1.36 - 6/23/2017 - Debugging on marriage match function, creation of birth/death functions
@@ -30,12 +33,12 @@ v0.5 - 5/30/2017 - Code setup; data imported from Excel to Python variables (Hou
 5/23/17 - Initial meeting
 
 Other Activity History
-6/26/2017 - 'FNNR-ABM User Manual' updated (Github acess & download instructions)
+6/26 - 6/27/2017 - 'FNNR-ABM User Manual' updated (Github acess & download instructions)
 6/8/2017 - 'FNNR-ABM User Manual' updated (Mesa installation instructions)
 6/7/2017 - Began document: 'FNNR-ABM User Manual' (Python installation instructions)
 
 Hours/Days of Work Reported
-Days of work completed - 24
+Days of work completed - 25
 Days submitted on SDSURF EMP timesheet so far - 10 (6/19 - 6/30)
 Maximum paid days of work to report - 45 (2 months, 5 days/week, 4 hours/day from 10am - 2pm)
 *If project is unfinished by the end of the paid cycle, future work on the project will continue on a volunteer basis for the summer.
