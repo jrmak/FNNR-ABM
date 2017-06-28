@@ -29,7 +29,7 @@ class ABM(Model):
                  GTGP_enrolled = 0, income = 0, GTGP_comp = 0, age = 21, gender = 1, marriage = 0,
                  education = 1, labor = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
                  birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
-                 mig_flag = 0, past_hh_id = 0):
+                 mig_flag = 0, past_hh_id = 0, last_birth_time = 0, mig_years = 0):
         # default values set for now, will define when model runs agents
 
         self.num_agents = num_agents
@@ -65,6 +65,8 @@ class ABM(Model):
         self.immi_marriage_rate = immi_marriage_rate
         self.mig_flag = mig_flag
         self.past_hh_id = past_hh_id
+        self.last_birth_time = last_birth_time
+        self.mig_years = mig_years
 
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
@@ -250,7 +252,8 @@ class ABM(Model):
                     ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                                           self.education, self.labor, self.marriage, self.birth_rate, self.birth_interval,
                                           self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
-                                          self.match_prob, self.immi_marriage_rate, self.past_hh_id)
+                                          self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.last_birth_time,
+                                          self.mig_years)
                     #hh_id twice as placeholder
                     self.schedule.add(ind)
 

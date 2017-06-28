@@ -10,9 +10,8 @@ from random import *
 from excel_import import *
 from math import sqrt, exp
 
-formermax = []
+married_male_list = []
 out_migrants_list = []
-year = 2000
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
@@ -24,14 +23,14 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
         super().__init__(unique_id, model)  # unique_id = household id
         self.hhpos = hhpos  # resident location
-        #print(self.hhpos)
+        # print(self.hhpos)  # returns positions, then None, then references
         self.hh_id = hh_id
         self.admin_village = admin_village
         self.nat_village = nat_village
-        self.charcoal = charcoal # consumption
+        self.charcoal = charcoal  # consumption
         self.land_area = land_area  # total land area for household
         self.GTGP_dry = GTGP_dry  # area
-        self.GTGP_rice = GTGP_rice # area
+        self.GTGP_rice = GTGP_rice  # area
         self.total_dry = total_dry  # area
         self.total_rice = total_rice  # area
         self.NCFP = NCFP  # another PES program
@@ -46,7 +45,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.GTGP_comp = randint(500, 2000)
         self.comp_sign = comp_sign  # influence of GTGP income on migration decisions
         self.GTGP_coef = uniform(0, 0.55)  # random coefficient
-        self.GTGP_part_flag = GTGP_part_flag #binary; further enrollment of GTGP
+        self.GTGP_part_flag = GTGP_part_flag  # binary; further enrollment of GTGP
         self.first_step_flag = first_step_flag
         # more attributes will be added later on
 
@@ -67,10 +66,10 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
     def gtgp_enroll(self):
         """See pseudo-code document: predicts GTGP participation per household"""
-        #for hh in agents: # for each household - removed
+        # for hh in agents: # for each household - removed
         #    self.num_mig = real_value_counter(return_values(hh, 'num_mig')) / 17  # sets num_mig in hh
         # 17: 1999-2016, so num_mig is average yearly number of migrants per household
-        #if self.num_labor == 0 and self.charcoal == 10:
+        # if self.num_labor == 0 and self.charcoal == 10:
        #     laborchance = randint(1,6)
        #     self.num_labor = laborchance  # initialize number of laborers randomly
         if self.first_step_flag == 0:
@@ -79,13 +78,10 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                 self.hh_id = self.unique_id
                 if self.hh_id > 0:
                     self.num_labor = self.initialize_labor(self.hh_id)
-                    #except:
-                    #    pass
-        #print(self.hh_id,'hhid',self.num_labor,'!') #current prob: num_labor outside loop for hh not landparcel
-        self.first_step_flag = 1
+        # print(self.hh_id,'hhid',self.num_labor,'!') #current prob: num_labor outside loop for hh not landparcel
         try:
             self.GTGP_part = 1
-                # break  # avoid redundant flagging
+            # break  # avoid redundant flagging
         except:
             pass
 
@@ -100,9 +96,9 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                         self.num_labor -= 1
                         self.num_mig += 1  # migration occurs
                         print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
-                    #pass
-                #if self.num_labor == 0 and self.num_non_labor == 0:
-                    #break
+                    # pass
+                # if self.num_labor == 0 and self.num_non_labor == 0:
+                    # break
                 except:
                     pass
                 if self.num_labor < self.min_req_labor:
@@ -116,7 +112,6 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                 self.num_labor = self.initialize_labor(self.unique_id)
         except:
             pass
-        self.first_step_flag = 1
         try:
             if self.num_labor > 0:
                 self.num_labor -= 1
@@ -139,9 +134,10 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
     def __init__(self, unique_id, model, hh_id, individual_id, age = 20, gender = 1, education = 1,
-                         labor = 0, marriage = 0, birth_rate = 1, birth_interval = 2,
-                         death_rate = 0.1, marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0,
-                         match_prob = 0.05, immi_marriage_rate = 0.03, past_hh_id = 0):
+                labor = 0, marriage = 0, birth_rate = 1, birth_interval = 2,
+                death_rate = 0.1, marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0,
+                match_prob = 0.05, immi_marriage_rate = 0.03, past_hh_id = 0, last_birth_time = 0,
+                mig_years = 0):
 
         super().__init__(self, unique_id, model, hh_id)
         self.individual_id = individual_id
@@ -160,6 +156,8 @@ class IndividualAgent(HouseholdAgent):
         self.immi_marriage_rate = immi_marriage_rate
         self.mig_flag = mig_flag
         self.past_hh_id = past_hh_id
+        self.last_birth_time = last_birth_time
+        self.mig_years = mig_years
 
     def make_single_male_list(self):
         single_male_list = []
@@ -185,41 +183,38 @@ class IndividualAgent(HouseholdAgent):
         """Loops through single females and matches to single males"""
         self.marriage_flag = 0
         if self.first_step_flag == 0:
+            global single_male_list
             single_male_list = self.make_single_male_list()
-            married_male_list = []
-        agelist = return_values(self.hh_id, 'age')  # find the ages of people in hh
-        genderlist = return_values(self.hh_id, 'gender')
-        if agelist is not None and genderlist is not None:  # if there are people in the household,
-            for i in range(len(agelist)):  # for each person,
-                if self.marriage != 1:
-                    self.marriage = 0  # otherwise default is 0.1, not sure why
-                if 20 < float(agelist[i]) and int(genderlist[i]) == 2 and self.marriage == 0:
-                    # if person is a woman,
-                    if random() < self.marriage_rate:
-                        self.first_step_flag = 1
-                        for male in single_male_list:
-                            print(male, 'single male')
-                            if random() < self.match_prob:
-                                self.marriage_flag = 1
-                                self.marriage = 1
-                                married_male_list.append(male)
-                                single_male_list.remove(male)
-                                self.hh_id = male.strip(male[-1])
-                                print(self.hh_id, self.individual_id)
-                                self.individual_id = self.hh_id + 'j'
-                                pass
-        if agelist is not None and genderlist is not None:  # if there are people in the household,
-            for i in range(len(agelist)):  # for each person,
-                if 20 < float(agelist[i]) and int(genderlist[i]) == 1:
-                    if self.individual_id in married_male_list:
-                        self.marriage = 1
+        # agelist = return_values(self.hh_id, 'age')  # find the ages of people in hh
+        # genderlist = return_values(self.hh_id, 'gender')
+        if self.marriage != 1:
+            self.marriage = 0  # otherwise default is 0.1, not sure why
+            if 20 < self.age and self.gender == 2 and self.marriage == 0:
+                # if person is a woman,
+                if random() < self.marriage_rate:
+                    for male in single_male_list:
+                        # print(male, 'single male')
+                        if random() < self.match_prob:
+                            self.marriage_flag = 1
+                            self.marriage = 1
+                            married_male_list.append(male)
+                            single_male_list.remove(male)
+                            self.hh_id = male.strip(male[-1])
+                            print(self.hh_id, self.individual_id, 'hh ind')
+                            self.individual_id = self.hh_id + 'j'
+                            pass
+        # if agelist is not None and genderlist is not None:  # if there are people in the household,
+            # for i in range(len(agelist)):  # for each person,
+        if 20 < self.age and self.gender == 1:
+            if self.individual_id in married_male_list:
+                self.marriage = 1
 
     def immigration_marriage(self):
         if self.marriage_flag == 1 and random() < self.immi_marriage_rate:
-            ind = IndividualAgent(hh_id, self, individual, self.individual_id, self.age, self.gender, self.education,
+            ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender, self.education,
                                   self.labor, self.marriage, self.birth_rate, self.birth_interval,
                                   self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
-                                  self.match_prob, self.immi_marriage_rate, self.past_hh_id)
+                                  self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.mig_years)
             ind.gender = 2
             age_random = normal(22.1, 2.6)
             if age_random >= 20.0:
@@ -236,19 +231,22 @@ class IndividualAgent(HouseholdAgent):
             ind.labor = 1
 
     def birth(self):
-        if self.marriage == 1 and self.gender == 2 and self.age < 55 and random() < self.birth_date:
-            #if current_time = ?? see pseudocode
-            ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender, self.education,
-                                  self.labor, self.marriage, self.birth_rate, self.birth_interval,
-                                  self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
-                                  self.match_prob, self.immi_marriage_rate, self.past_hh_id)
-            ind.age = 0
-            ind.gender = choice([0, 1])
-            ind.education = 0
-            ind.marriage = 0
-            ind.individual_id = self.hh_id + 'k'
-            ind.labor = 6
-            #self.
+        if self.marriage == 1 and self.gender == 2 and self.age < 55 and random() < self.birth_rate:
+            if random() > self.birth_rate and (self.mig_years - self.last_birth_time) > self.birth_interval:
+                self.last_birth_time = self.mig_years
+                ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
+                                      self.education, self.labor, self.marriage, self.birth_rate, self.birth_interval,
+                                      self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
+                                      self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.last_birth_time,
+                                      self.mig_years)
+                ind.age = 0
+                ind.gender = choice([0, 1])
+                ind.education = 0
+                ind.marriage = 0
+                ind.individual_id = str(self.hh_id) + 'k'
+                ind.labor = 6
+        self.mig_years += 1
+                #add to schedule
 
     def death(self):
         """Removes an object from reference"""
@@ -256,7 +254,7 @@ class IndividualAgent(HouseholdAgent):
             self.hh_id = 0
             self.individual_id = 0
 
-    def youth(self):
+    def youth_education(self):
         """Assigns student working status to those who are young"""
         if 7 < self.age < 19:
             self.labor = 5
@@ -264,37 +262,44 @@ class IndividualAgent(HouseholdAgent):
 
     def out_migration(self):
         self.mig_flag = 0
-        mig_prob = 0
-        while mig_prob != 1:
-            prob = exp(2.07 + 0.65 * self.num_labor + 4.35 * migration_network +
-                0.11 * self.land + 0.36 * self.GTGP_participation - 0.12 * age +
+        # mig_prob = 0  # pseudocode said to set to 0 initially, but not needed
+        migration_network = 0  # temporary
+        prob = exp(2.07 + 0.65 * self.num_labor + 4.35 * migration_network +
+                0.11 * self.land_area + 0.36 * self.GTGP_part - 0.12 * self.age +
                 0.25 * self.gender + 0.13 * self.education + 0.96 * self.marriage)
+        # ask Shuang what migration_network is
+        if prob > 1:
+            prob = 1
         mig_prob = prob / (prob + 1)
         if random() < mig_prob:
             self.mig_flag = 1
             self.past_hh_id = self.hh_id
             self.hh_id = 0
-            #year_mig from step counter
             out_migrants_list.append(self.individual_id)
 
     def re_migration(self):
         if self.individual_id in out_migrants_list:
-            prob = exp(5.31 - 0.12 * self.age + 0.14 * mig_years)
-        re_mig_prob =  prob / (prob + 1)
-        if random() < re_mig_prob:
-            self.hh_id = self.past_hh_id
-            self.labor = 1
-            out_migrants_list.remove(self.individual_id)
+            prob = exp(5.31 - 0.12 * self.age + 0.14 * self.mig_years)
+            re_mig_prob =  prob / (prob + 1)
+            if random() < re_mig_prob:
+                self.hh_id = self.past_hh_id
+                self.labor = 1
+                out_migrants_list.remove(self.individual_id)
 
     def step(self):
         """Step behavior for individual agents; see pseudo-code document"""
+        if self.first_step_flag == 0:
+            global currentyear
+            currentyear = 2000
         self.match_female()
         self.birth()
         self.death()
-        self.youth()
+        self.youth_education()
         self.out_migration()
-        year += 1
+        self.re_migration()
         self.age += 1
+        currentyear += 1
+        self.first_step_flag = 1  # must be at the end of step()
 
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
@@ -313,7 +318,7 @@ class LandParcelAgent(HouseholdAgent):
     def calc_distance(self, hhpos, landpos):
         """Given a household id, return the distances between household and parcels"""
         landpos = self.landpos
-        #print(landpos,'landpos')
+        # print(landpos,'landpos')
         if hhpos is not None:
             try:
                 distance = sqrt(
@@ -350,21 +355,15 @@ class LandParcelAgent(HouseholdAgent):
         """Every step, returns new max-distance land parcel for each household given households and land parcels"""
         maxlist = []
         hhpos = self.determine_hhpos_agents(self.hh_id, 'house_latitude', 'house_longitude')
-        #print(hhpos,';;', self.landpos,'!!')
-        #try:
+        if self.first_step_flag == 0:
+            formermax = []
         distance = self.calc_distance(hhpos, self.landpos)
         if distance not in formermax:
             maxlist.append(distance)
             formermax.append(distance)
-        #except:
-        #    pass
         if maxlist != ['']:
             try:
-                #max_index = maxlist.index(max(maxlist))
-                #if self.landpos == maxlist[max_index]:
                 self.maximum = 1
-                #else:
-                    #self.maximum = 0
             except:
                 self.maximum = 0
                 pass
@@ -378,7 +377,7 @@ class LandParcelAgent(HouseholdAgent):
                 self.GTGP_enrolled = 1
             else:
                 pass
-                #print('work on it')
+                # print('work on it')
 
     def step(self):
         """Step behavior for LandParcelAgent"""
