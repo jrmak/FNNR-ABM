@@ -1,6 +1,7 @@
 Version History
 
 Pseudocode Version 5 (0621)
+v1.42 - 6/28/2017 - Debugging on individual and immigration functions
 v1.41 - 6/27/2017 - Further debugging, added immigration functions
 
 Pseudocode Version 4 (0619)
