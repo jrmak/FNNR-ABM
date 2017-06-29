@@ -49,10 +49,11 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.first_step_flag = first_step_flag
         # more attributes will be added later on
 
-    def initialize_labor(self, hh):
+    def initialize_labor(self, hh_row):
         num_labor = 0
-        agelist = return_values(hh, 'age')  # find the ages of people in hh
-        if agelist[0] is not None:  # if there are people in the household,
+        # 169 vs. 94
+        agelist = return_values(hh_row, 'age')  # find the ages of people in hh
+        if agelist is not None:  # if there are people in the household,
             for age in agelist:  # for each person,
                 try:
                     if 15 < float(age) < 59:  # if the person is 15-65 years old,
@@ -72,8 +73,12 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         # if self.num_labor == 0 and self.charcoal == 10:
        #     laborchance = randint(1,6)
        #     self.num_labor = laborchance  # initialize number of laborers randomly
+        try:
+            self.unique_id = int(self.unique_id)
+        except:
+            pass
         if self.first_step_flag == 0:
-            if type(self.unique_id) == int and 0 < self.unique_id < 96:
+            if type(self.unique_id) == int and 0 < self.unique_id < 170:
                 # initialize number of laborers
                 self.hh_id = self.unique_id
                 if self.hh_id > 0:
@@ -84,12 +89,12 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
             # break  # avoid redundant flagging
         except:
             pass
-
         # later: depends on plant type and land area and PES policy
         if type(self.unique_id) == int:
             self.GTGP_coef = uniform(0, 0.55)
-            #elf.GTGP_comp = randint(500, 2000)
-            #self.income = randint(5000, 20000)
+            self.GTGP_comp = randint(500, 2000)
+            self.income = randint(5000, 20000)
+            print(self.num_labor, 'ab')
             if (self.GTGP_coef * self.GTGP_part) > self.mig_prob and (self.GTGP_comp / self.income) > self.comp_sign:
                 try:
                     if self.num_labor > 0:
@@ -101,8 +106,11 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                     # break
                 except:
                     pass
-                if self.num_labor < self.min_req_labor:
-                    self.GTGP_part_flag = 1  # sets flag for enrollment of more land
+                try:
+                    if self.num_labor < self.min_req_labor:
+                        self.GTGP_part_flag = 1  # sets flag for enrollment of more land
+                except:
+                    pass
             return self.GTGP_part_flag
 
     def gtgp_test(self):
@@ -160,22 +168,18 @@ class IndividualAgent(HouseholdAgent):
         self.mig_years = mig_years
 
     def make_single_male_list(self):
+        print(self.hh_id, self.individual_id, 'test')
+        agelist = return_values(self.hh_id, 'age')
+        genderlist = return_values(self.hh_id, 'gender')
         single_male_list = []
-        for hh_row in agents:  # agents is a list of ints 1-96 from excel_import
-            agelist = return_values(hh_row, 'age')  # find the ages of people in hh
-            genderlist = return_values(hh_row, 'gender')
-            individual_id_list = return_values(hh_row, 'name')
-            if individual_id_list is not None and individual_id_list is not []:
-                for individual in individual_id_list:
-                    self.individual_id = str(hh_row) + str(individual)
-                    indlist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
-                    for i in indlist:
-                        if i == individual[-1]:
-                            try:
-                                if 20 < float(agelist[indlist.index(i)]) and int(genderlist[indlist.index(i)]) == 1:
-                                    single_male_list.append(self.individual_id)
-                            except:
-                                pass
+        indlist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+        for i in indlist:
+            if i == self.individual_id[-1]:
+                try:
+                    if 20 < float(agelist[indlist.index(i)]) and int(genderlist[indlist.index(i)]) == 1:
+                        single_male_list.append(self.individual_id)
+                except:
+                    pass
         # print(single_male_list)
         return single_male_list
 
@@ -198,10 +202,10 @@ class IndividualAgent(HouseholdAgent):
                             self.marriage_flag = 1
                             self.marriage = 1
                             married_male_list.append(male)
-                            single_male_list.remove(male)
                             self.hh_id = male.strip(male[-1])
                             print(self.hh_id, self.individual_id, 'hh ind')
                             self.individual_id = self.hh_id + 'j'
+                            single_male_list.remove(male)
                             pass
         # if agelist is not None and genderlist is not None:  # if there are people in the household,
             # for i in range(len(agelist)):  # for each person,
