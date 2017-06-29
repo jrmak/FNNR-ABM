@@ -1,7 +1,7 @@
 Version History
 
 Pseudocode Version 5 (0621)
-v1.42 - 6/28/2017 - Debugging on individual and immigration functions
+v1.42 - 6/28 - 6/29/2017 - Debugging on individual and immigration functions
 v1.41 - 6/27/2017 - Further debugging, added immigration functions
 
 Pseudocode Version 4 (0619)
@@ -39,7 +39,7 @@ Other Activity History
 6/7/2017 - Began document: 'FNNR-ABM User Manual' (Python installation instructions)
 
 Hours/Days of Work Reported
-Days of work completed - 25
+Days of work completed - 26
 Days submitted on SDSURF EMP timesheet so far - 10 (6/19 - 6/30)
 Maximum paid days of work to report - 45 (2 months, 5 days/week, 4 hours/day from 10am - 2pm)
 *If project is unfinished by the end of the paid cycle, future work on the project will continue on a volunteer basis for the summer.
