@@ -23,7 +23,7 @@ def show_num_mig(model):
 formermax = []
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
-    def __init__(self, num_agents, width, height, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
+    def __init__(self, num_agents, width, height, hh_row = 0, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
                  num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, GTGP_part = 0,
                  GTGP_coef = 0, GTGP_part_flag = 0, area = 1, maximum = 0, admin_village = 1,
                  GTGP_enrolled = 0, income = 0, GTGP_comp = 0, age = 21, gender = 1, marriage = 0,
@@ -33,6 +33,7 @@ class ABM(Model):
         # default values set for now, will define when model runs agents
 
         self.num_agents = num_agents
+        self.hh_row = hh_row
         self.GTGP_land = GTGP_land
         self.GTGP_latitude = GTGP_latitude
         self.GTGP_longitude = GTGP_longitude
@@ -170,10 +171,11 @@ class ABM(Model):
     # Create agents
     def make_hh_agents(self):
         """Create the household agents"""
-        for hh_id in agents:  # agents is a list of ints 1-97 from excel_import
-            hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
+        for hh_row in agents:  # agents is a list of ints 1-97 from excel_import
+            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
+            hh_id = return_values(hh_row, 'hh_id')  # !
             try:
-                a = HouseholdAgent(hh_id, self, hhpos, self.admin_village, self.GTGP_part, self.GTGP_land,
+                a = HouseholdAgent(hh_id, self, hhpos, hh_row, self.admin_village, self.GTGP_part, self.GTGP_land,
                                     self.GTGP_coef, self.mig_prob, self.num_mig, self.min_req_labor,
                                     self.num_labor, self.income, self.GTGP_comp)
                 a.admin_village = 1
@@ -190,13 +192,13 @@ class ABM(Model):
             hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             maxlist = []
             landposlist = self.determine_landpos(hh_row, 'non_GTGP_latitude', 'non_GTGP_longitude')
-            # print(landposlist) #list should have multiple tuples
+            hh_id = return_values(hh_row, 'hh_id')
             for landpos in landposlist:
                 distance = self.calc_distance(hhpos, landpos)
                 if distance not in formermax:
                     maxlist.append(distance)
                     formermax.append(distance)
-                lp = LandParcelAgent(hh_row, self, landpos, self.maximum, self.area, self.GTGP_enrolled)
+                lp = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.GTGP_enrolled)
                 if maxlist != ['']:
                     try:
                         max_index = maxlist.index(max(maxlist))
@@ -210,18 +212,16 @@ class ABM(Model):
                     lp.maximum = 0
                     #print(lp.maximum, 'else2')
                 lp.GTGP_enrolled = 0
-                lp.hh_id = hh_row
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
 
         # add GTGP land parcels
         for hh_row in agents:  # from excel_import
-            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
+            hh_id = return_values(hh_row, 'hh_id')
             landposlist = self.determine_landpos(hh_row, 'GTGP_latitude', 'GTGP_longitude')
             for landpos in landposlist:
-                lp2 = LandParcelAgent(hh_row, self, landpos, self.area, self.GTGP_enrolled)
+                lp2 = LandParcelAgent(hh_id, self, landpos, hh_row, self.area, self.GTGP_enrolled)
                 lp2.GTGP_enrolled = 1
-                lp2.hh_id = hh_row
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
 
@@ -229,33 +229,32 @@ class ABM(Model):
         """Create the individual agents"""
         for hh_row in agents:  # agents is a list of ints 1-96 from excel_import
             individual_id_list = return_values(hh_row, 'name')
+            hh_id = return_values(hh_row, 'hh_id')
+            self.hh_id = hh_id
             agelist = return_values(hh_row, 'age')  # find the ages of people in hh
             genderlist = return_values(hh_row, 'gender')
             marriagelist = return_values(hh_row, 'marriage')
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
                     try:
-                        hh_id = return_values(hh_row, 'hh_id')
-                        self.hh_id = hh_id
                         self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
-                        #if agelist is not None and agelist is not []:
+                        # if agelist is not None and agelist is not []:
                         self.age = agelist[i]
-                        #if genderlist is not None and genderlist is not []:
+                        # if genderlist is not None and genderlist is not []:
                         self.gender = genderlist[i]
                         self.marriage = marriagelist[i]
+                        if 15 < self.age < 59:
+                            self.labor == 1
+                        else:
+                            self.labor == 0
+                        ind = IndividualAgent(self.hh_row, self, self.hh_id, self.individual_id, self.age, self.gender,
+                                              self.education, self.labor, self.marriage, self.birth_rate, self.birth_interval,
+                                              self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
+                                              self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.last_birth_time,
+                                              self.mig_years)
+                        #hh_id twice as placeholder
                     except:
                         pass
-                    if 15 < self.age < 59:
-                        self.labor == 1
-                    else:
-                        self.labor == 0
-                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
-                                          self.education, self.labor, self.marriage, self.birth_rate, self.birth_interval,
-                                          self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
-                                          self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.last_birth_time,
-                                          self.mig_years)
-                    #hh_id twice as placeholder
-                    self.schedule.add(ind)
 
     def step(self):
         """Advance the model by one step"""

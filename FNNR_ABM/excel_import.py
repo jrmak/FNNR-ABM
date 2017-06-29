@@ -27,56 +27,59 @@ def assign_sheet_parameters(hh_id, variable):
     parameters = []
     try:
         row = str(hh_id + 2)
+    # all lowercase!
+        if variable.lower() == 'gtgp_area':
+            parameters.append(str('DM' + row))
+            parameters.append(str('DQ' + row))
+        elif variable.lower() == 'hh_id':
+            parameters.append(str('A' + row))
+            parameters.append(str('A' + row))
+        elif variable.lower() == 'name':
+            parameters.append(str('F' + row))
+            parameters.append(str('N' + row))
+        elif variable.lower() == 'age':
+            parameters.append(str('AG' + row))
+            parameters.append(str('AO' + row))
+        elif variable.lower() == 'gender':
+            parameters.append(str('X' + row))
+            parameters.append(str('AF' + row))
+        elif variable.lower() == 'education':
+            parameters.append(str('AY' + row))
+            parameters.append(str('BG' + row))
+        elif variable.lower() == 'marriage':
+            parameters.append(str('BH' + row))
+            parameters.append(str('BP' + row))
+        elif variable.lower() == 'labor':  # work status
+            parameters.append(str('BQ' + row))
+            parameters.append(str('BY' + row))
+        elif variable.lower() == 'house_longitude':
+            parameters.append(str('CA' + row))
+            parameters.append(str('CA' + row))
+        elif variable.lower() == 'house_latitude':
+            parameters.append(str('CB' + row))
+            parameters.append(str('CB' + row))
+        elif variable.lower() == 'gtgp_longitude':
+            parameters.append(str('DW' + row))
+            parameters.append(str('EA' + row))
+        elif variable.lower() == 'gtgp_latitude':
+            parameters.append(str('EB' + row))
+            parameters.append(str('EF' + row))
+        elif variable.lower() == 'non_gtgp_longitude':
+            parameters.append(str('JK' + row))
+            parameters.append(str('JO' + row))
+        elif variable.lower() == 'non_gtgp_latitude':
+            parameters.append(str('JP' + row))
+            parameters.append(str('JT' + row))
+        elif variable.lower() == 'num_mig':
+            parameters.append(str('ZV' + row))
+            parameters.append(str('ZZ' + row))
+        # add more later; added variable strings must be lowercase
+        else:
+            print('Sorry,', variable, 'is not a valid variable category.')
+            pass
+        return parameters
     except:
         pass
-    # all lowercase!
-    if variable.lower() == 'gtgp_area':
-        parameters.append(str('DM' + row))
-        parameters.append(str('DQ' + row))
-    elif variable.lower() == 'hh_id':
-        parameters.append(str('A' + row))
-        parameters.append(str('A' + row))
-    elif variable.lower() == 'name':
-        parameters.append(str('F' + row))
-        parameters.append(str('N' + row))
-    elif variable.lower() == 'age':
-        parameters.append(str('AG' + row))
-        parameters.append(str('AO' + row))
-    elif variable.lower() == 'gender':
-        parameters.append(str('X' + row))
-        parameters.append(str('AF' + row))
-    elif variable.lower() == 'education':
-        parameters.append(str('AY' + row))
-        parameters.append(str('BG' + row))
-    elif variable.lower() == 'marriage':
-        parameters.append(str('BH' + row))
-        parameters.append(str('BP' + row))
-    elif variable.lower() == 'house_longitude':
-        parameters.append(str('CA' + row))
-        parameters.append(str('CA' + row))
-    elif variable.lower() == 'house_latitude':
-        parameters.append(str('CB' + row))
-        parameters.append(str('CB' + row))
-    elif variable.lower() == 'gtgp_longitude':
-        parameters.append(str('DW' + row))
-        parameters.append(str('EA' + row))
-    elif variable.lower() == 'gtgp_latitude':
-        parameters.append(str('EB' + row))
-        parameters.append(str('EF' + row))
-    elif variable.lower() == 'non_gtgp_longitude':
-        parameters.append(str('JK' + row))
-        parameters.append(str('JO' + row))
-    elif variable.lower() == 'non_gtgp_latitude':
-        parameters.append(str('JP' + row))
-        parameters.append(str('JT' + row))
-    elif variable.lower() == 'num_mig':
-        parameters.append(str('ZV' + row))
-        parameters.append(str('ZZ' + row))
-    # add more later; added variable strings must be lowercase
-    else:
-        print('Sorry,', variable, 'is not a valid variable category.')
-        pass
-    return parameters
 
 def assign_variable_per_hh(x, y):
     """Adds value of a certain variable to that household's list"""
@@ -96,13 +99,16 @@ def assign_variable_per_hh(x, y):
 
 def return_values(hh_row, var):
     """Returns values given hh_id and variable (combines previous functions)"""
-    # Example: return_values(1,'gender')
-    hh_row_variable = assign_sheet_parameters(hh_row, var)
-    # print(hh_id_variable) # Example: ['A3', 'AF3'] if argument is (1, 'gender')
-    variable_per_hh = assign_variable_per_hh(hh_row_variable[0], hh_row_variable[1])
-    # print(variable_per_hh) # Example: ['1', '2', '1'] for genders in a household
-    if variable_per_hh != []:
-        return variable_per_hh
+    try:
+        # Example: return_values(1,'gender')
+        hh_row_variable = assign_sheet_parameters(hh_row, var)
+        # print(hh_id_variable) # Example: ['A3', 'AF3'] if argument is (1, 'gender')
+        variable_per_hh = assign_variable_per_hh(hh_row_variable[0], hh_row_variable[1])
+        # print(variable_per_hh) # Example: ['1', '2', '1'] for genders in a household
+        if variable_per_hh != []:
+            return variable_per_hh
+    except:
+        pass
 
 def convert_lat_long(coord):
     """Converts coordinates from format 27,59,30.747 to 27.99184177"""
