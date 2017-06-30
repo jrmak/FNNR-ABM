@@ -8,47 +8,53 @@ from mesa import Model
 from mesa.time import StagedActivation
 from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
-from agents import *
-from excel_import import *
+from FNNR_ABM.agents import *
+from FNNR_ABM.excel_import import *
 from math import sqrt
+
 
 def show_num_mig(model):
     """Returns the average # of migrants / year in each household"""
     num_mig = [agent.num_mig for agent in model.schedule.agents]
-    X = sorted(num_mig)
+    x = sorted(num_mig)
     num_agents = model.num_agents
-    B = sum(X) / num_agents  # 17: 1999-2016
-    return B
+    b = sum(x) / num_agents  # 17: 1999-2016
+    return b
 
 formermax = []
+
+
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
-    def __init__(self, num_agents, width, height, GTGP_land = 0, GTGP_latitude = 0, GTGP_longitude = 0,
-                 num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, GTGP_part = 0,
-                 GTGP_coef = 0, GTGP_part_flag = 0, area = 1, maximum = 0, admin_village = 1,
-                 GTGP_enrolled = 0, income = 0, GTGP_comp = 0, age = 21, gender = 1, marriage = 0,
+    def __init__(self, num_agents, width, height, hh_row = 0, gtgp_land = 0, gtgp_latitude = 0, gtgp_longitude = 0,
+                 num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, gtgp_part = 0,
+                 gtgp_coef = 0, gtgp_part_flag = 0, area = 1, maximum = 0, admin_village = 1,
+                 gtgp_enrolled = 0, income = 0, gtgp_comp = 0, age = 21, gender = 1, marriage = 0,
                  education = 1, labor = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
-                 birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03):
+                 birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
+                 mig_flag = 0, past_hh_id = 0, last_birth_time = 0, mig_years = 0):
         # default values set for now, will define when model runs agents
 
+        super().__init__()
         self.num_agents = num_agents
-        self.GTGP_land = GTGP_land
-        self.GTGP_latitude = GTGP_latitude
-        self.GTGP_longitude = GTGP_longitude
+        self.hh_row = hh_row
+        self.gtgp_land = gtgp_land
+        self.gtgp_latitude = gtgp_latitude
+        self.gtgp_longitude = gtgp_longitude
         self.num_mig = num_mig
         self.mig_prob = mig_prob
         self.min_req_labor = min_req_labor
         self.num_labor = num_labor
-        self.GTGP_part = GTGP_part
-        self.GTGP_coef = GTGP_coef
-        self.GTGP_part_flag = GTGP_part_flag
+        self.gtgp_part = gtgp_part
+        self.gtgp_coef = gtgp_coef
+        self.gtgp_part_flag = gtgp_part_flag
 
         self.area = area
         self.admin_village = admin_village
-        self.GTGP_enrolled = GTGP_enrolled
+        self.gtgp_enrolled = gtgp_enrolled
         self.maximum = maximum
         self.income = income
-        self.GTGP_comp = GTGP_comp
+        self.gtgp_comp = gtgp_comp
 
         self.age = age
         self.gender = gender
@@ -62,6 +68,10 @@ class ABM(Model):
         self.marriage_flag = marriage_flag
         self.match_prob = match_prob
         self.immi_marriage_rate = immi_marriage_rate
+        self.mig_flag = mig_flag
+        self.past_hh_id = past_hh_id
+        self.last_birth_time = last_birth_time
+        self.mig_years = mig_years
 
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
@@ -70,13 +80,12 @@ class ABM(Model):
         self.make_hh_agents()
         self.make_land_agents()
         self.make_individual_agents()
-        IndividualAgent.make_single_male_list(self)
         self.running = True
 
+        # DataCollector: part of Mesa library
         self.datacollector = DataCollector(
             model_reporters={'Average Number of Migrants': show_num_mig},
             agent_reporters={'Migrants': lambda a: a.num_mig})
-
 
     def return_x(self, hh_id, latitude):
         """Returns latitudes of land parcels for a given household"""
@@ -86,8 +95,6 @@ class ABM(Model):
                     convert_lat_long(
                         str(return_values(hh_id, latitude))
                     ))
-            teststr = str(return_values(hh_id, latitude))
-            # print(convert_lat_long(teststr),'!')
             # print(xlist)
             if type(xlist) is not None:
                 for i in range(len(xlist)):
@@ -109,7 +116,7 @@ class ABM(Model):
                 convert_lat_long(
                     str(return_values(hh_id, longitude))
                 ))
-            #print(ylist)
+            # print(ylist)
             for i in range(len(ylist)):
                 y = ylist[i] * self.space.y_max
                 convertedlist.append(y)
@@ -165,12 +172,13 @@ class ABM(Model):
     # Create agents
     def make_hh_agents(self):
         """Create the household agents"""
-        for hh_id in agents:  # agents is a list of ints 1-97 from excel_import
-            hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
+        for hh_row in agents:  # agents is a list of ints 1-97 from excel_import
+            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
+            hh_id = return_values(hh_row, 'hh_id')  # !
             try:
-                a = HouseholdAgent(hh_id, self, hhpos, self.admin_village, self.GTGP_part, self.GTGP_land,
-                                    self.GTGP_coef, self.mig_prob, self.num_mig, self.min_req_labor,
-                                    self.num_labor, self.income, self.GTGP_comp)
+                a = HouseholdAgent(hh_id, self, hhpos, hh_row, self.admin_village, self.gtgp_part, self.gtgp_land,
+                                   self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
+                                   self.num_labor, self.income, self.gtgp_comp)
                 a.admin_village = 1
                 self.space.place_agent(a, hhpos)  # admin_village placeholder
                 self.schedule.add(a)
@@ -180,18 +188,18 @@ class ABM(Model):
 
     def make_land_agents(self):
         """Create the land agents on the map"""
-        # add non-GTGP land parcels
-        for hh_id in agents:  # from excel_import
-            hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
+        # add non-gtgp land parcels
+        for hh_row in agents:  # from excel_import
+            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             maxlist = []
-            landposlist = self.determine_landpos(hh_id, 'non_GTGP_latitude', 'non_GTGP_longitude')
-            # print(landposlist) #list should have multiple tuples
+            landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
+            hh_id = return_values(hh_row, 'hh_id')
             for landpos in landposlist:
                 distance = self.calc_distance(hhpos, landpos)
                 if distance not in formermax:
                     maxlist.append(distance)
                     formermax.append(distance)
-                lp = LandParcelAgent(hh_id, self, landpos, self.maximum, self.area, self.GTGP_enrolled)
+                lp = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled)
                 if maxlist != ['']:
                     try:
                         max_index = maxlist.index(max(maxlist))
@@ -203,20 +211,17 @@ class ABM(Model):
                         pass
                 else:
                     lp.maximum = 0
-                    #print(lp.maximum, 'else2')
-                lp.GTGP_enrolled = 0
-                lp.hh_id = hh_id
+                lp.gtgp_enrolled = 0
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
 
-        # add GTGP land parcels
-        for hh_id in agents:  # from excel_import
-            hhpos = self.determine_hhpos(hh_id, 'house_latitude', 'house_longitude')
-            landposlist = self.determine_landpos(hh_id, 'GTGP_latitude', 'GTGP_longitude')
+        # add gtgp land parcels
+        for hh_row in agents:  # from excel_import
+            hh_id = return_values(hh_row, 'hh_id')
+            landposlist = self.determine_landpos(hh_row, 'gtgp_latitude', 'gtgp_longitude')
             for landpos in landposlist:
-                lp2 = LandParcelAgent(hh_id, self, landpos, self.area, self.GTGP_enrolled)
-                lp2.GTGP_enrolled = 1
-                lp2.hh_id = hh_id
+                lp2 = LandParcelAgent(hh_id, self, landpos, hh_row, self.area, self.gtgp_enrolled)
+                lp2.gtgp_enrolled = 1
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
 
@@ -224,33 +229,37 @@ class ABM(Model):
         """Create the individual agents"""
         for hh_row in agents:  # agents is a list of ints 1-96 from excel_import
             individual_id_list = return_values(hh_row, 'name')
+            hh_id = return_values(hh_row, 'hh_id')
+            self.hh_id = hh_id
             agelist = return_values(hh_row, 'age')  # find the ages of people in hh
             genderlist = return_values(hh_row, 'gender')
             marriagelist = return_values(hh_row, 'marriage')
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
-                    hh_id = return_values(hh_row, 'hh_id')
-                    self.hh_id = hh_id
-                    self.individual_id = str(self.hh_id) + str(individual_id_list[i])                        # example: 2c
-                    #if agelist is not None and agelist is not []:
-                    self.age = agelist[i]
-                    #if genderlist is not None and genderlist is not []:
-                    self.gender = genderlist[i]
-                    self.marriage = marriagelist[i]
-                    if 15 < self.age < 59:
-                        self.labor == 1
-                    else:
-                        self.labor == 0
-                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender, self.education,
-                         self.labor, self.marriage, self.birth_rate, self.birth_interval,
-                         self.death_rate, self.marriage_rate, self.marriage_flag,
-                         self.match_prob, self.immi_marriage_rate)
-                    #hh_id twice as placeholder
-                    self.schedule.add(ind)
+                    try:
+                        self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
+                        # if agelist is not None and agelist is not []:
+                        self.age = agelist[i]
+                        # if genderlist is not None and genderlist is not []:
+                        self.gender = genderlist[i]
+                        self.marriage = marriagelist[i]
+                        if 15 < self.age < 59:
+                            self.labor == 1
+                        else:
+                            self.labor == 0
+                        ind = IndividualAgent(self.hh_row, self, self.hh_id, self.individual_id, self.age, self.gender,
+                                              self.education, self.labor, self.marriage, self.birth_rate,
+                                              self.birth_interval, self.death_rate, self.marriage_rate, self.marriage_flag,
+                                              self.mig_flag, self.match_prob, self.immi_marriage_rate, self.past_hh_id,
+                                              self.last_birth_time, self.mig_years)
+                        # hh_id twice as placeholder
+                        self.schedule.add(ind)
+                    except:
+                        pass
 
     def step(self):
         """Advance the model by one step"""
         self.datacollector.collect(self)
         self.schedule.step()
-        #for i in range(10):
+        # for i in range(10):
         #    self.schedule.step()  # run 10 steps at once
