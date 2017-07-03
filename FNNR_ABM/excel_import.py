@@ -11,7 +11,7 @@ import inspect
 # Directory in which source file is located, exact name of source file + extension
 currentpath = str(inspect.getfile(inspect.currentframe()))[:-16] #'remove excel_import.py' at end
 os.chdir(currentpath)  #will need to replace
-currentbook = 'FNNR_2016_Survey_psuedo_0628.xlsx'
+currentbook = 'FNNR_2016_Survey_psuedo_0703.xlsx'
 
 
 # openpyxl commands
@@ -110,7 +110,7 @@ def return_values(hh_row, var):
     except:
         pass
 
-def convert_lat_long(coord):
+def convert_decimal(coord):
     """Converts coordinates from format 27,59,30.747 to 27.99184177"""
     convertedlist = []
     coordlist = coord.strip("[]").split(",")
