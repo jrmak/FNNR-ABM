@@ -6,8 +6,9 @@ This document runs the server and helps visualize the agents.
 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule, TextElement
-from model import *
-from SimpleContinuousModule import SimpleCanvas
+from FNNR_ABM.model import *
+from FNNR_ABM.SimpleContinuousModule import SimpleCanvas
+
 
 def agent_draw(agent):
     draw = {"r": 1,
@@ -29,12 +30,12 @@ def agent_draw(agent):
     except:
         pass
     try:
-        if agent.GTGP_enrolled == 0:
+        if agent.gtgp_enrolled == 0:
             draw["Shape"] = "circle"
             draw["Color"] = "black"
             draw["Layer"] = 1
             draw["r"] = 3
-        if agent.GTGP_enrolled == 1:
+        if agent.gtgp_enrolled == 1:
             draw["Shape"] = "circle"
             draw["Color"] = "gold"
             draw["Layer"] = 2
@@ -53,31 +54,44 @@ chart = ChartModule([{"Label": 'Average Number of Migrants',
                     "Color": "Black"}], data_collector_name='datacollector')
 
 
-#migrants = ABM(100, 10, 10)
-#step
+# migrants = ABM(100, 10, 10)
+# step
 # migrants.datacollector.get_model_vars_dataframe().plot()
 
 # The text elements below update with every step.
 
+class Map(TextElement):
+    def __init__(self):
+        pass
+
+    def render(self, model):
+        return ("Blue: Household agents | Black: non-GTGP land parcel agents | Yellow: GTGP land parcel agents"
+                )
+
+
 class Migrants(TextElement):
     def __init__(self):
         pass
+
     def render(self, model):
         return ("X-axis: migrants | Y-axis; steps (years) | ",
                "Average # of Migrants per Household: " + str(show_num_mig(model))
                 )
 
+
 class Individuals(TextElement):
     def __init__(self):
         pass
+
     def render(self, model):
         return ("Number of Marriages:" + ""  # to be replaced later with actual value
                 )
 
+text0 = Map()
 text1 = Migrants()
 text2 = Individuals()
 
-server = ModularServer(ABM, [agent_canvas, chart, text1, text2], "GTGP Enrollment of Land Over Time",
+server = ModularServer(ABM, [agent_canvas, chart, text0, text1, text2], "GTGP Enrollment of Land Over Time",
                        100, 10, 10)
 
 # if __name__ == "__main__":
