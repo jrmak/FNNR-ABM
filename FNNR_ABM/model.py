@@ -12,13 +12,29 @@ from FNNR_ABM.agents import *
 from FNNR_ABM.excel_import import *
 from math import sqrt
 
+x = []
+
 
 def show_num_mig(model):
     """Returns the average # of migrants / year in each household"""
     num_mig = [agent.num_mig for agent in model.schedule.agents]
     x = sorted(num_mig)
     num_agents = 94
-    b = sum(x) / num_agents  # 17: 1999-2016
+    b = sum(x) / num_agents
+    return b
+
+def show_marriages(model):
+    for agent in model.schedule.agents:
+        try:
+            if agent.marriage_flag == 0 or agent.marriage_flag == 1:
+                marriage_flag = agent.marriage_flag
+                if marriage_flag == 1:
+                    x.append(marriage_flag)
+        except:
+            marriage_flag = 0
+            pass
+    # print(x)
+    b = sum(x)
     return b
 
 formermax = []
@@ -33,7 +49,7 @@ class ABM(Model):
                  education = 1, labor = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
                  birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
                  mig_flag = 0, past_hh_id = 0, last_birth_time = 0, mig_years = 0):
-        # default values set for now, will define when model runs agents
+                 # default values set for now, will define when model runs agents
 
         super().__init__()
         self.hh_id = hh_id
@@ -101,21 +117,16 @@ class ABM(Model):
                     convertedlist.append(x)
         except TypeError:
             pass
-        # print(convertedlist)
         return convertedlist
 
     def return_y(self, hh_id, longitude):
         """Returns longitudes of land parcels for a given household"""
-        # print(convert_lat_long(
-        #            str(return_values(hh_id, longitude))
-        #        ))
         convertedlist = []
         try:
             ylist = convert_fraction_long(
                 convert_decimal(
                     str(return_values(hh_id, longitude))
                 ))
-            # print(ylist)
             for i in range(len(ylist)):
                 y = ylist[i] * self.space.y_max  # fraction times space
                 convertedlist.append(y)
@@ -126,8 +137,6 @@ class ABM(Model):
     def return_lp_pos_list(self, xlist, ylist):
         """Returns a list of tuples containing coordinates of land parcels"""
         convertedlist = []
-        # print(xlist)
-        # print(ylist)
         for i in range(len(xlist)):
             x = xlist[i]
             y = ylist[i]
@@ -173,13 +182,12 @@ class ABM(Model):
             hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             hh_id = return_values(hh_row, 'hh_id')
             self.hh_id = hh_id
-            if hhpos is not None:
-                a = HouseholdAgent(self.hh_id, self, hhpos, self.admin_village, self.gtgp_part, self.gtgp_land,
-                               self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
-                               self.num_labor, self.income, self.gtgp_comp)
-                a.admin_village = 1
-                self.space.place_agent(a, hhpos)  # admin_village placeholder
-                self.schedule.add(a)
+            a = HouseholdAgent(hh_row, self, hhpos, self.hh_id, self.admin_village, self.gtgp_part, self.gtgp_land,
+                           self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
+                           self.num_labor, self.income, self.gtgp_comp)
+            a.admin_village = 1  # see server.py, line 22
+            self.space.place_agent(a, hhpos)  # admin_village placeholder
+            self.schedule.add(a)
 
     def make_land_agents(self):
         """Create the land agents on the map"""
@@ -241,7 +249,7 @@ class ABM(Model):
                         self.labor == 1
                     else:
                         self.labor == 0
-                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
+                    ind = IndividualAgent(hh_row, self, self.hh_id, self.individual_id, self.age, self.gender,
                                           self.education, self.labor, self.marriage, self.birth_rate,
                                           self.birth_interval, self.death_rate, self.marriage_rate, self.marriage_flag,
                                           self.mig_flag, self.match_prob, self.immi_marriage_rate, self.past_hh_id,

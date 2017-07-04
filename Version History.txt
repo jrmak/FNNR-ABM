@@ -1,7 +1,8 @@
 Version History
 
 Pseudocode Version 5 (0621)
-v1.42 - 6/28 - 7/3/2017 - Debugging on individual and immigration functions
+v1.46 - 7/4/2017 - Worked on displaying immigration function statistics in simulation window as text elements
+v1.42 - 1.45 - 6/28 - 7/3/2017 - Debugging on individual and immigration functions
 v1.41 - 6/27/2017 - Further debugging, added immigration functions
 
 Pseudocode Version 4 (0619)
@@ -39,16 +40,15 @@ Other Activity History
 6/7/2017 - Began document: 'FNNR-ABM User Manual' (Python installation instructions)
 
 Hours/Days of Work Reported
-Days of work completed - 26
+Days of work completed - 27 (as of end of 7/3)
 Days submitted on SDSURF EMP timesheet so far - 10 (6/19 - 6/30)
 Maximum paid days of work to report - 45 (2 months, 5 days/week, 4 hours/day from 10am - 2pm)
 *If project is unfinished by the end of the paid cycle, future work on the project will continue on a volunteer basis for the summer.
 
 To-do List
 - Finish individual (household demography) processes *IN PROGRESS
-- Update all self values with imported data values *IN PROGRESS
 - Start modeling immigration behaviors from newest version of pseudocode
-- Add a table with listed data values, updated each step
+- Add a table with listed data values, updated each step *IMPORTANT
 - Add simlulation map/window axis labels (coordinates) using matplotlib/JavaScript
 - Add simulation map/window legend using matplotlib/JavaScript
 - Implement BatchRunner (Mesa) for automated trials/testing
@@ -56,3 +56,4 @@ To-do List
 
 Bug Fixes Needed
 - tornado WARNING:404 favicon.ico missing (safe to ignore)
+- When simulation is reset in-browser, marriage text element is not reset (list-append)

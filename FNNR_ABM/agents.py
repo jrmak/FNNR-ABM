@@ -17,7 +17,7 @@ out_migrants_list = []
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
-    def __init__(self, unique_id, model, hh_id, hhpos, admin_village = 1, nat_village = 1, land_area = 100,
+    def __init__(self, unique_id, model, hhpos, hh_id, admin_village = 1, nat_village = 1, land_area = 100,
                  charcoal = 10, gtgp_dry = 50, gtgp_rice = 50, total_dry = 50, total_rice = 50,
                  NCFP = 1, num_mig = 0, income = 0, mig_prob = 0.5, num_labor = 0,
                  min_req_labor = 1, comp_sign = 0.1, gtgp_coef = 0, gtgp_part = 0, gtgp_part_flag = 0,
@@ -25,10 +25,9 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
         super().__init__(unique_id, model)
         # unique_id is a required attribute from Mesa that I don't completely understand
-        self.hh_id = hh_id
-        # print(self.hh_id, 'hh_id')  # still need to debug
+        # print(self.unique_id)
         self.hhpos = hhpos  # resident location
-        # print(self.hhpos)  # returns positions, then None, then references
+        self.hh_id = hh_id
         self.admin_village = admin_village
         self.nat_village = nat_village
         self.charcoal = charcoal  # consumption
@@ -79,36 +78,39 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         # if self.num_labor == 0 and self.charcoal == 10:
        #     laborchance = randint(1,6)
        #     self.num_labor = laborchance  # initialize number of laborers randomly
-        if self.first_step_flag == 0 and type(self.unique_id) == int:
+        if self.first_step_flag == 0:
+            # unique_id here is hh_row from model.py, line 176
             if self.initialize_labor(self.unique_id) is not None and type(self.unique_id) == int:
                 self.num_labor = self.initialize_labor(self.unique_id)
                 self.first_step_flag = 1  # temporary
-        try:
-            self.gtgp_part = 1
+        self.gtgp_part = 1
             # break  # avoid redundant flagging
+        # later: depends on plant type and land area and PES policy
+        # print(self.hh_id, self.num_labor)
+        try:
+            self.hh_id = int(self.hh_id)
         except:
             pass
-        # later: depends on plant type and land area and PES policy
-        print(self.hh_id, self.num_labor)
-            # self.gtgp_coef = uniform(0, 0.55)
-            # self.gtgp_comp = randint(500, 2000)
-            # self.income = randint(5000, 20000)
-        if (self.gtgp_coef * self.gtgp_part) > self.mig_prob and (self.gtgp_comp / self.income) > self.comp_sign:
-            try:
-                if self.num_labor > 0:
-                    self.num_labor -= 1
-                    self.num_mig += 1  # migration occurs
-                    print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
-                # pass
-            # if self.num_labor == 0 and self.num_non_labor == 0:
-                # break
-            except:
-                pass
-            try:
-                if self.num_labor < self.min_req_labor:
-                    self.gtgp_part_flag = 1  # sets flag for enrollment of more land
-            except:
-                pass
+        # the below attributes change every year
+        self.gtgp_coef = uniform(0, 0.55)
+        self.gtgp_comp = randint(500, 2000)
+        self.income = randint(5000, 20000)
+        if type(self.hh_id) == int:
+            if (self.gtgp_coef * self.gtgp_part) > self.mig_prob and (self.gtgp_comp / self.income) > self.comp_sign    \
+                    and type(self.hh_id) == int:
+                try:
+                    if self.num_labor > 0:
+                        self.num_labor -= 1
+                        self.num_mig += 1  # migration occurs
+                        print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
+                        pass
+                except:
+                    pass
+                try:
+                    if self.num_labor < self.min_req_labor:
+                        self.gtgp_part_flag = 1  # sets flag for enrollment of more land
+                except:
+                    pass
         return self.gtgp_part_flag
 
     def gtgp_test(self):
@@ -168,6 +170,7 @@ class IndividualAgent(HouseholdAgent):
             global single_male_list  # debug: return it at step 0
             if 20 < self.age and self.gender == 1:
                 single_male_list.append(self.individual_id)
+                shuffle(single_male_list)
         # if self.individual_id == '169f':
         #     print(single_male_list)
         # agelist = return_values(self.hh_id, 'age')  # find the ages of people in hh
@@ -183,7 +186,6 @@ class IndividualAgent(HouseholdAgent):
                             self.marriage = 1
                             married_male_list.append(male)
                             self.hh_id = male.strip(male[-1])
-                            print(self.hh_id, self.individual_id, 'hh ind')
                             self.individual_id = self.hh_id + 'j'
                             single_male_list.remove(male)
                             pass
@@ -354,7 +356,6 @@ class LandParcelAgent(HouseholdAgent):
 
     def gtgp_convert(self):
         super(LandParcelAgent, self).gtgp_enroll()
-        # print(self.gtgp_part_flag,'flag')
         if self.gtgp_part_flag == 1:  # if the household is set to enroll in gtgp,
             if self.maximum == 1:
                 self.gtgp_enrolled = 1
