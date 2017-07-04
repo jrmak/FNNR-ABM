@@ -84,7 +84,7 @@ class Individuals(TextElement):
         pass
 
     def render(self, model):
-        return ("Number of Marriages:" + ""  # to be replaced later with actual value
+        return ("Total # of Marriages in Reserve: " + str(show_marriages(model))
                 )
 
 text0 = Map()

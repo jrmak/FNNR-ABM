@@ -12,13 +12,29 @@ from FNNR_ABM.agents import *
 from FNNR_ABM.excel_import import *
 from math import sqrt
 
+x = []
+
 
 def show_num_mig(model):
     """Returns the average # of migrants / year in each household"""
     num_mig = [agent.num_mig for agent in model.schedule.agents]
     x = sorted(num_mig)
     num_agents = 94
-    b = sum(x) / num_agents  # 17: 1999-2016
+    b = sum(x) / num_agents
+    return b
+
+def show_marriages(model):
+    for agent in model.schedule.agents:
+        try:
+            if agent.marriage_flag == 0 or agent.marriage_flag == 1:
+                marriage_flag = agent.marriage_flag
+                if marriage_flag == 1:
+                    x.append(marriage_flag)
+        except:
+            marriage_flag = 0
+            pass
+    # print(x)
+    b = sum(x)
     return b
 
 formermax = []
@@ -101,21 +117,16 @@ class ABM(Model):
                     convertedlist.append(x)
         except TypeError:
             pass
-        # print(convertedlist)
         return convertedlist
 
     def return_y(self, hh_id, longitude):
         """Returns longitudes of land parcels for a given household"""
-        # print(convert_lat_long(
-        #            str(return_values(hh_id, longitude))
-        #        ))
         convertedlist = []
         try:
             ylist = convert_fraction_long(
                 convert_decimal(
                     str(return_values(hh_id, longitude))
                 ))
-            # print(ylist)
             for i in range(len(ylist)):
                 y = ylist[i] * self.space.y_max  # fraction times space
                 convertedlist.append(y)
@@ -126,8 +137,6 @@ class ABM(Model):
     def return_lp_pos_list(self, xlist, ylist):
         """Returns a list of tuples containing coordinates of land parcels"""
         convertedlist = []
-        # print(xlist)
-        # print(ylist)
         for i in range(len(xlist)):
             x = xlist[i]
             y = ylist[i]
