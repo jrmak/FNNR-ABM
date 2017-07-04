@@ -8,51 +8,51 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule, TextElement
 from FNNR_ABM.model import *
 from FNNR_ABM.SimpleContinuousModule import SimpleCanvas
+from FNNR_ABM.agents import *
 
 
 def agent_draw(agent):
-    draw = {"r": 1,
-            "w": 1,
-            "h": 1,
+    draw = {"r": 3,  # radius in pixels, for circles
+            "w": 0.01, # width in % of drawing window, for rectangles
+            "h": 0.01, # height in % of drawing window, for rectangles
             "Filled": "true"}
 
 # Household blue, individual green, land parcel yellow, PES policy unassigned
 
-# admin_village is not actually important for drawing; it is a placeholder attribute to identify households
+# admin_village is not actually important to the model; it is a placeholder attribute to identify households
+# so they can be drawn
+# see model.py, line 179
+
     try:
         if agent.admin_village == 1:
             draw["Shape"] = "rect"
             draw["Color"] = "blue"
             draw["Layer"] = 0
-            draw["w"] = 0.01
-            draw["h"] = 0.01
 
     except:
         pass
+
+# black if non-GTGP land parcel, yellow if GTGP
+
     try:
         if agent.gtgp_enrolled == 0:
             draw["Shape"] = "circle"
             draw["Color"] = "black"
             draw["Layer"] = 1
-            draw["r"] = 3
+
         if agent.gtgp_enrolled == 1:
             draw["Shape"] = "circle"
             draw["Color"] = "gold"
             draw["Layer"] = 2
-            draw["r"] = 3
+
     except:
         pass
-    # else:
-    #     draw["Color"] = "red"
-    #     draw["Layer"] = 3
-    #     draw["r"] = 3
     return draw
 
 agent_canvas = SimpleCanvas(agent_draw, 700, 700)
 
 chart = ChartModule([{"Label": 'Average Number of Migrants',
-                    "Color": "Black"}], data_collector_name='datacollector')
-
+                    "Color": "Black"}], data_collector_name = 'datacollector')
 
 # migrants = ABM(100, 10, 10)
 # step
@@ -75,7 +75,7 @@ class Migrants(TextElement):
 
     def render(self, model):
         return ("X-axis: migrants | Y-axis; steps (years) | ",
-               "Average # of Migrants per Household: " + str(show_num_mig(model))
+                "Average # of Migrants per Household: " + str(show_num_mig(model))
                 )
 
 
