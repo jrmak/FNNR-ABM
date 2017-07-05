@@ -8,16 +8,15 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule, TextElement
 from FNNR_ABM.model import *
 from FNNR_ABM.SimpleContinuousModule import SimpleCanvas
-from FNNR_ABM.agents import *
-
 
 def agent_draw(agent):
     draw = {"r": 3,  # radius in pixels, for circles
-            "w": 0.01, # width in % of drawing window, for rectangles
-            "h": 0.01, # height in % of drawing window, for rectangles
+            "w": 0.01,  # width in % of drawing window, for rectangles
+            "h": 0.01,  # height in % of drawing window, for rectangles
             "Filled": "true"}
 
 # Household blue, individual green, land parcel yellow, PES policy unassigned
+# Will add legend later
 
 # admin_village is not actually important to the model; it is a placeholder attribute to identify households
 # so they can be drawn
@@ -49,13 +48,15 @@ def agent_draw(agent):
         pass
     return draw
 
-agent_canvas = SimpleCanvas(agent_draw, 700, 700)
+agent_canvas = SimpleCanvas(agent_draw, 700, 700)  # create simulation window
 
+# create line graph
 chart = ChartModule([{"Label": 'Average Number of Migrants',
-                    "Color": "Black"}], data_collector_name = 'datacollector')
+                    "Color": "Black"}], canvas_height = 300, canvas_width = 750,
+                    data_collector_name = 'datacollector')
 
 # migrants = ABM(100, 10, 10)
-# step
+# step here; non-working code for Mesa tables
 # migrants.datacollector.get_model_vars_dataframe().plot()
 
 # The text elements below update with every step.

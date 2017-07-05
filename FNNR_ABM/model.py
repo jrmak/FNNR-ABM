@@ -23,6 +23,7 @@ def show_num_mig(model):
     b = sum(x) / num_agents
     return b
 
+
 def show_marriages(model):
     for agent in model.schedule.agents:
         try:
@@ -183,8 +184,8 @@ class ABM(Model):
             hh_id = return_values(hh_row, 'hh_id')
             self.hh_id = hh_id
             a = HouseholdAgent(hh_row, self, hhpos, self.hh_id, self.admin_village, self.gtgp_part, self.gtgp_land,
-                           self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
-                           self.num_labor, self.income, self.gtgp_comp)
+                               self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
+                               self.num_labor, self.income, self.gtgp_comp)
             a.admin_village = 1  # see server.py, line 22
             self.space.place_agent(a, hhpos)  # admin_village placeholder
             self.schedule.add(a)
