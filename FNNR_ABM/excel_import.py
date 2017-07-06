@@ -9,8 +9,8 @@ from openpyxl import *
 import inspect
 
 # Directory in which source file is located, exact name of source file + extension
-currentpath = str(inspect.getfile(inspect.currentframe()))[:-16] #'remove excel_import.py' at end
-os.chdir(currentpath)  #will need to replace
+currentpath = str(inspect.getfile(inspect.currentframe()))[:-16] # 'removes excel_import.py' at end
+os.chdir(currentpath)
 currentbook = 'FNNR_2016_Survey_psuedo_0703.xlsx'
 
 
@@ -20,6 +20,7 @@ sheet = wbglobal.active
 
 # a list of 96 hh_ids; hardcoded since number from excel file not likely to change
 agents = list(range(1, 95))
+
 
 def assign_sheet_parameters(hh_id, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
@@ -81,6 +82,7 @@ def assign_sheet_parameters(hh_id, variable):
     except:
         pass
 
+
 def assign_variable_per_hh(x, y):
     """Adds value of a certain variable to that household's list"""
     var = []
@@ -97,6 +99,7 @@ def assign_variable_per_hh(x, y):
                         # var = str(CellObj.value)
     return var
 
+
 def return_values(hh_row, var):
     """Returns values given hh_id and variable (combines previous functions)"""
     try:
@@ -110,6 +113,7 @@ def return_values(hh_row, var):
     except:
         pass
 
+
 def convert_decimal(coord):
     """Converts coordinates from format 27,59,30.747 to 27.99184177"""
     convertedlist = []
@@ -120,16 +124,15 @@ def convert_decimal(coord):
         indexlist = [0, 3, 6, 9, 12, 15]
         for i in indexlist:
             try:
-                degree = int(coordlist[i].strip("'").strip(" ").replace("'",''))
-                #print(i, degree, 'i degree success')
+                degree = int(coordlist[i].strip("'").strip(" ").replace("'", ''))
                 minutes = int(coordlist[i + 1])
                 seconds = float(coordlist[i + 2].strip("'"))
                 converted = degree + (minutes / 60) + (seconds / 3600)
                 convertedlist.append(converted)
             except:
                 break
-            #fix later
         return (convertedlist)
+
 
 def convert_fraction_lat(coordlist):
     """Converts coordinates into fractions to fit into continuous space"""
@@ -148,6 +151,7 @@ def convert_fraction_lat(coordlist):
             pass  # skips over instances where coordinate is empty
         # print(convertedlist)
     return convertedlist
+
 
 def convert_fraction_long(coordlist):
     """Converts coordinates into fractions to fit into continuous space"""
