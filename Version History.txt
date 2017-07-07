@@ -1,6 +1,7 @@
 Version History
 
 Pseudocode Version 6 (0628)
+v1.53 - 7/7/2017 - Created simulation legend/got dynamic graphs working, started on Excel export file
 v1.52 - 7/6/2017 - Worked on displaying graph results through matplotlib
 v1.51 - 7/5/2017 - Updated code to 0628 pseudocode changes, added further general code comments
 
@@ -44,16 +45,15 @@ Other Activity History
 6/7/2017 - Began document: 'FNNR-ABM User Manual' (Python installation instructions)
 
 Hours/Days of Work Reported
-Days of work completed - 29.5 (as of end of 7/6)
+Days of work completed - 30.5 (as of end of 7/7)
 Days submitted on SDSURF EMP timesheet so far - 10 (6/19 - 6/30)
 
 To-do List
-- Create export file for step-by-step data to write to
+- Update code to finished pseudocode framework
+- Create export file for step-by-step data to write to *IN PROGRESS
 - Add a table or text element with listed data values, updated each step *IN PROGRESS
-- Add graphs of changes in attributes over time *IN PROGRESS
-- Add simulation map/window legend using matplotlib/JavaScript *IN PROGRESS
-- Identify furthest land parcel from household, recalculating each step (does not currently affect simulation/numbers)
 
 Bug Fixes Needed
 - tornado WARNING:404 favicon.ico missing (safe to ignore)
-- When simulation is reset in-browser, marriage text element is not reset (list-append)
+- When simulation is reset in-browser, marriage text element is not reset (side effect of using a list-append approach)
+- Will need to identify furthest land parcel from household, recalculating each step (does not currently affect simulation/numbers)
