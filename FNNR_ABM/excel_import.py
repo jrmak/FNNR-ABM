@@ -11,7 +11,7 @@ import inspect
 # Directory in which source file is located, exact name of source file + extension
 currentpath = str(inspect.getfile(inspect.currentframe()))[:-16] # 'removes excel_import.py' at end
 os.chdir(currentpath)
-currentbook = 'FNNR_2016_Survey_psuedo_0703.xlsx'
+currentbook = 'FNNR_2016_Survey_psuedo_0706.xlsx'
 
 
 # openpyxl commands
@@ -27,7 +27,7 @@ def assign_sheet_parameters(hh_id, variable):
     """Will create a new function when this list gets long enough"""
     parameters = []
     try:
-        row = str(hh_id + 2)
+        row = str(hh_id + 2)  # For example, row 3 in the Excel file corresponds to Household ID #1
     # all lowercase!
         if variable.lower() == 'gtgp_area':
             parameters.append(str('DM' + row))

@@ -9,6 +9,8 @@ from mesa import Agent  # Agent superclass from mesa
 from random import *  # random # generator
 from FNNR_ABM.excel_import import *
 from math import sqrt, exp
+from excel_export import save
+
 
 formermax = []
 single_male_list = []
@@ -21,7 +23,9 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                  charcoal = 10, gtgp_dry = 50, gtgp_rice = 50, total_dry = 50, total_rice = 50,
                  NCFP = 1, num_mig = 0, income = 0, mig_prob = 0.5, num_labor = 0,
                  min_req_labor = 1, comp_sign = 0.1, gtgp_coef = 0, gtgp_part = 0, gtgp_part_flag = 0,
-                 num_non_labor = 0, gtgp_comp = 0, first_step_flag = 0):
+                 num_non_labor = 0, gtgp_comp = 0, first_step_flag = 0, rice_mu = 0, dry_mu = 0,
+                 gtgp_rice_mu = 0, gtgp_dry_mu = 0, restaurant_prev = 0, lodging_prev = 0, transport_prev = 0,
+                 sales_prev = 0, other_prev = 0):
 
         super().__init__(unique_id, model)
         # unique_id is a required attribute from Mesa that I don't completely understand
@@ -51,6 +55,16 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.gtgp_part_flag = gtgp_part_flag  # binary; further enrollment of gtgp
         self.first_step_flag = first_step_flag
         # more attributes will be added later on
+
+        self.rice_mu = rice_mu
+        self.dry_mu = dry_mu
+        self.gtgp_rice_mu = gtgp_rice_mu
+        self.gtgp_dry_mu = gtgp_dry_mu
+        self.restaurant_prev = restaurant_prev
+        self.lodging_prev = lodging_prev
+        self.transport_prev = transport_prev
+        self.sales_prev = sales_prev
+        self.other_prev = other_prev
 
     def initialize_labor(self, hh_row):
         num_labor = 0
@@ -134,7 +148,7 @@ class IndividualAgent(HouseholdAgent):
     def __init__(self, unique_id, model, hh_id, individual_id, age = 20, gender = 1, education = 1,
                  labor = 0, marriage = 0, birth_rate = 1, birth_interval = 2, death_rate = 0.1,
                  marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
-                 past_hh_id = 0, last_birth_time = 0, mig_years = 0):
+                 past_hh_id = 0, last_birth_time = 0, mig_years = 0, remittance_prev = 0):
 
         super().__init__(self, unique_id, model, hh_id)
         self.individual_id = individual_id
@@ -156,6 +170,7 @@ class IndividualAgent(HouseholdAgent):
         self.past_hh_id = past_hh_id
         self.last_birth_time = last_birth_time
         self.mig_years = mig_years
+        self.remittance_prev = remittance_prev
 
     def match_female(self):
         """Loops through single females and matches to single males; see pseudocode"""
@@ -287,6 +302,8 @@ class IndividualAgent(HouseholdAgent):
         if self.first_step_flag == 0:
             global currentyear
             currentyear = 2000
+            global step_counter
+            step_counter = 0
         self.match_female()
         self.birth()
         self.death()
@@ -296,6 +313,8 @@ class IndividualAgent(HouseholdAgent):
         self.age += 1
         currentyear += 1
         self.first_step_flag = 1  # must be at the end of step()
+        step_counter += 1
+        # save(step_counter, self.individual_id, self.marriage)
 
 
 class LandParcelAgent(HouseholdAgent):
@@ -315,7 +334,6 @@ class LandParcelAgent(HouseholdAgent):
     def calc_distance(self, hhpos):
         """Given a household id, return the distances between household and parcels"""
         landpos = self.landpos
-        # print(landpos,'landpos')
         if hhpos is not None:
             try:
                 distance = sqrt(
