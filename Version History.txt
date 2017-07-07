@@ -48,10 +48,10 @@ Days of work completed - 29.5 (as of end of 7/6)
 Days submitted on SDSURF EMP timesheet so far - 10 (6/19 - 6/30)
 
 To-do List
+- Create export file for step-by-step data to write to
 - Add a table or text element with listed data values, updated each step *IN PROGRESS
-- Add simlulation map/window axis labels (coordinates) using matplotlib/JavaScript *IN PROGRESS
+- Add graphs of changes in attributes over time *IN PROGRESS
 - Add simulation map/window legend using matplotlib/JavaScript *IN PROGRESS
-- Implement BatchRunner (Mesa) for automated trials/testing
 - Identify furthest land parcel from household, recalculating each step (does not currently affect simulation/numbers)
 
 Bug Fixes Needed
