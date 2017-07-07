@@ -18,9 +18,8 @@ x = []
 def show_num_mig(model):
     """Returns the average # of migrants / year in each household"""
     num_mig = [agent.num_mig for agent in model.schedule.agents]
-    x = sorted(num_mig)
     num_agents = 94
-    b = sum(x) / num_agents
+    b = sum(num_mig) / num_agents
     return b
 
 def show_single_male(model):
@@ -36,7 +35,6 @@ def show_marriages(model):
         except:
             marriage_flag = 0
             pass
-    # print(x)
     b = sum(x)
     return b
 
@@ -103,12 +101,13 @@ class ABM(Model):
 
         # DataCollector: part of Mesa library
         self.datacollector = DataCollector(
-            model_reporters={'Average Number of Migrants': show_num_mig},
-            agent_reporters={'Migrants': lambda a: a.num_mig})
+            model_reporters = {'Average Number of Migrants': show_num_mig}
+            )
+#            agent_reporters={'Migrants': lambda a: a.num_mig})
 
         self.datacollector2 = DataCollector(
-            model_reporters={'Average Number of Migrants': show_marriages},
-            agent_reporters={'Migrants': lambda a: a.marriage})
+            model_reporters = {'Total # of Marriages in the Reserve': show_marriages})
+#            agent_reporters={'Migrants': lambda a: a.marriage})
 
     def return_x(self, hh_id, latitude):
         """Returns latitudes of land parcels for a given household"""
@@ -267,6 +266,7 @@ class ABM(Model):
     def step(self):
         """Advance the model by one step"""
         self.datacollector.collect(self)
+        self.datacollector2.collect(self)
         self.schedule.step()
         # for i in range(10):
         #    self.schedule.step()  # run 10 steps at once

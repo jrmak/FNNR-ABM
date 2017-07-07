@@ -9,6 +9,7 @@ from mesa.visualization.modules import ChartModule, TextElement
 from FNNR_ABM.model import *
 from FNNR_ABM.SimpleContinuousModule import SimpleCanvas
 import matplotlib.pyplot as plt
+import inspect
 
 def agent_draw(agent):
     draw = {"r": 3,  # radius in pixels, for circles
@@ -56,11 +57,16 @@ chart = ChartModule([{"Label": 'Average Number of Migrants',
                     "Color": "Black"}], canvas_height = 250, canvas_width = 700,
                     data_collector_name = 'datacollector')
 
-model = ABM(100, 10, 10)
+chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
+                    "Color": "Black"}], canvas_height = 250, canvas_width = 700,
+                    data_collector_name = 'datacollector2')
+
+
+model = ABM(100, 10, 10)  # sets up model to run for 100 steps
 for i in range(100):
     model.step()
-mig_plot = model.datacollector.get_model_vars_dataframe()
-smale_plot = model.datacollector2.get_model_vars_dataframe()
+mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
+mar_plot = model.datacollector2.get_model_vars_dataframe()
 # migranttable = migrants.datacollector.get_agent_vars_dataframe()
 # migranttable.head()
 # TypeError: '<' not supported between instances of 'LandParcelAgent' and 'int'
@@ -69,23 +75,25 @@ plt.title('Average Number of Out-Migrants Per Household')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Migrants')
 
-# smale_plot.plot()
-# plt.title('Single Men in the Reserve')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Men')
+mar_plot.plot()
+plt.title('Total # of Marriages in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Marriages')
 
 plt.show()
 
 # The text elements below update with every step.
 
 
-class Map(TextElement):
+class MapLegend(TextElement):
     def __init__(self):
         pass
 
     def render(self, model):
-        return ("Blue: Household agents | Black: non-GTGP land parcel agents | Yellow: GTGP land parcel agents"
-                )
+        # image created on MS Paint and uploaded to internet, but also featured in this folder for reference
+        return ("<img src = 'http://i64.tinypic.com/f41pwi.png'>", "<br>")
+        # return ("Blue: Household agents | Black: non-GTGP land parcel agents | Yellow: GTGP land parcel agents"
+        #         )
 
 
 class Migrants(TextElement):
@@ -95,23 +103,25 @@ class Migrants(TextElement):
     def render(self, model):
         return ("X-axis: migrants | Y-axis; steps (years) | ",
                 "Average # of Migrants per Household: " + str(show_num_mig(model))
+                + "<br><br>"
                 )
 
 
-class Individuals(TextElement):
+class Marriages(TextElement):
     def __init__(self):
         pass
 
     def render(self, model):
-        return ("Total # of Marriages in Reserve: " + str(show_marriages(model))
+        return ("X-axis: marriages | Y-axis; steps (years) | ",
+                "Total # of Marriages in the Reserve: " + str(show_marriages(model))
                 )
 
-text0 = Map()
+text0 = MapLegend()
 text1 = Migrants()
-text2 = Individuals()
+text2 = Marriages()
 
-server = ModularServer(ABM, [agent_canvas, chart, text0, text1, text2], "GTGP Enrollment of Land Over Time",
-                       100, 10, 10)
+server = ModularServer(ABM, [agent_canvas, text0, chart, text1, chart2, text2],
+                       "GTGP Enrollment of Land Over Time", 100, 10, 10)
 
 # if __name__ == "__main__":
 server.launch()  # actual run line
