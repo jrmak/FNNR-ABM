@@ -1,5 +1,8 @@
 Version History
 
+Pseudocode Version 7 (0705)
+v1.54 - 7/8/2017 - Worked on Excel exporting and integration of new pseudocode version
+
 Pseudocode Version 6 (0628)
 v1.53 - 7/7/2017 - Created simulation legend/got dynamic graphs working, started on Excel export file
 v1.52 - 7/6/2017 - Worked on displaying graph results through matplotlib
@@ -45,7 +48,7 @@ Other Activity History
 6/7/2017 - Began document: 'FNNR-ABM User Manual' (Python installation instructions)
 
 Hours/Days of Work Reported
-Days of work completed - 30.5 (as of end of 7/7)
+Days of work completed - 31.5 (as of end of 7/8)
 Days submitted on SDSURF EMP timesheet so far - 10 (6/19 - 6/30)
 
 To-do List
