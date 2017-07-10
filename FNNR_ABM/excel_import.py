@@ -50,7 +50,7 @@ def assign_sheet_parameters(hh_id, variable):
         elif variable.lower() == 'marriage':
             parameters.append(str('BH' + row))
             parameters.append(str('BP' + row))
-        elif variable.lower() == 'labor':  # work status
+        elif variable.lower() == 'workstatus':
             parameters.append(str('BQ' + row))
             parameters.append(str('BY' + row))
         elif variable.lower() == 'house_longitude':
@@ -74,6 +74,9 @@ def assign_sheet_parameters(hh_id, variable):
         elif variable.lower() == 'num_mig':
             parameters.append(str('ZV' + row))
             parameters.append(str('ZZ' + row))
+        elif variable.lower() == 'migration_network':
+            parameters.append(str('AIP' + row))
+            parameters.append(str('AIP' + row))
         # add more later; added variable strings must be lowercase
         else:
             print('Sorry,', variable, 'is not a valid variable category.')

@@ -7,7 +7,7 @@ It also defines what occurs to the agents at each 'step' of the ABM.
 
 from mesa import Agent  # Agent superclass from mesa
 from random import *  # random # generator
-from FNNR_ABM.excel_import import *
+from excel_import import *
 from math import sqrt, exp
 from excel_export import save
 
@@ -16,6 +16,7 @@ formermax = []
 single_male_list = []
 married_male_list = []
 out_migrants_list = []
+birth_list = []
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
@@ -25,7 +26,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                  min_req_labor = 1, comp_sign = 0.1, gtgp_coef = 0, gtgp_part = 0, gtgp_part_flag = 0,
                  num_non_labor = 0, gtgp_comp = 0, first_step_flag = 0, rice_mu = 0, dry_mu = 0,
                  gtgp_rice_mu = 0, gtgp_dry_mu = 0, restaurant_prev = 0, lodging_prev = 0, transport_prev = 0,
-                 sales_prev = 0, other_prev = 0):
+                 sales_prev = 0, other_prev = 0, current_year = 2000, migration_network = 0):
 
         super().__init__(unique_id, model)
         # unique_id is a required attribute from Mesa that I don't completely understand
@@ -53,7 +54,9 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.comp_sign = comp_sign  # influence of gtgp income on migration decisions
         self.gtgp_coef = uniform(0, 0.55)  # compared to mig_prob, which is 0.5, should give ~10% chance of > 0.5
         self.gtgp_part_flag = gtgp_part_flag  # binary; further enrollment of gtgp
+
         self.first_step_flag = first_step_flag
+        self.current_year = current_year
         # more attributes will be added later on
 
         self.rice_mu = rice_mu
@@ -65,6 +68,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.transport_prev = transport_prev
         self.sales_prev = sales_prev
         self.other_prev = other_prev
+        self.migration_network = migration_network
 
     def initialize_labor(self, hh_row):
         num_labor = 0
@@ -140,23 +144,24 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         """Step behavior for household agents; see pseudo-code document"""
         # use either self.gtgp_test() or self.gtgp_enroll()
         self.gtgp_enroll()
-        self.first_step_flag = 1
+        self.current_year += 1
 
 
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
     def __init__(self, unique_id, model, hh_id, individual_id, age = 20, gender = 1, education = 1,
-                 labor = 0, marriage = 0, birth_rate = 1, birth_interval = 2, death_rate = 0.1,
+                 workstatus = 0, marriage = 0, birth_rate = 1, birth_interval = 2, death_rate = 0.1,
                  marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
-                 past_hh_id = 0, last_birth_time = 0, mig_years = 0, remittance_prev = 0):
+                 past_hh_id = 0, last_birth_time = 0, mig_years = 0, remittance_prev = 0, step_counter = 0):
 
         super().__init__(self, unique_id, model, hh_id)
         self.individual_id = individual_id
+        print(self.individual_id)
         self.hh_id = self.individual_id[:-1]
         self.age = age
         self.gender = gender
         self.education = education
-        self.labor = labor
+        self.workstatus = workstatus
 
         self.marriage = marriage
         self.birth_rate = birth_rate
@@ -171,6 +176,8 @@ class IndividualAgent(HouseholdAgent):
         self.last_birth_time = last_birth_time
         self.mig_years = mig_years
         self.remittance_prev = remittance_prev
+
+        self.step_counter = step_counter
 
     def match_female(self):
         """Loops through single females and matches to single males; see pseudocode"""
@@ -206,7 +213,7 @@ class IndividualAgent(HouseholdAgent):
         """Adds a 3% chance that an additional immigrant marriage takes place along with a given marriage"""
         if self.marriage_flag == 1 and random() < self.immi_marriage_rate:
             ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
-                                  self.education, self.labor, self.marriage, self.birth_rate, self.birth_interval,
+                                  self.education, self.workstatus, self.marriage, self.birth_rate, self.birth_interval,
                                   self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
                                   self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.mig_years)
             ind.gender = 2
@@ -222,15 +229,15 @@ class IndividualAgent(HouseholdAgent):
                 self.marriage = 1
                 ind.hh_id = random_male.strip(random_male[-1])
                 ind.individual_id = ind.hh_id + 'j'
-            ind.labor = 1
+            ind.workstatus = 1
 
     def birth(self):
-        """Adds a new IndividualAgnet class object"""
+        """Adds a new IndividualAgent class object"""
         if self.marriage == 1 and self.gender == 2 and self.age < 55 and random() < self.birth_rate:
             if random() > self.birth_rate and (self.mig_years - self.last_birth_time) > self.birth_interval:
                 self.last_birth_time = self.mig_years
                 ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
-                                      self.education, self.labor, self.marriage, self.birth_rate, self.birth_interval,
+                                      self.education, self.workstatus, self.marriage, self.birth_rate, self.birth_interval,
                                       self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
                                       self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.last_birth_time,
                                       self.mig_years)
@@ -239,26 +246,28 @@ class IndividualAgent(HouseholdAgent):
                 ind.education = 0
                 ind.marriage = 0
                 ind.individual_id = str(self.hh_id) + 'k'
-                ind.labor = 6
-                # add to schedule?
+                ind.workstatus = 6
+                birth_list.append(ind)
+                print(birth_list)
         self.mig_years += 1
         # add to schedule
 
     def death(self):
         """Removes an object from reference"""
         if self.age > 65 and random() < self.death_rate:
-            self.hh_id = 0
-            self.individual_id = 0
+            self.hh_id = '0'
+            self.individual_id = '0'
 
     def youth_education(self):
         """Assigns student working status to those who are young"""
         if 7 < self.age < 19:
-            self.labor = 5
+            self.workstatus = 5
             # *5 for student education + 1
+            # what about after they turn 20?
 
     def out_migration(self):
         """Describes out-migration process and probability"""
-        if self.labor == 1 or self.labor == 2:
+        if self.workstatus == 1 or self.workstatus == 2:
             farm_work = 1  # converts working status into binary farm work status
         else:
             farm_work = 0
@@ -282,7 +291,7 @@ class IndividualAgent(HouseholdAgent):
             self.past_hh_id = self.hh_id
             self.hh_id = 0
             out_migrants_list.append(self.individual_id)
-            self.labor = 4
+            self.workstatus = 4
 
     def re_migration(self):
         """Describes re-migration process and probability following out-migration"""
@@ -294,16 +303,11 @@ class IndividualAgent(HouseholdAgent):
             re_mig_prob = prob / (prob + 1)
             if random() < re_mig_prob:
                 self.hh_id = self.past_hh_id
-                self.labor = 1
+                self.workstatus = 1
                 out_migrants_list.remove(self.individual_id)
 
     def step(self):
         """Step behavior for individual agents; calls above functions"""
-        if self.first_step_flag == 0:
-            global currentyear
-            currentyear = 2000
-            global step_counter
-            step_counter = 0
         self.match_female()
         self.birth()
         self.death()
@@ -311,10 +315,12 @@ class IndividualAgent(HouseholdAgent):
         self.out_migration()
         self.re_migration()
         self.age += 1
-        currentyear += 1
+        self.current_year += 1
         self.first_step_flag = 1  # must be at the end of step()
-        step_counter += 1
-        # save(step_counter, self.individual_id, self.marriage)
+        self.step_counter += 1
+        if self.step_counter < 10:
+            save(self.step_counter, self.hh_id, self.individual_id, self.age, self.education, self.marriage,
+                 self.workstatus, self.mig_years, self.past_hh_id, self.migration_network)
 
 
 class LandParcelAgent(HouseholdAgent):
