@@ -1,8 +1,9 @@
+# !/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import csv
 import inspect
 import os
-
-# !/usr/bin/python
 
 """Clear FNNR-ABM_export.csv each time you run the model. Figuring out how to do this automatically later."""
 
@@ -23,6 +24,7 @@ filewriter.writerow(['Step', 'Household ID', 'Individual ID', 'Age', 'Education'
 fnnr_export.flush()  # flush memory
 fnnr_export.close()
 
+
 def save(step_counter, hh_id, individual_id, age, education, marriage, workstatus, mig_years, past_hh_id,
          migration_network):
     """Exports entries onto a .csv file"""
@@ -32,7 +34,7 @@ def save(step_counter, hh_id, individual_id, age, education, marriage, workstatu
     except IOError:
         print('Please close Excel and retry.')  # will not work if the .csv is already open
         pass
-    fnnr_export.writelines(str(step_counter))
+    fnnr_export.write(str(step_counter))
     fnnr_export.writelines(',')
     fnnr_export.writelines(str(hh_id))
     fnnr_export.writelines(',')

@@ -1,4 +1,5 @@
 # !/usr/bin/python
+# -*- coding: utf-8 -*-
 
 """
 This document defines agents and its attributes.
@@ -6,10 +7,10 @@ It also defines what occurs to the agents at each 'step' of the ABM.
 """
 
 from mesa import Agent  # Agent superclass from mesa
-from random import *  # random # generator
+from random import random, randint, uniform, normalvariate, shuffle, choice  # random # generator
 from excel_import import *
 from math import sqrt, exp
-from excel_export import save
+from excel_export import *
 
 
 formermax = []
@@ -22,11 +23,10 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
     def __init__(self, unique_id, model, hhpos, hh_id, admin_village = 1, nat_village = 1, land_area = 100,
                  charcoal = 10, gtgp_dry = 50, gtgp_rice = 50, total_dry = 50, total_rice = 50,
-                 NCFP = 1, num_mig = 0, income = 0, mig_prob = 0.5, num_labor = 0,
+                 ncfp = 1, num_mig = 0, income = 0, mig_prob = 0.5, num_labor = 0,
                  min_req_labor = 1, comp_sign = 0.1, gtgp_coef = 0, gtgp_part = 0, gtgp_part_flag = 0,
-                 num_non_labor = 0, gtgp_comp = 0, first_step_flag = 0, rice_mu = 0, dry_mu = 0,
-                 gtgp_rice_mu = 0, gtgp_dry_mu = 0, restaurant_prev = 0, lodging_prev = 0, transport_prev = 0,
-                 sales_prev = 0, other_prev = 0, current_year = 2000, migration_network = 0):
+                 num_non_labor = 0, gtgp_comp = 0, first_step_flag = 0, restaurant_prev = 0, lodging_prev = 0,
+                 transport_prev = 0, sales_prev = 0, other_prev = 0, current_year = 2000, migration_network = 0):
 
         super().__init__(unique_id, model)
         # unique_id is a required attribute from Mesa that I don't completely understand
@@ -41,7 +41,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.gtgp_rice = gtgp_rice  # area
         self.total_dry = total_dry  # area
         self.total_rice = total_rice  # area
-        self.NCFP = NCFP  # another PES program
+        self.ncfp = ncfp  # another PES program
         self.num_mig = num_mig  # how many migrants the hh has
 
         self.gtgp_part = gtgp_part  # binary (gtgp status of household)
@@ -59,10 +59,6 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.current_year = current_year
         # more attributes will be added later on
 
-        self.rice_mu = rice_mu
-        self.dry_mu = dry_mu
-        self.gtgp_rice_mu = gtgp_rice_mu
-        self.gtgp_dry_mu = gtgp_dry_mu
         self.restaurant_prev = restaurant_prev
         self.lodging_prev = lodging_prev
         self.transport_prev = transport_prev
@@ -156,7 +152,6 @@ class IndividualAgent(HouseholdAgent):
 
         super().__init__(self, unique_id, model, hh_id)
         self.individual_id = individual_id
-        print(self.individual_id)
         self.hh_id = self.individual_id[:-1]
         self.age = age
         self.gender = gender
@@ -178,6 +173,11 @@ class IndividualAgent(HouseholdAgent):
         self.remittance_prev = remittance_prev
 
         self.step_counter = step_counter
+
+        income_local_off_farm = (self.restaurant_prev + self.lodging_prev + self.transport_prev + self.sales_prev +
+                                 self.other_prev)
+
+        self.land_area = (self.total_rice + self.total_dry - self.gtgp_rice - self.gtgp_dry)
 
     def match_female(self):
         """Loops through single females and matches to single males; see pseudocode"""
@@ -202,7 +202,7 @@ class IndividualAgent(HouseholdAgent):
                             self.hh_id = male.strip(male[-1])
                             self.individual_id = self.hh_id + 'j'
                             single_male_list.remove(male)
-                            pass
+                            pass  # once a match is made, don't keep looping
         # if agelist is not None and genderlist is not None:  # if there are people in the household,
             # for i in range(len(agelist)):  # for each person,
         if 20 < self.age and self.gender == 1:
@@ -211,18 +211,19 @@ class IndividualAgent(HouseholdAgent):
 
     def immigration_marriage(self):
         """Adds a 3% chance that an additional immigrant marriage takes place along with a given marriage"""
+        # Will this skew the gender distribution of people in the reserve?
         if self.marriage_flag == 1 and random() < self.immi_marriage_rate:
             ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                                   self.education, self.workstatus, self.marriage, self.birth_rate, self.birth_interval,
                                   self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
                                   self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.mig_years)
             ind.gender = 2
-            age_random = normal(22.1, 2.6)
+            age_random = normalvariate(22.1, 2.6)
             if age_random >= 20.0:
                 ind.age = age_random
             else:
                 ind.age = 20
-            ind.education = normal(8.7, 1.3)
+            ind.education = normalvariate(8.7, 1.3)
             ind.marriage = 1
             random_male = choice(single_male_list)
             if self.individual_id == random_male:
@@ -236,19 +237,19 @@ class IndividualAgent(HouseholdAgent):
         if self.marriage == 1 and self.gender == 2 and self.age < 55 and random() < self.birth_rate:
             if random() > self.birth_rate and (self.mig_years - self.last_birth_time) > self.birth_interval:
                 self.last_birth_time = self.mig_years
-                ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
-                                      self.education, self.workstatus, self.marriage, self.birth_rate, self.birth_interval,
-                                      self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
-                                      self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.last_birth_time,
-                                      self.mig_years)
-                ind.age = 0
-                ind.gender = choice([0, 1])
-                ind.education = 0
-                ind.marriage = 0
-                ind.individual_id = str(self.hh_id) + 'k'
-                ind.workstatus = 6
-                birth_list.append(ind)
-                print(birth_list)
+                if self.hh_id != 0:
+                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
+                                          self.education, self.workstatus, self.marriage, self.birth_rate, self.birth_interval,
+                                          self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
+                                          self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.last_birth_time,
+                                          self.mig_years)
+                    ind.age = 0
+                    ind.gender = choice([0, 1])
+                    ind.education = 0
+                    ind.marriage = 0
+                    ind.individual_id = str(self.hh_id) + 'k'
+                    ind.workstatus = 6
+                    birth_list.append(ind)
         self.mig_years += 1
         # add to schedule
 
@@ -273,16 +274,15 @@ class IndividualAgent(HouseholdAgent):
             farm_work = 0
         self.mig_flag = 0
         if self.num_labor != 0:
-            non_GTGP_land_per_labor = self.land_area / self.num_labor
+            non_gtgp_land_per_labor = self.land_area / self.num_labor
         else:
-            non_GTGP_land_per_labor = 0
+            non_gtgp_land_per_labor = 0
         # mig_prob = 0  # pseudocode said to set to 0 initially, but not needed
         migration_network = 0  # temporary
         prob = exp(2.07 + 0.65 * self.num_labor + 4.35 * migration_network +
-                   0.11 * non_GTGP_land_per_labor + 0.36 * self.gtgp_part - 0.12 * self.age +
+                   0.11 * non_gtgp_land_per_labor + 0.36 * self.gtgp_part - 0.12 * self.age +
                    0.25 * self.gender + 0.13 * self.education + 0.96 * self.marriage +
                    0.01 * farm_work)
-        # ask Shuang what migration_network is
         if prob > 1:
             prob = 1
         mig_prob = prob / (prob + 1)
@@ -292,6 +292,8 @@ class IndividualAgent(HouseholdAgent):
             self.hh_id = 0
             out_migrants_list.append(self.individual_id)
             self.workstatus = 4
+            remittance_prev = normalvariate(1200, 160000)  # must set to local variable first
+            self.remittance_prev = remittance_prev
 
     def re_migration(self):
         """Describes re-migration process and probability following out-migration"""
@@ -305,6 +307,11 @@ class IndividualAgent(HouseholdAgent):
                 self.hh_id = self.past_hh_id
                 self.workstatus = 1
                 out_migrants_list.remove(self.individual_id)
+
+    def gtgp_participation(self):
+        """A household will participate in GTGP until the contract expires"""
+        gtgp_net_cash = self.gtgp_comp - self.plant_type * unit_price
+        # ask Shuang about unit price
 
     def step(self):
         """Step behavior for individual agents; calls above functions"""

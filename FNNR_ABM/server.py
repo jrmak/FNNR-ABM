@@ -20,10 +20,9 @@ def agent_draw(agent):
             "Filled": "true"}
 
 # Household blue, individual green, land parcel yellow, PES policy unassigned
-# Will add legend later
 
 # admin_village is not actually important to the model; it is a placeholder attribute to identify households
-# so they can be drawn
+# so that households can be drawn
 # see model.py, line 179
 
     try:
@@ -57,32 +56,33 @@ agent_canvas = SimpleCanvas(agent_draw, 700, 700)  # create simulation window
 # create line graph
 chart = ChartModule([{"Label": 'Average Number of Migrants',
                      "Color": "Black"}], canvas_height = 250, canvas_width = 700,
-                     data_collector_name = 'datacollector')
+                     data_collector_name = 'migrantcollector')
 
 chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
                      "Color": "Black"}], canvas_height = 250, canvas_width = 700,
-                     data_collector_name = 'datacollector2')
+                     data_collector_name = 'marriagecollector')
 
 
-# model = ABM(100, 10, 10)
-# for i in range(100):  # sets up model to run for 100 steps
-#     model.step()
-# mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
-# mar_plot = model.datacollector2.get_model_vars_dataframe()
-# # migranttable = migrants.datacollector.get_agent_vars_dataframe()
-# # migranttable.head()
-# # TypeError: '<' not supported between instances of 'LandParcelAgent' and 'int'
-# mig_plot.plot()
-# plt.title('Average Number of Out-Migrants Per Household')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Migrants')
-#
-# mar_plot.plot()
-# plt.title('Total # of Marriages in the Reserve')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Marriages')
-#
-# plt.show()
+model = ABM(100, 10, 10)
+for i in range(100):  # sets up model to run for 100 steps
+    model.step()
+mig_plot = model.migrantcollector.get_model_vars_dataframe()  # see model.py
+mar_plot = model.marriagecollector.get_model_vars_dataframe()
+# migranttable = migrants.datacollector.get_agent_vars_dataframe()
+# migranttable.head()
+# TypeError: '<' not supported between instances of 'LandParcelAgent' and 'int'
+# Mesa doesn't work well with multiple types of Agents
+mig_plot.plot()
+plt.title('Average Number of Out-Migrants Per Household')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Migrants')
+
+mar_plot.plot()
+plt.title('Total # of Marriages in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Marriages')
+
+plt.show()
 
 # The text elements below update with every step.
 
@@ -93,9 +93,9 @@ class MapLegend(TextElement):
 
     def render(self, model):
         # image created on MS Paint and uploaded to internet, but also featured in this folder for reference
-        return ("<img src = 'http://i64.tinypic.com/f41pwi.png'>", "<br>")
-        # return ("Blue: Household agents | Black: non-GTGP land parcel agents | Yellow: GTGP land parcel agents"
-        #         )
+        return ("<img src = 'http://i64.tinypic.com/f41pwi.png'>", "<br>",
+                "The simulation map window spans from 27.95 - 28° North, 108.65-108.83° East.",
+                "<br><br>")
 
 
 class Migrants(TextElement):
@@ -104,9 +104,8 @@ class Migrants(TextElement):
 
     def render(self, model):
         return ("X-axis: migrants | Y-axis; steps (years) | ",
-                "Average # of Migrants per Household: " + str(show_num_mig(model))
-                + "<br><br>"
-                )
+                "Average # of Migrants per Household: " + str(show_num_mig(model)),
+                "<br><br>")
 
 
 class Marriages(TextElement):

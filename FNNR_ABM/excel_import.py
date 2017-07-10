@@ -18,8 +18,8 @@ currentbook = 'FNNR_2016_Survey_psuedo_0706.xlsx'
 wbglobal = load_workbook(currentbook)
 sheet = wbglobal.active
 
-# a list of 96 hh_ids; hardcoded since number from excel file not likely to change
-agents = list(range(1, 95))
+# a list of 94 hh_ids; hardcoded since number from excel file not likely to change
+agents = list(range(1, 95))  # range(1, 95) goes 1-94
 
 
 def assign_sheet_parameters(hh_id, variable):
