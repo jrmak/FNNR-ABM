@@ -1,7 +1,8 @@
 Version History
 
 Pseudocode Version 7 (0705)
-v1.54 - 7/8/2017 - Worked on Excel exporting and integration of new pseudocode version
+v1.55 *Will rename to 1.62 and 1.63 - 7/10-13/2017 - Function debugging
+v1.54 *Will rename to 1.61 - 7/8/2017 - Worked on Excel exporting and integration of new pseudocode version
 
 Pseudocode Version 6 (0628)
 v1.53 - 7/7/2017 - Created simulation legend/got dynamic graphs working, started on Excel export file
