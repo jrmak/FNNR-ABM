@@ -8,6 +8,7 @@ import os
 
 currentpath = str(inspect.getfile(inspect.currentframe()))[:-16]  # 'removes excel_import.py' at end
 os.chdir(currentpath)
+print("Find FNNR-ABM_export.csv in: " + str(currentpath))
 
 try:
     fnnr_export = open('FNNR-ABM_export.csv', 'a+')  # a+ will create the file if it doesn't exist already
