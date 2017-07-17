@@ -9,6 +9,7 @@ are the same as the two graphs in the web browser simulation (dynamic number of 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule, TextElement
 from model import *
+from agents import *
 from SimpleContinuousModule import SimpleCanvas
 import matplotlib.pyplot as plt
 import inspect
@@ -93,7 +94,12 @@ class MapLegend(TextElement):
 
     def render(self, model):
         # image created on MS Paint and uploaded to internet, but also featured in this folder for reference
-        return ("<img src = 'http://i64.tinypic.com/f41pwi.png'>", "<br>")
+        return ("<img src = 'http://i64.tinypic.com/f41pwi.png'>" + "<br>"
+                + "Non-GTGP Land Parcels: " + str(len(nongtgplist))
+                + " | GTGP Land Parcels: " + str(len(gtgplist))
+                + " | Total Land Parcels: 361"
+                + "<br><br>"
+                + "<h3>Average # of Migrants per Household</h3>")
         # return ("Blue: Household agents | Black: non-GTGP land parcel agents | Yellow: GTGP land parcel agents"
         #         )
 
@@ -103,10 +109,10 @@ class Migrants(TextElement):
         pass
 
     def render(self, model):
-        return ("X-axis: migrants | Y-axis; steps (years) | ",
+        return ("X-axis: migrants | Y-axis: steps (years) | ",
                 "Average # of Migrants per Household: " + str(show_num_mig(model))
                 + "<br><br>"
-                )
+                + "<h3>Total # of Marriages in the Reserve</h3>")
 
 
 class Marriages(TextElement):
@@ -114,7 +120,7 @@ class Marriages(TextElement):
         pass
 
     def render(self, model):
-        return ("X-axis: marriages | Y-axis; steps (years) | ",
+        return ("X-axis: marriages | Y-axis: steps (years) | ",
                 "Total # of Marriages in the Reserve: " + str(show_marriages(model))
                 )
 
