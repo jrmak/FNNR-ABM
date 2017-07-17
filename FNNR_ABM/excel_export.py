@@ -18,14 +18,15 @@ except IOError:
     pass
 
 filewriter = csv.writer(fnnr_export)
-filewriter.writerow(['Step', 'Household ID', 'Individual ID', 'Age', 'Education', 'Marriage', 'Work Status',
-                     'Migration Years', 'Past HH ID', 'Migration Network'])
+filewriter.writerow(['Step', 'Current Year', 'Household ID', 'Individual ID', 'Age', 'Education', 'Marriage',
+                     'Work Status', 'Migration Years', 'Past HH ID', 'Laborers in Household',
+                     'Migrants from Household'])
 
 fnnr_export.flush()  # flush memory
 fnnr_export.close()
 
-def save(step_counter, hh_id, individual_id, age, education, marriage, workstatus, mig_years, past_hh_id,
-         migration_network):
+def save(step_counter, current_year, hh_id, individual_id, age, education, marriage, workstatus, mig_years, past_hh_id,
+         num_mig, num_labor):
     """Exports entries onto a .csv file"""
     try:
         fnnr_export = open('FNNR-ABM_export.csv', 'a+')  # a+ will create the file if it doesn't exist already
@@ -34,6 +35,8 @@ def save(step_counter, hh_id, individual_id, age, education, marriage, workstatu
         print('Please close Excel and retry.')  # will not work if the .csv is already open
         pass
     fnnr_export.writelines(str(step_counter))
+    fnnr_export.writelines(',')
+    fnnr_export.writelines(str(current_year))
     fnnr_export.writelines(',')
     fnnr_export.writelines(str(hh_id))
     fnnr_export.writelines(',')
@@ -51,7 +54,9 @@ def save(step_counter, hh_id, individual_id, age, education, marriage, workstatu
     fnnr_export.writelines(',')
     fnnr_export.writelines(str(past_hh_id))
     fnnr_export.writelines(',')
-    fnnr_export.writelines(str(migration_network))
+    fnnr_export.writelines(str(num_mig))
+    fnnr_export.writelines(',')
+    fnnr_export.writelines(str(num_labor))
     fnnr_export.writelines('\n')
     fnnr_export.flush()  # flush memory
     fnnr_export.close()
