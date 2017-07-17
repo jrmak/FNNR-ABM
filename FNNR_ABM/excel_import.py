@@ -74,12 +74,6 @@ def assign_sheet_parameters(hh_id, variable):
         elif variable.lower() == 'num_mig':
             parameters.append(str('ZV' + row))
             parameters.append(str('ZZ' + row))
-        elif variable.lower() == 'migration_network':
-            parameters.append(str('AIP' + row))
-            parameters.append(str('AIP' + row))
-        elif variable.lower() == 'plant_type':
-            parameters.append(str('GO' + row))
-            parameters.append(str('HH' + row))
         # add more later; added variable strings must be lowercase
         else:
             print('Sorry,', variable, 'is not a valid variable category.')
