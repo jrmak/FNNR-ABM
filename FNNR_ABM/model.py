@@ -1,5 +1,4 @@
 # !/usr/bin/python
-# -*- coding: utf-8 -*-
 
 """
 This document runs the main model, placing agents into the ABM.
@@ -23,10 +22,8 @@ def show_num_mig(model):
     b = sum(num_mig) / num_agents
     return b
 
-
 def show_single_male(model):
     return len(single_male_list)
-
 
 def show_marriages(model):
     for agent in model.schedule.agents:
@@ -103,12 +100,12 @@ class ABM(Model):
         self.running = True
 
         # DataCollector: part of Mesa library
-        self.migrantcollector = DataCollector(
+        self.datacollector = DataCollector(
             model_reporters = {'Average Number of Migrants': show_num_mig}
             )
 #            agent_reporters={'Migrants': lambda a: a.num_mig})
 
-        self.marriagecollector = DataCollector(
+        self.datacollector2 = DataCollector(
             model_reporters = {'Total # of Marriages in the Reserve': show_marriages})
 #            agent_reporters={'Migrants': lambda a: a.marriage})
 
@@ -191,7 +188,6 @@ class ABM(Model):
             hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             hh_id = return_values(hh_row, 'hh_id')
             self.hh_id = hh_id
-            migration_network = return_values(hh_row, 'migration_network')
             a = HouseholdAgent(hh_row, self, hhpos, self.hh_id, self.admin_village, self.gtgp_part, self.gtgp_land,
                                self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
                                self.num_labor, self.income, self.gtgp_comp)
@@ -269,10 +265,6 @@ class ABM(Model):
 
     def step(self):
         """Advance the model by one step"""
-        self.migrantcollector.collect(self)
-        self.marriagecollector.collect(self)
+        self.datacollector.collect(self)
+        self.datacollector2.collect(self)
         self.schedule.step()
-        for ind in birth_list:
-            self.schedule.add(ind)  # adds any new infants who were born
-            # for i in range(10):
-        #    self.schedule.step()  # run 10 steps at once

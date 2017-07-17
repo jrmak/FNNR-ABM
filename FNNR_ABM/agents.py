@@ -60,6 +60,10 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.current_year = current_year
         # more attributes will be added later on
 
+        self.rice_mu = rice_mu
+        self.dry_mu = dry_mu
+        self.gtgp_rice_mu = gtgp_rice_mu
+        self.gtgp_dry_mu = gtgp_dry_mu
         self.restaurant_prev = restaurant_prev
         self.lodging_prev = lodging_prev
         self.transport_prev = transport_prev
