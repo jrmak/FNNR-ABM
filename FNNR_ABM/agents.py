@@ -17,10 +17,13 @@ formermax = []
 single_male_list = []
 married_male_list = []
 out_migrants_list = []
+re_migrants_list = []
 birth_list = []
+death_list = []
 hhlist = []
 nongtgplist = []
 gtgplist = []
+
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
@@ -60,10 +63,6 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.current_year = current_year
         # more attributes will be added later on
 
-        self.rice_mu = rice_mu
-        self.dry_mu = dry_mu
-        self.gtgp_rice_mu = gtgp_rice_mu
-        self.gtgp_dry_mu = gtgp_dry_mu
         self.restaurant_prev = restaurant_prev
         self.lodging_prev = lodging_prev
         self.transport_prev = transport_prev
@@ -142,9 +141,10 @@ class IndividualAgent(HouseholdAgent):
     def __init__(self, unique_id, model, hh_id, individual_id, age = 20, gender = 1, education = 1,
                  workstatus = 0, marriage = 0, birth_rate = 1, birth_interval = 2, death_rate = 0.1,
                  marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
-                 past_hh_id = 0, last_birth_time = 0, mig_years = 0, remittance_prev = 0, step_counter = 0):
+                 past_hh_id = 0, last_birth_time = 0, mig_years = 0, remittance_prev = 0, step_counter = 0,
+                 num_mig = 1, num_labor = 1):
 
-        super().__init__(self, unique_id, model, hh_id)
+        super().__init__(self, unique_id, model, hh_id, num_mig, num_labor)
         self.individual_id = individual_id
         self.hh_id = self.individual_id[:-1]  # for example, if individual id is 94f, household id is 94
         self.age = age
@@ -241,15 +241,16 @@ class IndividualAgent(HouseholdAgent):
                     ind.workstatus = 6
                     birth_list.append(ind.individual_id)
                     # (birth_list)
-        self.mig_years += 1
+        # self.mig_years += 1
+        # the above was line in pseudocode, but should not be in this function
         # add to schedule
 
     def death(self):
         """Removes an object from reference"""
         if self.age > 65 and random() < self.death_rate:
             self.hh_id = '0'
+            death_list.append(self.individual_id)
             self.individual_id = '0'
-
     def youth_education(self):
         """Assigns student working status to those who are young"""
         if 7 < self.age < 19:
@@ -274,7 +275,6 @@ class IndividualAgent(HouseholdAgent):
                    0.11 * non_GTGP_land_per_labor + 0.36 * self.gtgp_part - 0.12 * self.age +
                    0.25 * self.gender + 0.13 * self.education + 0.96 * self.marriage +
                    0.01 * farm_work)
-        # ask Shuang what migration_network is
         if prob > 1:
             prob = 1
         mig_prob = prob / (prob + 1)
@@ -290,6 +290,7 @@ class IndividualAgent(HouseholdAgent):
         if self.individual_id in out_migrants_list:
             # prob = exp(5.31 - 0.12 * self.age + 0.14 * self.mig_years)
             # old formula above
+            self.mig_years += 1
             prob = exp(-1.2 + 0.06 * self.age - 0.08 * self.mig_years)
             # age is defined as the age at the time of migration
             re_mig_prob = prob / (prob + 1)
@@ -297,6 +298,7 @@ class IndividualAgent(HouseholdAgent):
                 self.hh_id = self.past_hh_id
                 self.workstatus = 1
                 out_migrants_list.remove(self.individual_id)
+                re_migrants_list.append(self.individual_id)
 
     def step(self):
         """Step behavior for individual agents; calls above functions"""

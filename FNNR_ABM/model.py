@@ -12,8 +12,6 @@ from agents import *
 from excel_import import *
 from math import sqrt
 
-x = []
-
 
 def show_num_mig(model):
     """Returns the average # of migrants / year in each household"""
@@ -22,20 +20,18 @@ def show_num_mig(model):
     b = sum(num_mig) / num_agents
     return b
 
-def show_single_male(model):
-    return len(single_male_list)
-
+marriages = []
 def show_marriages(model):
     for agent in model.schedule.agents:
         try:
             if agent.marriage_flag == 0 or agent.marriage_flag == 1:
                 marriage_flag = agent.marriage_flag
                 if marriage_flag == 1:
-                    x.append(marriage_flag)
+                    marriages.append(marriage_flag)
         except:
             marriage_flag = 0
             pass
-    b = sum(x)
+    b = sum(marriages)
     return b
 
 formermax = []
