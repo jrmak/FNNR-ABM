@@ -10,9 +10,11 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule, TextElement
 from model import *
 from agents import *
+from excel_export_summary import *
 from SimpleContinuousModule import SimpleCanvas
 import matplotlib.pyplot as plt
 import inspect
+
 
 def agent_draw(agent):
     draw = {"r": 3,  # radius in pixels, for circles
@@ -65,25 +67,33 @@ chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
                      data_collector_name = 'datacollector2')
 
 
-# model = ABM(100, 10, 10)
-# for i in range(100):  # sets up model to run for 100 steps
-#     model.step()
-# mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
-# mar_plot = model.datacollector2.get_model_vars_dataframe()
-# # migranttable = migrants.datacollector.get_agent_vars_dataframe()
-# # migranttable.head()
-# # TypeError: '<' not supported between instances of 'LandParcelAgent' and 'int'
-# mig_plot.plot()
-# plt.title('Average Number of Out-Migrants Per Household')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Migrants')
-#
-# mar_plot.plot()
-# plt.title('Total # of Marriages in the Reserve')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Marriages')
-#
-# plt.show()
+model = ABM(100, 10, 10)
+individuals = 278 + len(birth_list) + len(re_migrants_list) - len(out_migrants_list) - len(death_list)
+for i in range(10):  # sets up model to run for 10 steps
+    model.step()
+    i_counter = i
+    save_summary(i_counter, show_num_mig(model), show_marriages(model), len(birth_list), str(individuals))
+for i in range(10):  # sets up model to run to 20 steps total
+    model.step()
+    i_counter += 1
+    save_summary(i_counter, show_num_mig(model), show_marriages(model), len(birth_list), str(individuals))
+
+mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
+mar_plot = model.datacollector2.get_model_vars_dataframe()
+# migranttable = migrants.datacollector.get_agent_vars_dataframe()
+# migranttable.head()
+# TypeError: '<' not supported between instances of 'LandParcelAgent' and 'int'
+mig_plot.plot()
+plt.title('Average Number of Out-Migrants Per Household')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Migrants')
+
+mar_plot.plot()
+plt.title('Total # of Marriages in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Marriages')
+
+plt.show()
 
 # The text elements below update with every step.
 
