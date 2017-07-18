@@ -6,7 +6,7 @@ import os
 
 """Clear FNNR-ABM_export_individual.csv each time you run the model. Figuring out how to do this automatically later."""
 
-currentpath = str(inspect.getfile(inspect.currentframe()))[:-16]  # 'removes excel_import.py' at end
+currentpath = str(inspect.getfile(inspect.currentframe()))[:-26]  # 'removes excel_import.py' at end
 os.chdir(currentpath)
 
 try:
@@ -14,7 +14,6 @@ try:
     # a is also preferred to w here to append, rather than overwrite, values
 except IOError:
     print('Please close Excel and retry.')  # will not work if the .csv is already open
-    pass
 
 filewriter = csv.writer(fnnr_export)
 filewriter.writerow(['Step', 'Current Year', 'Household ID', 'Individual ID', 'Age', 'Education', 'Marriage',
@@ -32,7 +31,7 @@ def save(step_counter, current_year, hh_id, individual_id, age, education, marri
         # a is also preferred to w here to append, rather than overwrite, values
     except IOError:
         print('Please close Excel and retry.')  # will not work if the .csv is already open
-        pass
+
     fnnr_export.writelines(str(step_counter))
     fnnr_export.writelines(',')
     fnnr_export.writelines(str(current_year))
@@ -58,4 +57,14 @@ def save(step_counter, current_year, hh_id, individual_id, age, education, marri
     fnnr_export.writelines(str(num_labor))
     fnnr_export.writelines('\n')
     fnnr_export.flush()  # flush memory
+    fnnr_export.close()
+
+
+def erase_individual():
+    try:
+        fnnr_export = open('FNNR-ABM_export_summary.csv', 'w+')  # a+ will create the file if it doesn't exist already
+        # a is also preferred to w here to append, rather than overwrite, values
+        fnnr_export.truncate()
+    except IOError:
+        print('Please close Excel and retry.')  # will not work if the .csv is already open
     fnnr_export.close()

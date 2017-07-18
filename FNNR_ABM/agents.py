@@ -129,6 +129,13 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         if chance > 0.95:
             self.gtgp_part_flag = 1
 
+    def gtgp_participation(self):
+        minimum_non_gtgp = 0.3
+        non_gtgp_area = (self.total_dry + self.total_rice) - (self.gtgp_dry + self.gtgp_rice)
+        if non_gtgp_area < minimum_non_gtgp:
+            gtgp_part_prob = 0
+
+
     def step(self):
         """Step behavior for household agents; see pseudo-code document"""
         # use either self.gtgp_test() or self.gtgp_enroll()
@@ -251,6 +258,7 @@ class IndividualAgent(HouseholdAgent):
             self.hh_id = '0'
             death_list.append(self.individual_id)
             self.individual_id = '0'
+
     def youth_education(self):
         """Assigns student working status to those who are young"""
         if 7 < self.age < 19:
@@ -266,7 +274,8 @@ class IndividualAgent(HouseholdAgent):
             farm_work = 0
         self.mig_flag = 0
         if self.num_labor != 0:
-            non_GTGP_land_per_labor = self.land_area / self.num_labor
+            non_gtgp_area = (self.total_dry + self.total_rice) - (self.gtgp_dry + self.gtgp_rice)
+            non_GTGP_land_per_labor = non_gtgp_area / self.num_labor
         else:
             non_GTGP_land_per_labor = 0
         # mig_prob = 0  # pseudocode said to set to 0 initially, but not needed
@@ -320,7 +329,8 @@ class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
 
     def __init__(self, unique_id, model, hhpos, hh_id, landpos, gtgp_enrolled = 0,
-                 area = 1, latitude = 0, longitude = 0, maximum = 0, plant_type = 1):
+                 area = 1, latitude = 0, longitude = 0, maximum = 0, plant_type = 1,
+                 land_output = 0, land_type = 0, land_time = 0):
 
         super().__init__(self, unique_id, model, hhpos, hh_id)
         self.hh_id = hh_id
@@ -330,6 +340,9 @@ class LandParcelAgent(HouseholdAgent):
         self.latitude = latitude
         self.longitude = longitude
         self.plant_type = plant_type
+        self.land_output = land_output
+        self.land_type = land_type
+        self.land_time = land_time
         self.maximum = maximum
 
     def calc_distance(self, hhpos):
@@ -382,6 +395,36 @@ class LandParcelAgent(HouseholdAgent):
                 self.maximum = 0
                 pass
         return self.maximum
+
+    def output(self):
+        if self.plant_type == 1:
+            unit_price = 0.7
+        elif self.plant_type == 2:
+            unit_price = 0.8
+        elif self.plant_type == 3:
+            unit_price = 0.9
+        elif self.plant_type == 4:
+            unit_price = 2.3
+        elif self.plant_type == 5:
+            unit_price = 0
+        else:
+            unit_price = 1
+        crop_income = self.land_output * unit_price
+        unit_comp = 1  # preset, not in pseudocode currently
+        comp_amount = self.land_area * unit_comp
+        gtgp_net_income = comp_amount - crop_income
+
+    def gtgp_part(self):
+        if self.land_type == 1:
+            prob = exp(1.02 - 0.15 * self.age_1 - 0.07 * self.gender_1 + 0.18 * self.education_1
+                       - 0.58 * self.land_time - 0.76 * non_gtgp_land_per_labor + 0.08 * gtgp_net_income)
+            gtgp_part_prob = prob / (prob + 1)
+        else:
+            prob = exp(1.24 - 0.16 * self.age_1 - 0.07 * self.gender_1 + 0.12 * self.education_1
+                       - 0.23 * self._land_time - 0.85 * non_gtgp_land_per_labor + 0.12 * gtgp_net_income)
+            gtgp_part_prob = prob / (prob + 1)
+        if random() > gtgp_part_prob:
+            self.gtgp_enrolled = 1
 
     def gtgp_convert(self):
         result = super(LandParcelAgent, self).gtgp_enroll()
