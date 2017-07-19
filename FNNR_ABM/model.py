@@ -16,7 +16,7 @@ from math import sqrt
 def show_num_mig(model):
     """Returns the average # of migrants / year in each household"""
     num_mig = [agent.num_mig for agent in model.schedule.agents]
-    num_agents = 94
+    num_agents = 94  # household agents
     b = sum(num_mig) / num_agents
     return b
 
