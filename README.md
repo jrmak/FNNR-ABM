@@ -19,5 +19,5 @@ Openpyxl - Helps import data values into Python code from Excel files
 * [FNNR_ABM/agents.py](FNNR_ABM/agents.py): Contains the agent classes (HouseholdAgent and child classes IndividualAgent/LandParcelAgent, as well as PESAgent, a policy agent that will be activated later), and defines agent behavior at each step of the simulation. 
 * [FNNR_ABM/simple_continuous_canvas.js](FNNR_ABM/simple_continuous_canvas.js): JavaScript file that "draws" the simulation in a web-based window.
 * [FNNR_ABM/SimpleContinuousModule.py](FNNR_ABM/SimpleContinuousModule.py): Sets up the simulation visualization module; calls simple_continuous_canvas.js in order to do so.
-* [FNNR_ABM/FNNR_2016_Survey_psuedo_0615.zip](FNNR_2016_Survey_psuedo_XXXX.zip): (typo: pseudo, sp) Password-protected to protect research. Excel file containing data for import. XXXX corresponds to the version in format day/month (for example, the June 28th 2017 version would be 0628).
+* [FNNR_ABM/FNNR_2016_Survey_psuedo_XXXX.zip](FNNR_2016_Survey_psuedo_0706.zip): (typo: pseudo, sp) Password-protected to protect research. Excel file containing data for import. XXXX corresponds to the version in format day/month (for example, the June 28th 2017 version would be 0628).
 * [FNNR_ABM/server.py](FNNR_ABM/server.py): Sets up the visualization; *run this file to execute the code.*

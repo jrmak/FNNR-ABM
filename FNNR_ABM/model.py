@@ -200,25 +200,25 @@ class ABM(Model):
             landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
             hh_id = return_values(hh_row, 'hh_id')
             for landpos in landposlist:
-                distance = self.calc_distance(hhpos, landpos)
-                if distance not in formermax:
-                    maxlist.append(distance)
-                    formermax.append(distance)
+            #     distance = self.calc_distance(hhpos, landpos)
+            #     if distance not in formermax:
+            #         maxlist.append(distance)
+            #         formermax.append(distance)
                 lp = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled)
-                if maxlist != ['']:
-                    try:
-                        max_index = maxlist.index(max(maxlist))
-                        if landpos == landposlist[max_index]:
-                            lp.maximum = 1
-                        else:
-                            lp.maximum = 0
-                    except:
-                        pass
-                else:
-                    lp.maximum = 0
-                lp.gtgp_enrolled = 0
-                self.space.place_agent(lp, landpos)
-                self.schedule.add(lp)
+            # if maxlist != ['']:
+            #     try:
+            #         max_index = maxlist.index(max(maxlist))
+            #         if landpos == landposlist[max_index]:
+            #             lp.maximum = 1
+            #         else:
+            #             lp.maximum = 0
+            #     except:
+            #         pass
+            # else:
+                # lp.maximum = 0
+            lp.gtgp_enrolled = 0
+            self.space.place_agent(lp, landpos)
+            self.schedule.add(lp)
 
         # add gtgp land parcels
         for hh_row in agents:  # from excel_import
