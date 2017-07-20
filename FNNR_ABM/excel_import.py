@@ -41,12 +41,21 @@ def assign_sheet_parameters(hh_id, variable):
         elif variable.lower() == 'age':
             parameters.append(str('AG' + row))
             parameters.append(str('AO' + row))
+        elif variable.lower() == 'age_1':
+            parameters.append(str('AG' + row))
+            parameters.append(str('AG' + row))
         elif variable.lower() == 'gender':
             parameters.append(str('X' + row))
             parameters.append(str('AF' + row))
+        elif variable.lower() == 'gender_1':
+            parameters.append(str('X' + row))
+            parameters.append(str('X' + row))
         elif variable.lower() == 'education':
             parameters.append(str('AY' + row))
             parameters.append(str('BG' + row))
+        elif variable.lower() == 'education_1':
+            parameters.append(str('AY' + row))
+            parameters.append(str('AY' + row))
         elif variable.lower() == 'marriage':
             parameters.append(str('BH' + row))
             parameters.append(str('BP' + row))

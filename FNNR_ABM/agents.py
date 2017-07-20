@@ -100,6 +100,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         non_gtgp_area = (self.total_dry + self.total_rice) - (self.gtgp_dry + self.gtgp_rice)
         if non_gtgp_area < minimum_non_gtgp:
             gtgp_part_prob = 0
+        # Ask Shuang
 
 
     def step(self):
@@ -107,45 +108,45 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         # use either self.gtgp_test() or self.gtgp_enroll()
         self.current_year += 1
 
-    def gtgp_enroll(self):
-        # self.num_mig = real_value_counter(return_values(self.unique_id, 'num_mig')) / 17  # sets num_mig in hh
-        # 17: 1999-2016, so num_mig is average yearly number of migrants per household
-        # if self.first_step_flag == 0:
-        #   laborchance = randint(1,6)
-        #     self.num_labor = laborchance  # initialize number of laborers randomly
-        if self.first_step_flag == 0:
-            # unique_id here is hh_row from model.py, line 176
-            if self.initialize_labor(self.unique_id) is not None and type(self.unique_id) == int:
-                self.num_labor = self.initialize_labor(self.unique_id)
-                self.first_step_flag = 1  # prevents above lines from repeating after initialization
-        self.gtgp_part = 1
-        # later: depends on plant type and land area and PES policy
-        self.gtgp_coef = uniform(0, 0.55)  # numbers taken from pseudocode
-        self.gtgp_comp = randint(500, 2000)
-        self.income = randint(5000, 20000)
-        if type(self.unique_id) == int and self.hh_id is not None:
-            if (self.gtgp_coef * self.gtgp_part) > self.mig_prob and (self.gtgp_comp / self.income) > self.comp_sign:
-                if self.num_labor > 0:
-                    self.num_labor -= 1
-                    self.num_mig += 1  # migration occurs
-                    # print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
-                if self.num_labor < self.min_req_labor and int(self.hh_id) not in hhlist:
-                    gtgp_part_flag = 1  # sets flag for enrollment of more land
-                    hhlist.append(int(self.hh_id))
-        return hhlist  # a list of households set to enroll in further GTGP; see LandParcelAgent's gtgp_convert()
+    # def gtgp_enroll(self):
+    #     # self.num_mig = real_value_counter(return_values(self.unique_id, 'num_mig')) / 17  # sets num_mig in hh
+    #     # 17: 1999-2016, so num_mig is average yearly number of migrants per household
+    #     # if self.first_step_flag == 0:
+    #     #   laborchance = randint(1,6)
+    #     #     self.num_labor = laborchance  # initialize number of laborers randomly
+    #     if self.first_step_flag == 0:
+    #         # unique_id here is hh_row from model.py, line 176
+    #         if self.initialize_labor(self.unique_id) is not None and type(self.unique_id) == int:
+    #             self.num_labor = self.initialize_labor(self.unique_id)
+    #             self.first_step_flag = 1  # prevents above lines from repeating after initialization
+    #     self.gtgp_part = 1
+    #     # later: depends on plant type and land area and PES policy
+    #     self.gtgp_coef = uniform(0, 0.55)  # numbers taken from pseudocode
+    #     self.gtgp_comp = randint(500, 2000)
+    #     self.income = randint(5000, 20000)
+    #     if type(self.unique_id) == int and self.hh_id is not None:
+    #         if (self.gtgp_coef * self.gtgp_part) > self.mig_prob and (self.gtgp_comp / self.income) > self.comp_sign:
+    #             if self.num_labor > 0:
+    #                 self.num_labor -= 1
+    #                 self.num_mig += 1  # migration occurs
+    #                 # print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
+    #             if self.num_labor < self.min_req_labor and int(self.hh_id) not in hhlist:
+    #                 gtgp_part_flag = 1  # sets flag for enrollment of more land
+    #                 hhlist.append(int(self.hh_id))
+    #     return hhlist  # a list of households set to enroll in further GTGP; see LandParcelAgent's gtgp_convert()
 
-    def gtgp_test(self):
-        # Basic formula for testing web browser simulation; each step, 5% of agents change flags.
-        # can remove function once model is finished; just for debugging purposes / template for future functions
-        if self.first_step_flag == 0:
-            self.num_labor = self.initialize_labor(self.unique_id)
-        if self.num_labor > 0:
-            self.num_labor -= 1
-            self.num_mig += 1
-            # print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
-        chance = random()
-        if chance > 0.95:
-            self.gtgp_part_flag = 1
+    # def gtgp_test(self):
+    #     # Basic formula for testing web browser simulation; each step, 5% of agents change flags.
+    #     # can remove function once model is finished; just for debugging purposes / template for future functions
+    #     if self.first_step_flag == 0:
+    #         self.num_labor = self.initialize_labor(self.unique_id)
+    #     if self.num_labor > 0:
+    #         self.num_labor -= 1
+    #         self.num_mig += 1
+    #         # print(' # of laborers: ', self.num_labor, ' # of migrants: ', self.num_mig)
+    #     chance = random()
+    #     if chance > 0.95:
+    #         self.gtgp_part_flag = 1
 
 
 class IndividualAgent(HouseholdAgent):
@@ -294,6 +295,7 @@ class IndividualAgent(HouseholdAgent):
         mig_prob = prob / (prob + 1)
         if random() < mig_prob:
             self.mig_flag = 1
+            # self.num_mig? Ask Shuang
             self.past_hh_id = self.hh_id
             self.hh_id = 0
             out_migrants_list.append(self.individual_id)
@@ -334,7 +336,8 @@ class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
 
     def __init__(self, unique_id, model, hhpos, hh_id, landpos, gtgp_enrolled = 0, area = 1, latitude = 0,
-                 longitude = 0, maximum = 0, plant_type = 1, land_output = 0, land_type = 0, land_time = 0):
+                 longitude = 0, maximum = 0, plant_type = 1, land_output = 0, land_type = 0, land_time = 0,
+                 gtgp_net_income = 0):
 
         super().__init__(self, unique_id, model, hhpos, hh_id)
         self.hh_id = hh_id
@@ -348,6 +351,7 @@ class LandParcelAgent(HouseholdAgent):
         self.land_type = land_type
         self.land_time = land_time
         self.maximum = maximum
+        self.gtgp_net_income = gtgp_net_income
 
     def calc_distance(self, hhpos):
         """Given a household id, return the distances between household and parcels"""
@@ -416,24 +420,24 @@ class LandParcelAgent(HouseholdAgent):
         crop_income = self.land_output * unit_price
         unit_comp = 1  # preset, not in pseudocode currently
         comp_amount = self.land_area * unit_comp
-        gtgp_net_income = comp_amount - crop_income
+        self.gtgp_net_income = comp_amount - crop_income
 
     def gtgp_part(self):
         if self.land_type == 1:
             prob = exp(1.02 - 0.15 * self.age_1 - 0.07 * self.gender_1 + 0.18 * self.education_1
-                       - 0.58 * self.land_time - 0.76 * non_gtgp_land_per_labor + 0.08 * gtgp_net_income)
+                       - 0.58 * self.land_time - 0.76 * non_gtgp_land_per_labor + 0.08 * self.gtgp_net_income)
             gtgp_part_prob = prob / (prob + 1)
         else:
             prob = exp(1.24 - 0.16 * self.age_1 - 0.07 * self.gender_1 + 0.12 * self.education_1
-                       - 0.23 * self._land_time - 0.85 * non_gtgp_land_per_labor + 0.12 * gtgp_net_income)
+                       - 0.23 * self.land_time - 0.85 * non_gtgp_land_per_labor + 0.12 * self.gtgp_net_income)
             gtgp_part_prob = prob / (prob + 1)
         if random() > gtgp_part_prob:
             self.gtgp_enrolled = 1
 
-    def gtgp_convert(self):
-        result = super(LandParcelAgent, self).gtgp_enroll()
-        if int(self.hh_id) in result:
-            self.gtgp_enrolled = 1
+    # def gtgp_convert(self):
+    #     result = super(LandParcelAgent, self).gtgp_enroll()
+    #     if int(self.hh_id) in result:
+    #         self.gtgp_enrolled = 1
 
     def non_gtgp_count(self):
         if self.gtgp_enrolled == 0 and self.unique_id not in nongtgplist:
