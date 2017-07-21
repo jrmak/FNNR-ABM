@@ -62,8 +62,8 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.current_year = current_year
         # more attributes will be added later on
 
-        self.restaurant_prev = restaurant_prev
-        self.lodging_prev = lodging_prev
+        self.restaurant_prev = 0  # will always be 0 because none in survey
+        self.lodging_prev = lodging_prev  # only hh_id 60
         self.transport_prev = transport_prev
         self.sales_prev = sales_prev
         self.other_prev = other_prev
@@ -142,7 +142,7 @@ class IndividualAgent(HouseholdAgent):
                  workstatus = 0, marriage = 0, birth_rate = 1, birth_interval = 2, death_rate = 0.1,
                  marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
                  past_hh_id = 0, last_birth_time = 0, mig_years = 0, remittance_prev = 0, step_counter = 0,
-                 num_mig = 1, num_labor = 1):
+                 num_mig = 0, num_labor = 1):
 
         super().__init__(self, unique_id, model, hh_id, num_mig, num_labor)
         self.individual_id = individual_id
@@ -261,22 +261,24 @@ class IndividualAgent(HouseholdAgent):
 
     def out_migration(self):
         """Describes out-migration process and probability"""
-        if self.workstatus == 1 or self.workstatus == 2:
+        income_local_off_farm = (int(self.restaurant_prev) + int(self.lodging_prev) + int(self.transport_prev) +
+                                 int(self.sales_prev) + int(self.other_prev))
+        if self.workstatus == 1:
             farm_work = 1  # converts working status into binary farm work status
         else:
             farm_work = 0
         self.mig_flag = 0
         if self.num_labor != 0:
-            non_gtgp_area = (self.total_dry + self.total_rice) - (self.gtgp_dry + self.gtgp_rice)
+            non_gtgp_area = (self.total_rice + self.total_dry) - (self.gtgp_dry + self.gtgp_rice)
             non_GTGP_land_per_labor = non_gtgp_area / self.num_labor
         else:
             non_GTGP_land_per_labor = 0
-        # mig_prob = 0  # pseudocode said to set to 0 initially, but not needed
-        migration_network = 0  # temporary
-        prob = exp(2.07 + 0.65 * self.num_labor + 4.35 * migration_network +
-                   0.11 * non_GTGP_land_per_labor + 0.36 * self.gtgp_part - 0.12 * self.age +
-                   0.25 * self.gender + 0.13 * self.education + 0.96 * self.marriage +
-                   0.01 * farm_work)
+        # print(income_local_off_farm)
+        mig_prob = 0  # pseudocode said to set to 0 initially, but not needed
+        prob = exp(2.07 - 0.00015 * income_local_off_farm + 0.67 * self.num_labor + 4.36 * self.migration_network -
+                   0.58 * non_GTGP_land_per_labor + 0.27 * self.gtgp_part - 0.13 * self.age +
+                   0.07 * self.gender + 0.17 * self.education + 0.88 * self.marriage +
+                   1.39 * farm_work + 0.001 * int(self.remittance_prev))
         if prob > 1:
             prob = 1
         mig_prob = prob / (prob + 1)
@@ -345,62 +347,6 @@ class LandParcelAgent(HouseholdAgent):
         self.gender_1 = gender_1
         self.education_1 = education_1
 
-    # def calc_distance(self, hhpos):
-    #     """Given a household id, return the distances between household and parcels"""
-    #     landpos = self.landpos
-    #     if hhpos is not None:
-    #         try:
-    #             distance = sqrt(
-    #                 (landpos[0] - hhpos[0]) ** 2 + (landpos[1] - hhpos[1]) ** 2
-    #                 )
-    #         except:
-    #             pass
-    #     try:
-    #         if distance < 10:
-    #             return distance
-    #     except:
-    #         pass
-
-    # def determine_hhpos_agents(self, hh_id, latitude, longitude):
-    #     """Determine position of agent on map"""
-    #     try:
-    #         x = convert_fraction_lat(
-    #             convert_decimal(
-    #                 str(return_values(hh_id, latitude))
-    #             )
-    #         )[0] * 10
-    #
-    #         y = convert_fraction_long(
-    #             convert_decimal(
-    #                 str(return_values(hh_id, longitude))
-    #             )
-    #         )[0] * 10
-    #         pos = (x, y)
-    #         return pos
-    #     except:
-    #         pass
-
-    # def recalculate_max(self):
-    #     """Every step, returns new max-distance land parcel for each household given households and land parcels"""
-    #     maxlist = []
-    #     hhpos = self.determine_hhpos_agents(self.hh_id, 'house_latitude', 'house_longitude')
-    #     distance = self.calc_distance(hhpos)
-    #     if distance not in formermax:
-    #         maxlist.append(distance)
-    #         formermax.append(distance)
-    #     if maxlist != ['']:
-    #         try:
-    #             self.maximum = 1
-    #         except:
-    #             self.maximum = 0
-    #             pass
-    #     return self.maximum
-
-    def initialize_lp_variables(self):
-        self.age_1 = age_1
-        self.gender_1 = gender_1
-        self.education_1 = education_1  # placeholder
-
     def output(self):
         if self.plant_type == 1:
             unit_price = 0.7
@@ -421,8 +367,6 @@ class LandParcelAgent(HouseholdAgent):
 
     def gtgp_participation(self):
         """Initializes labor and determines non-GTGP and GTGP staus"""
-        print(self.first_step_flag)
-        print(self.unique_id)
         if self.first_step_flag == 0:
             hh_size = 3  # temporary
             # unique_id here is hh_row from model.py, line 176
@@ -437,8 +381,7 @@ class LandParcelAgent(HouseholdAgent):
         prob = exp(2.52 - 0.012 * self.age_1 - 0.29 * self.gender_1 + 0.01 * self.education_1 + 0.001 * hh_size
                    - 2.45 * self.land_type * 0.0006 * self.gtgp_net_income + 0.04 * self.land_time)
         gtgp_part_prob = prob / (prob + 1)
-        print(gtgp_part_prob)
-        if random() < gtgp_part_prob:
+        if random() > gtgp_part_prob:  # verify
             self.gtgp_enrolled = 1
         return self.gtgp_enrolled
 

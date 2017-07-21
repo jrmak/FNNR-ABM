@@ -45,7 +45,10 @@ class ABM(Model):
                  gtgp_enrolled = 0, income = 0, gtgp_comp = 0, age = 21, gender = 1, marriage = 0,
                  education = 1, workstatus = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
                  birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
-                 mig_flag = 0, past_hh_id = 0, last_birth_time = 0, mig_years = 0):
+                 mig_flag = 0, past_hh_id = 0, last_birth_time = 0, mig_years = 0, migration_network = 0, age_1 = 0,
+                 gender_1 = 0, education_1 = 0, land_type = 0, land_time = 0, lodging_prev = 0, transport_prev = 0,
+                 other_prev = 0, remittance_prev = 0, total_rice = 0, total_dry = 0, gtgp_rice = 0, gtgp_dry = 0):
+
                  # default values set for now, will define when model runs agents
 
         super().__init__()
@@ -86,6 +89,22 @@ class ABM(Model):
         self.last_birth_time = last_birth_time
         self.mig_years = mig_years
 
+        self.age_1 = age_1
+        self.gender_1 = gender_1
+        self.education_1 = education_1
+        self.land_type = land_type
+        self.land_time = land_time
+
+        self.lodging_prev = lodging_prev
+        self.transport_prev = transport_prev
+        self.other_prev = other_prev
+        self.remittance_prev = remittance_prev
+
+        self.total_rice = total_rice
+        self.total_dry = total_dry
+        self.gtgp_rice = gtgp_rice
+        self.gtgp_dry = gtgp_dry
+
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
         # methods: get_distance, get_neighbors, move_agent, out_of_bounds, place_agent
@@ -99,11 +118,11 @@ class ABM(Model):
         self.datacollector = DataCollector(
             model_reporters = {'Average Number of Migrants': show_num_mig}
             )
-#            agent_reporters={'Migrants': lambda a: a.num_mig})
+            # agent_reporters={'Migrants': lambda a: a.num_mig})
 
         self.datacollector2 = DataCollector(
             model_reporters = {'Total # of Marriages in the Reserve': show_marriages})
-#            agent_reporters={'Migrants': lambda a: a.marriage})
+            # agent_reporters={'Migrants': lambda a: a.marriage})
 
     def return_x(self, hh_id, latitude):
         """Returns latitudes of land parcels for a given household"""
@@ -168,67 +187,125 @@ class ABM(Model):
         longlist = self.return_y(hh_id, longitude)
         return self.return_lp_pos_list(latlist, longlist)
 
-    def calc_distance(self, landpos, hhpos):
-        """Given a household id, return the distances between household and parcels"""
-        if landpos is not None and hhpos is not None:
-            distance = sqrt(
-                (landpos[0] - hhpos[0]) ** 2 + (landpos[1] - hhpos[1]) ** 2
-                )
-            if distance < 10:
-                return distance
-
     # Create agents
     def make_hh_agents(self):
         """Create the household agents"""
         for hh_row in agents:  # agents is a list of ints 1-97 from excel_import
             hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             hh_id = return_values(hh_row, 'hh_id')
+            self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
+            if self.total_rice == '-3' or self.total_rice == -3:
+                self.total_rice = 0
+            self.total_dry = return_values(hh_row, 'non_gtgp_dry_mu')
+            if self.total_dry == '-3' or self.total_dry == -3:
+                self.total_dry = 0
+            self.gtgp_rice = return_values(hh_row, 'gtgp_rice_mu')
+            if self.gtgp_rice == '-3' or self.gtgp_rice == -3:
+                self.gtgp_rice = 0
+            self.gtgp_dry = return_values(hh_row, 'gtgp_dry_mu')
+            if self.gtgp_dry == '-3' or self.gtgp_dry == -3:
+                self.gtgp_dry = 0
+            self.lodging_prev = return_values(hh_row, 'lodging_prev')
+            if self.lodging_prev == '-3' or self.lodging_prev == -3:
+                self.lodging_prev = 0
+            self.transport_prev = return_values(hh_row, 'transport_prev')
+            if self.transport_prev == '-3' or self.transport_prev == -3:
+                self.transport_prev = 0
+            self.other_prev = return_values(hh_row, 'other_prev')
+            if self.other_prev == '-3' or self.other_prev == -3:
+                self.other_prev = 0
+            self.remittance_prev = return_values(hh_row, 'remittance_prev')
+            if self.remittance_prev == '-3' or self.remittance_prev == -3:
+                self.remittance_prev = 0
             self.hh_id = hh_id
             a = HouseholdAgent(hh_row, self, hhpos, self.hh_id, self.admin_village, self.gtgp_part, self.gtgp_land,
                                self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
-                               self.num_labor, self.income, self.gtgp_comp)
+                               self.num_labor, self.income, self.gtgp_comp, self.total_rice, self.total_dry,
+                               self.gtgp_rice, self.gtgp_dry, self.lodging_prev, self.transport_prev, self.other_prev,
+                               self.remittance_prev)
             a.admin_village = 1  # see server.py, line 22
             self.space.place_agent(a, hhpos)  # admin_village placeholder
             self.schedule.add(a)
 
     def make_land_agents(self):
-        """Create the land agents on the map"""
-        # add non-gtgp land parcels
+        """Create the land agents on the map; adding output and time later"""
+
+        # add non-gtgp rice paddies
         for hh_row in agents:  # from excel_import
-            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
-            maxlist = []
-            landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
             hh_id = return_values(hh_row, 'hh_id')
+            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
+            landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
+            self.land_area = return_values(hh_id, 'non_gtgp_rice_mu')
+            if self.land_area != 0:
+                self.land_type = 0
+            hh_id = return_values(hh_row, 'hh_id')
+            self.age_1 = return_values(hh_row, 'age')[0]
+            self.gender_1 = return_values(hh_row, 'gender')[0]
+            self.education_1 = return_values(hh_row, 'education')[0]
+            self.land_time = return_values(hh_row, 'non_gtgp_travel_time')
             for landpos in landposlist:
-            #     distance = self.calc_distance(hhpos, landpos)
-            #     if distance not in formermax:
-            #         maxlist.append(distance)
-            #         formermax.append(distance)
-                lp = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled)
-            # if maxlist != ['']:
-            #     try:
-            #         max_index = maxlist.index(max(maxlist))
-            #         if landpos == landposlist[max_index]:
-            #             lp.maximum = 1
-            #         else:
-            #             lp.maximum = 0
-            #     except:
-            #         pass
-            # else:
-                # lp.maximum = 0
+                lp = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
+                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time)
             lp.gtgp_enrolled = 0
             self.space.place_agent(lp, landpos)
             self.schedule.add(lp)
+
+        # add non-gtgp dry parcels
+        for hh_row in agents:  # from excel_import
+            hh_id = return_values(hh_row, 'hh_id')
+            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
+            landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
+            self.land_area = return_values(hh_id, 'non_gtgp_dry_mu')
+            if self.land_area != 0:
+                self.land_type = 1
+            self.age_1 = return_values(hh_row, 'age')[0]
+            self.gender_1 = return_values(hh_row, 'gender')[0]
+            self.education_1 = return_values(hh_row, 'education')[0]
+            self.land_time = return_values(hh_row, 'non_gtgp_travel_time')
+            for landpos in landposlist:
+                lp2 = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
+                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time)
+            lp2.gtgp_enrolled = 0
+            self.space.place_agent(lp2, landpos)
+            self.schedule.add(lp2)
+
 
         # add gtgp land parcels
         for hh_row in agents:  # from excel_import
             hh_id = return_values(hh_row, 'hh_id')
             landposlist = self.determine_landpos(hh_row, 'gtgp_latitude', 'gtgp_longitude')
+            self.land_area = return_values(hh_id, 'gtgp_rice_mu')
+            if self.land_area != 0:
+                self.land_type = 0
+            self.age_1 = return_values(hh_row, 'age')[0]
+            self.gender_1 = return_values(hh_row, 'gender')[0]
+            self.education_1 = return_values(hh_row, 'education')[0]
+            self.land_time = return_values(hh_row, 'gtgp_travel_time')
             for landpos in landposlist:
-                lp2 = LandParcelAgent(hh_id, self, landpos, hh_row, self.area, self.gtgp_enrolled)
-                lp2.gtgp_enrolled = 1
-                self.space.place_agent(lp2, landpos)
-                self.schedule.add(lp2)
+                lp3 = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
+                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time)
+                lp3.gtgp_enrolled = 1
+                self.space.place_agent(lp3, landpos)
+                self.schedule.add(lp3)
+
+        # add gtgp land parcels
+        for hh_row in agents:  # from excel_import
+            hh_id = return_values(hh_row, 'hh_id')
+            landposlist = self.determine_landpos(hh_row, 'gtgp_latitude', 'gtgp_longitude')
+            self.land_area = return_values(hh_id, 'gtgp_dry_mu')
+            if self.land_area != 0:
+                self.land_type = 1
+            self.age_1 = return_values(hh_row, 'age')[0]
+            self.gender_1 = return_values(hh_row, 'gender')[0]
+            self.education_1 = return_values(hh_row, 'education')[0]
+            self.land_time = return_values(hh_row, 'gtgp_travel_time')
+            for landpos in landposlist:
+                lp4 = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
+                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time)
+                lp4.gtgp_enrolled = 1
+                self.space.place_agent(lp4, landpos)
+                self.schedule.add(lp4)
+
 
     def make_individual_agents(self):
         """Create the individual agents"""
@@ -239,6 +316,7 @@ class ABM(Model):
             agelist = return_values(hh_row, 'age')  # find the ages of people in hh
             genderlist = return_values(hh_row, 'gender')
             marriagelist = return_values(hh_row, 'marriage')
+            self.migration_network = return_values(hh_row, 'migration_network')[0]
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
                     self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
@@ -255,7 +333,7 @@ class ABM(Model):
                                           self.education, self.workstatus, self.marriage, self.birth_rate,
                                           self.birth_interval, self.death_rate, self.marriage_rate, self.marriage_flag,
                                           self.mig_flag, self.match_prob, self.immi_marriage_rate, self.past_hh_id,
-                                          self.last_birth_time, self.mig_years)
+                                          self.last_birth_time, self.mig_years, self.migration_network)
                     # hh_id twice as placeholder test at home
                     self.schedule.add(ind)
 
