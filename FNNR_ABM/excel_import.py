@@ -41,21 +41,12 @@ def assign_sheet_parameters(hh_id, variable):
         elif variable.lower() == 'age':
             parameters.append(str('AG' + row))
             parameters.append(str('AO' + row))
-        elif variable.lower() == 'age_1':
-            parameters.append(str('AG' + row))
-            parameters.append(str('AG' + row))
         elif variable.lower() == 'gender':
             parameters.append(str('X' + row))
             parameters.append(str('AF' + row))
-        elif variable.lower() == 'gender_1':
-            parameters.append(str('X' + row))
-            parameters.append(str('X' + row))
         elif variable.lower() == 'education':
             parameters.append(str('AY' + row))
             parameters.append(str('BG' + row))
-        elif variable.lower() == 'education_1':
-            parameters.append(str('AY' + row))
-            parameters.append(str('AY' + row))
         elif variable.lower() == 'marriage':
             parameters.append(str('BH' + row))
             parameters.append(str('BP' + row))
@@ -80,22 +71,29 @@ def assign_sheet_parameters(hh_id, variable):
         elif variable.lower() == 'non_gtgp_latitude':
             parameters.append(str('JP' + row))
             parameters.append(str('JT' + row))
+
         elif variable.lower() == 'num_mig':
             parameters.append(str('ZV' + row))
             parameters.append(str('ZZ' + row))
         elif variable.lower() == 'migration_network':
-            parameters.append(str('CX' + row))
-            parameters.append(str('DB' + row))
-        elif variable.lower() == 'rice_mu':
+            parameters.append(str('AIP' + row))
+            parameters.append(str('AIP' + row))
+        elif variable.lower() == 'non_gtgp_rice_mu':
             parameters.append(str('CU' + row))
+            parameters.append(str('CU' + row))
+        elif variable.lower() == 'gtgp_rice_mu':
             parameters.append(str('CW' + row))
-        elif variable.lower() == 'dry_mu':
+            parameters.append(str('CW' + row))
+        elif variable.lower() == 'non_gtgp_dry_mu':
             parameters.append(str('CX' + row))
+            parameters.append(str('CX' + row))
+        elif variable.lower() == 'gtgp_dry_mu':
+            parameters.append(str('DB' + row))
             parameters.append(str('DB' + row))
         elif variable.lower() == 'non_gtgp_plant_type':
             parameters.append(str('CX' + row))
             parameters.append(str('DB' + row))
-        elif variable.lower() == 'gtgp_pre_plant_type':
+        elif variable.lower() == 'pre_gtgp_plant_type':
             parameters.append(str('DC' + row))
             parameters.append(str('DL' + row))
         elif variable.lower() == 'gtgp_travel_time':
@@ -104,6 +102,20 @@ def assign_sheet_parameters(hh_id, variable):
         elif variable.lower() == 'non_gtgp_travel_time':
             parameters.append(str('IR' + row))
             parameters.append(str('EU' + row))
+
+        elif variable.lower() == 'lodging_prev':
+            parameters.append(str('VM' + row))
+            parameters.append(str('VM' + row))
+        elif variable.lower() == 'transport_prev':
+            parameters.append(str('VS' + row))
+            parameters.append(str('VS' + row))
+        elif variable.lower() == 'other_prev':
+            parameters.append(str('WF' + row))
+            parameters.append(str('WF' + row))
+        elif variable.lower() == 'remittance_prev':
+            parameters.append(str('AHT' + row))
+            parameters.append(str('AHT' + row))
+
         # add more later; added variable strings must be lowercase
         else:
             print('Sorry,', variable, 'is not a valid variable category.')
