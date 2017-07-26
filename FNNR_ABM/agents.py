@@ -138,7 +138,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
-    def __init__(self, unique_id, model, hh_id, individual_id, age = 20, gender = 1, education = 1,
+    def __init__(self, unique_id, model, hh_id, individual_id, age, gender, education,
                  workstatus = 0, marriage = 0, birth_rate = 1, birth_interval = 2, death_rate = 0.1,
                  marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
                  past_hh_id = 0, last_birth_time = 0, mig_years = 0, remittance_prev = 0, step_counter = 0,
@@ -285,7 +285,7 @@ class IndividualAgent(HouseholdAgent):
         if random() < mig_prob:
             self.mig_flag = 1
             self.num_mig += 1
-            # self.num_mig? Ask Shuang
+            # one migrant from each household at a time
             self.past_hh_id = self.hh_id
             self.hh_id = 0
             out_migrants_list.append(self.individual_id)
@@ -325,27 +325,26 @@ class IndividualAgent(HouseholdAgent):
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
 
-    def __init__(self, unique_id, model, hhpos, hh_id, landpos, gtgp_enrolled = 0, area = 1, latitude = 0,
-                 longitude = 0, maximum = 0, plant_type = 1, land_output = 0, land_type = 0, land_time = 0,
-                 gtgp_net_income = 0, age_1 = 0, gender_1 = 0, education_1 = 0):
+    def __init__(self, unique_id, model, hhpos, hh_id, landpos, hh_row, gtgp_enrolled, age_1,
+                 gender_1, education_1, land_type, land_time, plant_type = 0,
+                 gtgp_net_income = 0, gtgp_output = 0, non_gtgp_output = 0, land_output = 0):
 
         super().__init__(self, unique_id, model, hhpos, hh_id)
         self.hh_id = hh_id
         self.landpos = landpos
         self.gtgp_enrolled = gtgp_enrolled
-        self.area = area
-        self.latitude = latitude
-        self.longitude = longitude
-        self.plant_type = plant_type
-        self.land_output = land_output
-        self.land_type = land_type
-        self.land_time = land_time
-        self.maximum = maximum
-        self.gtgp_net_income = gtgp_net_income
-
         self.age_1 = age_1
         self.gender_1 = gender_1
         self.education_1 = education_1
+        # self.area = area
+        self.land_output = land_output
+        self.land_type = land_type
+        self.land_time = land_time
+        self.gtgp_net_income = gtgp_net_income
+        self.plant_type = plant_type
+
+        self.gtgp_output = gtgp_output
+        self.non_gtgp_output = non_gtgp_output
 
     def output(self):
         if self.plant_type == 1:
@@ -360,20 +359,19 @@ class LandParcelAgent(HouseholdAgent):
             unit_price = 0
         else:
             unit_price = 1
+        self.land_output = self.gtgp_output + self.non_gtgp_output
         crop_income = self.land_output * unit_price
         unit_comp = 1  # preset, not in pseudocode currently
-        comp_amount = self.land_area * unit_comp
+        self.land_area = self.total_dry + self.total_rice
+        comp_amount = self.land_area * unit_comp  # ask Shuang
         self.gtgp_net_income = comp_amount - crop_income
 
     def gtgp_participation(self):
         """Initializes labor and determines non-GTGP and GTGP staus"""
+        hh_size = 3
         if self.first_step_flag == 0:
-            hh_size = 3  # temporary
-            # unique_id here is hh_row from model.py, line 176
-            if self.initialize_labor(self.unique_id) is not None and type(self.unique_id) == int:
-                print(self.hh_id)
-                self.num_labor = self.initialize_labor(self.hh_id)
-                self.first_step_flag = 1  # prevents above lines from repeating after initialization
+            self.num_labor = self.initialize_labor(self.hh_id)
+            self.first_step_flag = 1  # prevents above lines from repeating after initialization
         minimum_non_gtgp = 0.3
         non_gtgp_area = (self.total_dry + self.total_rice) - (self.gtgp_dry + self.gtgp_rice)
         if non_gtgp_area < minimum_non_gtgp:
@@ -381,10 +379,13 @@ class LandParcelAgent(HouseholdAgent):
         prob = exp(2.52 - 0.012 * self.age_1 - 0.29 * self.gender_1 + 0.01 * self.education_1 + 0.001 * hh_size
                    - 2.45 * self.land_type * 0.0006 * self.gtgp_net_income + 0.04 * self.land_time)
         gtgp_part_prob = prob / (prob + 1)
+        # print(self.hh_id, self.age_1, self.gender_1, self.education_1, self.gtgp_enrolled, 'test1')
+        # print(self.land_type, self.gtgp_net_income, self.land_time, hh_size, 'test')
+        # to-do: put in self.aboves, verify, check Excel files, add more graphs, hh migrants
+        # print(gtgp_part_prob)
         if random() > gtgp_part_prob:  # verify
             self.gtgp_enrolled = 1
         return self.gtgp_enrolled
-
 
     # def gtgp_convert(self):
     #     result = super(LandParcelAgent, self).gtgp_enroll()
@@ -406,6 +407,7 @@ class LandParcelAgent(HouseholdAgent):
     def step(self):
         """Step behavior for LandParcelAgent"""
         # self.recalculate_max()
+        self.output()
         result = self.gtgp_participation()
         self.non_gtgp_count()
         self.gtgp_count()

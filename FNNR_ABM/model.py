@@ -47,7 +47,8 @@ class ABM(Model):
                  birth_interval = 2, marriage_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
                  mig_flag = 0, past_hh_id = 0, last_birth_time = 0, mig_years = 0, migration_network = 0, age_1 = 0,
                  gender_1 = 0, education_1 = 0, land_type = 0, land_time = 0, lodging_prev = 0, transport_prev = 0,
-                 other_prev = 0, remittance_prev = 0, total_rice = 0, total_dry = 0, gtgp_rice = 0, gtgp_dry = 0):
+                 other_prev = 0, remittance_prev = 0, total_rice = 0, total_dry = 0, gtgp_rice = 0, gtgp_dry = 0,
+                 gtgp_output = 0, non_gtgp_output = 0):
 
                  # default values set for now, will define when model runs agents
 
@@ -104,6 +105,8 @@ class ABM(Model):
         self.total_dry = total_dry
         self.gtgp_rice = gtgp_rice
         self.gtgp_dry = gtgp_dry
+        self.gtgp_output = gtgp_output
+        self.non_gtgp_output = non_gtgp_output
 
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
@@ -235,77 +238,100 @@ class ABM(Model):
             hh_id = return_values(hh_row, 'hh_id')
             hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
-            self.land_area = return_values(hh_id, 'non_gtgp_rice_mu')
-            if self.land_area != 0:
-                self.land_type = 0
-            hh_id = return_values(hh_row, 'hh_id')
             self.age_1 = return_values(hh_row, 'age')[0]
             self.gender_1 = return_values(hh_row, 'gender')[0]
             self.education_1 = return_values(hh_row, 'education')[0]
-            self.land_time = return_values(hh_row, 'non_gtgp_travel_time')
             for landpos in landposlist:
-                lp = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
-                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time)
-            lp.gtgp_enrolled = 0
-            self.space.place_agent(lp, landpos)
-            self.schedule.add(lp)
+                try:
+                    self.land_area = return_values(hh_row, 'non_gtgp_rice_mu')[0]
+                    if self.land_area != 0:
+                        self.land_type = 0
+                    # print(hh_row, return_values(hh_row, 'non_gtgp_output'))
+                    # print([landposlist.index(landpos)])
+                    self.non_gtgp_output = return_values(hh_row, 'non_gtgp_output')[landposlist.index(landpos)]
+                    self.land_time = return_values(hh_row, 'non_gtgp_travel_time')[landposlist.index(landpos)]
+                    lp = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
+                                         self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
+                                         self.non_gtgp_output, self.gtgp_output)
+                    # print(lp.age_1, lp.gender_1, landpos, hh_row)
+                    lp.gtgp_enrolled = 0
+                    self.space.place_agent(lp, landpos)
+                    self.schedule.add(lp)
+                except:
+                    pass
 
         # add non-gtgp dry parcels
         for hh_row in agents:  # from excel_import
             hh_id = return_values(hh_row, 'hh_id')
             hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
-            self.land_area = return_values(hh_id, 'non_gtgp_dry_mu')
-            if self.land_area != 0:
-                self.land_type = 1
             self.age_1 = return_values(hh_row, 'age')[0]
             self.gender_1 = return_values(hh_row, 'gender')[0]
             self.education_1 = return_values(hh_row, 'education')[0]
-            self.land_time = return_values(hh_row, 'non_gtgp_travel_time')
             for landpos in landposlist:
-                lp2 = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
-                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time)
-            lp2.gtgp_enrolled = 0
-            self.space.place_agent(lp2, landpos)
-            self.schedule.add(lp2)
-
+                try:
+                    self.land_area = return_values(hh_row, 'non_gtgp_dry_mu')[0]
+                    if self.land_area != 0:
+                        self.land_type = 1
+                    self.non_gtgp_output = return_values(hh_row, 'non_gtgp_output')[landposlist.index(landpos)]
+                    self.land_time = return_values(hh_row, 'non_gtgp_travel_time')[landposlist.index(landpos)]
+                    lp2 = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
+                                         self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
+                                         self.non_gtgp_output, self.gtgp_output)
+                    lp2.gtgp_enrolled = 0
+                    self.space.place_agent(lp2, landpos)
+                    self.schedule.add(lp2)
+                except:
+                    pass
 
         # add gtgp land parcels
         for hh_row in agents:  # from excel_import
             hh_id = return_values(hh_row, 'hh_id')
             landposlist = self.determine_landpos(hh_row, 'gtgp_latitude', 'gtgp_longitude')
-            self.land_area = return_values(hh_id, 'gtgp_rice_mu')
-            if self.land_area != 0:
-                self.land_type = 0
             self.age_1 = return_values(hh_row, 'age')[0]
             self.gender_1 = return_values(hh_row, 'gender')[0]
             self.education_1 = return_values(hh_row, 'education')[0]
-            self.land_time = return_values(hh_row, 'gtgp_travel_time')
             for landpos in landposlist:
-                lp3 = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
-                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time)
-                lp3.gtgp_enrolled = 1
-                self.space.place_agent(lp3, landpos)
-                self.schedule.add(lp3)
+                try:
+                    self.land_area = return_values(hh_row, 'gtgp_rice_mu')[0]
+                    if self.land_area != 0:
+                        self.land_type = 0
+                    self.gtgp_output = return_values(hh_row, 'gtgp_output')[landposlist.index(landpos)]
+                    self.land_time = return_values(hh_row, 'gtgp_travel_time')[landposlist.index(landpos)]
+                    lp3 = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
+                                         self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
+                                         self.non_gtgp_output, self.gtgp_output)
+                    lp3.gtgp_enrolled = 1
+                    self.space.place_agent(lp3, landpos)
+                    self.schedule.add(lp3)
+                except:
+                    pass
 
         # add gtgp land parcels
         for hh_row in agents:  # from excel_import
             hh_id = return_values(hh_row, 'hh_id')
             landposlist = self.determine_landpos(hh_row, 'gtgp_latitude', 'gtgp_longitude')
-            self.land_area = return_values(hh_id, 'gtgp_dry_mu')
-            if self.land_area != 0:
-                self.land_type = 1
             self.age_1 = return_values(hh_row, 'age')[0]
             self.gender_1 = return_values(hh_row, 'gender')[0]
             self.education_1 = return_values(hh_row, 'education')[0]
-            self.land_time = return_values(hh_row, 'gtgp_travel_time')
             for landpos in landposlist:
-                lp4 = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
-                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time)
-                lp4.gtgp_enrolled = 1
-                self.space.place_agent(lp4, landpos)
-                self.schedule.add(lp4)
-
+                try:
+                    self.land_area = return_values(hh_row, 'gtgp_dry_mu')[0]
+                    if self.land_area != 0:
+                        self.land_type = 1
+                    self.gtgp_output = return_values(hh_row, 'gtgp_output')[landposlist.index(landpos)]
+                    self.land_time = return_values(hh_row, 'gtgp_travel_time')[landposlist.index(landpos)]
+                    #lp4 = LandParcelAgent(hh_id, self, landpos, hh_row, self.maximum, self.area, self.gtgp_enrolled,
+                    #                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
+                    #                     self.non_gtgp_output, self.gtgp_output)
+                    lp4 = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
+                                         self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
+                                         self.non_gtgp_output, self.gtgp_output)
+                    lp4.gtgp_enrolled = 1
+                    self.space.place_agent(lp4, landpos)
+                    self.schedule.add(lp4)
+                except:
+                    pass
 
     def make_individual_agents(self):
         """Create the individual agents"""
