@@ -143,7 +143,7 @@ class IndividualAgent(HouseholdAgent):
                  birth_rate = 1, birth_interval = 2, death_rate = 0.1,
                  marriage_rate = 0.1, marriage_flag = 0, mig_flag = 0, match_prob = 0.05, immi_marriage_rate = 0.03,
                  past_hh_id = 0, last_birth_time = 0, mig_years = 0, remittance_prev = 0, step_counter = 0,
-                 hh_size = 0):
+                 hh_size = 0, hh_row = 0):
 
 
         super().__init__(self, unique_id, model, hh_id, num_mig, num_labor, gtgp_rice, total_dry, total_rice)
@@ -176,7 +176,7 @@ class IndividualAgent(HouseholdAgent):
         self.total_dry = total_dry
         self.total_rice = total_rice
         self.hh_size = hh_size
-
+        self.hh_row = hh_row
 
     def match_female(self):
         """Loops through single females and matches to single males; see pseudocode"""
@@ -214,7 +214,8 @@ class IndividualAgent(HouseholdAgent):
             ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                                   self.education, self.workstatus, self.marriage, self.birth_rate, self.birth_interval,
                                   self.death_rate, self.marriage_rate, self.marriage_flag, self.mig_flag,
-                                  self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.mig_years)
+                                  self.match_prob, self.immi_marriage_rate, self.past_hh_id, self.mig_years,
+                                  self.hh_row)
             ind.gender = 2
             age_random = normal(22.1, 2.6)
             if age_random >= 20.0:
@@ -270,6 +271,10 @@ class IndividualAgent(HouseholdAgent):
             # *5 for student education + 1
             # what about after they turn 20?
 
+    # def get_hh_row_agents(self, hh_id):
+    #     hh_id = self.hh_id
+    #     return get_hh_row(hh_id)
+
     def out_migration(self):
         """Describes out-migration process and probability"""
         #
@@ -284,9 +289,9 @@ class IndividualAgent(HouseholdAgent):
             farm_work = 0
         self.mig_flag = 0
         # step 0
-        if self.hh_id != 0:
-            hh_row = get_hh_row(int(self.hh_id))  # slowing down formula
-            print(hh_row)
+        if self.first_step_flag == 0:
+            self.hh_row = get_hh_row(int(self.hh_id))  # slowing down formula
+            print(self.hh_row)
         try:
              self.num_labor = super().initialize_labor(hh_row)
         except:
