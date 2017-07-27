@@ -11,7 +11,7 @@ import inspect
 # Directory in which source file is located, exact name of source file + extension
 currentpath = str(inspect.getfile(inspect.currentframe()))[:-16] # 'removes excel_import.py' at end
 os.chdir(currentpath)
-currentbook = 'FNNR_2016_Survey_psuedo_0706.xlsx'
+currentbook = 'FNNR_2016_Survey_psuedo_0721.xlsx'
 
 
 # openpyxl commands
@@ -22,107 +22,111 @@ sheet = wbglobal.active
 agents = list(range(1, 95))  # range(1, 95) goes 1-94
 
 
-def assign_sheet_parameters(hh_id, variable):
+def assign_sheet_parameters(hh_row, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
     """Will create a new function when this list gets long enough"""
     parameters = []
-    try:
-        row = str(hh_id + 2)  # For example, row 3 in the Excel file corresponds to Household ID #1
+    row = str(int(hh_row) + 2)  # For example, row 3 in the Excel file corresponds to Household ID #1
     # all lowercase!
-        if variable.lower() == 'gtgp_area':
-            parameters.append(str('DM' + row))
-            parameters.append(str('DQ' + row))
-        elif variable.lower() == 'hh_id':
-            parameters.append(str('A' + row))
-            parameters.append(str('A' + row))
-        elif variable.lower() == 'name':
-            parameters.append(str('F' + row))
-            parameters.append(str('N' + row))
-        elif variable.lower() == 'age':
-            parameters.append(str('AG' + row))
-            parameters.append(str('AO' + row))
-        elif variable.lower() == 'gender':
-            parameters.append(str('X' + row))
-            parameters.append(str('AF' + row))
-        elif variable.lower() == 'education':
-            parameters.append(str('AY' + row))
-            parameters.append(str('BG' + row))
-        elif variable.lower() == 'marriage':
-            parameters.append(str('BH' + row))
-            parameters.append(str('BP' + row))
-        elif variable.lower() == 'workstatus':
-            parameters.append(str('BQ' + row))
-            parameters.append(str('BY' + row))
-        elif variable.lower() == 'house_longitude':
-            parameters.append(str('CA' + row))
-            parameters.append(str('CA' + row))
-        elif variable.lower() == 'house_latitude':
-            parameters.append(str('CB' + row))
-            parameters.append(str('CB' + row))
-        elif variable.lower() == 'gtgp_longitude':
-            parameters.append(str('DW' + row))
-            parameters.append(str('EA' + row))
-        elif variable.lower() == 'gtgp_latitude':
-            parameters.append(str('EB' + row))
-            parameters.append(str('EF' + row))
-        elif variable.lower() == 'non_gtgp_longitude':
-            parameters.append(str('JK' + row))
-            parameters.append(str('JO' + row))
-        elif variable.lower() == 'non_gtgp_latitude':
-            parameters.append(str('JP' + row))
-            parameters.append(str('JT' + row))
+    if variable.lower() == 'gtgp_area':
+        parameters.append(str('DM' + row))
+        parameters.append(str('DQ' + row))
+    elif variable.lower() == 'hh_id':
+        parameters.append(str('A' + row))
+        parameters.append(str('A' + row))
+    elif variable.lower() == 'name':
+        parameters.append(str('F' + row))
+        parameters.append(str('N' + row))
+    elif variable.lower() == 'age':
+        parameters.append(str('AG' + row))
+        parameters.append(str('AO' + row))
+    elif variable.lower() == 'gender':
+        parameters.append(str('X' + row))
+        parameters.append(str('AF' + row))
+    elif variable.lower() == 'education':
+        parameters.append(str('AY' + row))
+        parameters.append(str('BG' + row))
+    elif variable.lower() == 'marriage':
+        parameters.append(str('BH' + row))
+        parameters.append(str('BP' + row))
+    elif variable.lower() == 'workstatus':
+        parameters.append(str('BQ' + row))
+        parameters.append(str('BY' + row))
+    elif variable.lower() == 'house_longitude':
+        parameters.append(str('CA' + row))
+        parameters.append(str('CA' + row))
+    elif variable.lower() == 'house_latitude':
+        parameters.append(str('CB' + row))
+        parameters.append(str('CB' + row))
+    elif variable.lower() == 'gtgp_longitude':
+        parameters.append(str('DW' + row))
+        parameters.append(str('EA' + row))
+    elif variable.lower() == 'gtgp_latitude':
+        parameters.append(str('EB' + row))
+        parameters.append(str('EF' + row))
+    elif variable.lower() == 'non_gtgp_longitude':
+        parameters.append(str('JK' + row))
+        parameters.append(str('JO' + row))
+    elif variable.lower() == 'non_gtgp_latitude':
+        parameters.append(str('JP' + row))
+        parameters.append(str('JT' + row))
 
-        elif variable.lower() == 'num_mig':
-            parameters.append(str('ZV' + row))
-            parameters.append(str('ZZ' + row))
-        elif variable.lower() == 'migration_network':
-            parameters.append(str('AIP' + row))
-            parameters.append(str('AIP' + row))
-        elif variable.lower() == 'non_gtgp_rice_mu':
-            parameters.append(str('CU' + row))
-            parameters.append(str('CU' + row))
-        elif variable.lower() == 'gtgp_rice_mu':
-            parameters.append(str('CW' + row))
-            parameters.append(str('CW' + row))
-        elif variable.lower() == 'non_gtgp_dry_mu':
-            parameters.append(str('CX' + row))
-            parameters.append(str('CX' + row))
-        elif variable.lower() == 'gtgp_dry_mu':
-            parameters.append(str('DB' + row))
-            parameters.append(str('DB' + row))
-        elif variable.lower() == 'non_gtgp_plant_type':
-            parameters.append(str('CX' + row))
-            parameters.append(str('DB' + row))
-        elif variable.lower() == 'pre_gtgp_plant_type':
-            parameters.append(str('DC' + row))
-            parameters.append(str('DL' + row))
-        elif variable.lower() == 'gtgp_travel_time':
-            parameters.append(str('ER' + row))
-            parameters.append(str('EU' + row))
-        elif variable.lower() == 'non_gtgp_travel_time':
-            parameters.append(str('IR' + row))
-            parameters.append(str('EU' + row))
+    elif variable.lower() == 'num_mig':
+        parameters.append(str('ZV' + row))
+        parameters.append(str('ZZ' + row))
+    elif variable.lower() == 'migration_network':
+        parameters.append(str('AIP' + row))
+        parameters.append(str('AIP' + row))
 
-        elif variable.lower() == 'lodging_prev':
-            parameters.append(str('VM' + row))
-            parameters.append(str('VM' + row))
-        elif variable.lower() == 'transport_prev':
-            parameters.append(str('VS' + row))
-            parameters.append(str('VS' + row))
-        elif variable.lower() == 'other_prev':
-            parameters.append(str('WF' + row))
-            parameters.append(str('WF' + row))
-        elif variable.lower() == 'remittance_prev':
-            parameters.append(str('AHT' + row))
-            parameters.append(str('AHT' + row))
+    elif variable.lower() == 'non_gtgp_rice_mu':
+        parameters.append(str('CU' + row))
+        parameters.append(str('CU' + row))
+    elif variable.lower() == 'gtgp_rice_mu':
+        parameters.append(str('CW' + row))
+        parameters.append(str('CW' + row))
+    elif variable.lower() == 'non_gtgp_dry_mu':
+        parameters.append(str('CX' + row))
+        parameters.append(str('CX' + row))
+    elif variable.lower() == 'gtgp_dry_mu':
+        parameters.append(str('DB' + row))
+        parameters.append(str('DB' + row))
+    elif variable.lower() == 'non_gtgp_plant_type':
+        parameters.append(str('IB' + row))
+        parameters.append(str('IF' + row))
+    elif variable.lower() == 'pre_gtgp_plant_type':
+        parameters.append(str('DC' + row))
+        parameters.append(str('DG' + row))
+    elif variable.lower() == 'gtgp_travel_time':
+        parameters.append(str('EQ' + row))
+        parameters.append(str('EU' + row))
+    elif variable.lower() == 'non_gtgp_travel_time':
+        parameters.append(str('IQ' + row))
+        parameters.append(str('IU' + row))
+    elif variable.lower() == 'pre_gtgp_output':
+        parameters.append(str('GY' + row))
+        parameters.append(str('HC' + row))
+    elif variable.lower() == 'non_gtgp_output':
+        parameters.append(str('KE' + row))
+        parameters.append(str('KI' + row))
 
-        # add more later; added variable strings must be lowercase
-        else:
-            print('Sorry,', variable, 'is not a valid variable category.')
-            pass
-        return parameters
-    except:
+    elif variable.lower() == 'lodging_prev':
+        parameters.append(str('VM' + row))
+        parameters.append(str('VM' + row))
+    elif variable.lower() == 'transport_prev':
+        parameters.append(str('VS' + row))
+        parameters.append(str('VS' + row))
+    elif variable.lower() == 'other_prev':
+        parameters.append(str('WF' + row))
+        parameters.append(str('WF' + row))
+    elif variable.lower() == 'remittance_prev':
+        parameters.append(str('AHT' + row))
+        parameters.append(str('AHT' + row))
+
+    # add more later; added variable strings must be lowercase
+    else:
+        print('Sorry,', variable, 'is not a valid variable category.')
         pass
+    return parameters
 
 
 def assign_variable_per_hh(x, y):
@@ -138,22 +142,18 @@ def assign_variable_per_hh(x, y):
                     # in this case, var is a list, not a str, because it has multiple items
                     if CellObj.value not in ['-1', '-3', '-4', -1, -3, -4, None]:
                         var.append(CellObj.value)
-                        # var = str(CellObj.value)
+                        # var = str(CellObj.value
     return var
 
 
 def return_values(hh_row, var):
     """Returns values given hh_id and variable (combines previous functions)"""
-    try:
-        # Example: return_values(1,'gender')
-        hh_row_variable = assign_sheet_parameters(hh_row, var)
-        # print(hh_id_variable) # Example: ['A3', 'AF3'] if argument is (1, 'gender')
-        variable_per_hh = assign_variable_per_hh(hh_row_variable[0], hh_row_variable[1])
-        # print(variable_per_hh) # Example: ['1', '2', '1'] for genders in a household
-        if variable_per_hh != []:
-            return variable_per_hh
-    except:
-        pass
+    # Example: return_values(1,'gender')
+    hh_row_variable = assign_sheet_parameters(hh_row, var)
+    variable_per_hh = assign_variable_per_hh(hh_row_variable[0], hh_row_variable[1])
+    # print(variable_per_hh) # Example: ['1', '2', '1'] for genders in a household
+    if variable_per_hh != []:
+        return variable_per_hh
 
 
 def convert_decimal(coord):
@@ -209,13 +209,3 @@ def convert_fraction_long(coordlist):
         except:
             pass  # skips over instances where coordinate is empty
     return convertedlist
-
-"""
-def real_value_counter(value_list):
-    #Converts excel values to actual numbers
-    counter = 0
-    for value in value_list:
-        if value is not 'None':
-            counter += 1
-    return counter
-"""
