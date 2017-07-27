@@ -1,4 +1,4 @@
-Version History
+Version History:
 
 Pseudocode Versions 8 and 9 (0716 and 0720)
 v1.71 - 1.74 - 7/18 - 7/21/2017 - Export debugging, updated code to new pseudocode version
