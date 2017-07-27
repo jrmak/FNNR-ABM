@@ -71,7 +71,7 @@ chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
 model = ABM(100, 10, 10)
 # erase_summary()
 # erase_individual()
-for i in range(80):  # sets up model to run for 80 steps
+for i in range(8):  # sets up model to run for 80 steps
     model.step()
     individuals = 278 + len(birth_list) + len(re_migrants_list) - len(out_migrants_list) - len(death_list)
     i_counter = i

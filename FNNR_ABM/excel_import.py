@@ -149,7 +149,7 @@ def assign_variable_per_hh(x, y):
                     # in this case, var is a list, not a str, because it has multiple items
                     if CellObj.value not in ['-1', '-3', '-4', -1, -3, -4, None]:
                         var.append(CellObj.value)
-                        # var = str(CellObj.value
+                        # var = str(CellObj.value)
     return var
 
 

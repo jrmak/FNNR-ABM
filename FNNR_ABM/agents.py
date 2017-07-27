@@ -283,8 +283,10 @@ class IndividualAgent(HouseholdAgent):
         else:
             farm_work = 0
         self.mig_flag = 0
-        # hh_row = get_hh_row(int(self.hh_id))  # slowing down formula
-        print(self.unique_id)
+        # step 0
+        if self.hh_id != 0:
+            hh_row = get_hh_row(int(self.hh_id))  # slowing down formula
+            print(hh_row)
         try:
              self.num_labor = super().initialize_labor(hh_row)
         except:
@@ -339,7 +341,6 @@ class IndividualAgent(HouseholdAgent):
         if prob > 1:
             prob = 1
         mig_prob = prob / (prob + 1)
-        print(mig_prob)
         # try:
         #     if self.hh_id != 0:
         #         self.hh_size = len(return_values(get_hh_row(int(self.hh_id)), 'age'))
@@ -467,7 +468,7 @@ class LandParcelAgent(HouseholdAgent):
         # print(self.hh_id, self.age_1, self.gender_1, self.education_1, self.gtgp_enrolled, 'test1')
         # print(self.land_type, self.gtgp_net_income, self.land_time, hh_size, 'test')
         # to-do: verify, check Excel files, add more graphs, hh migrants
-        print(gtgp_part_prob)
+        # print(gtgp_part_prob)
         if random() < gtgp_part_prob:  # verify
             self.gtgp_enrolled = 1
         return self.gtgp_enrolled
