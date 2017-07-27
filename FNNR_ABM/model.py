@@ -48,7 +48,8 @@ class ABM(Model):
                  mig_flag = 0, past_hh_id = 0, last_birth_time = 0, mig_years = 0, migration_network = 0, age_1 = 0,
                  gender_1 = 0, education_1 = 0, land_type = 0, land_time = 0, lodging_prev = 0, transport_prev = 0,
                  other_prev = 0, remittance_prev = 0, total_rice = 0, total_dry = 0, gtgp_rice = 0, gtgp_dry = 0,
-                 pre_gtgp_output = 0, non_gtgp_output = 0, plant_type = 0, land_area = 0, gtgp_net_income = 0):
+                 pre_gtgp_output = 0, non_gtgp_output = 0, plant_type = 0, land_area = 0, gtgp_net_income = 0,
+                 hh_size = 0):
 
                  # default values set for now, will define when model runs agents
 
@@ -110,6 +111,7 @@ class ABM(Model):
         self.gtgp_dry = gtgp_dry
         self.pre_gtgp_output = pre_gtgp_output
         self.non_gtgp_output = non_gtgp_output
+        self.hh_size = hh_size
 
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
         # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
@@ -199,18 +201,19 @@ class ABM(Model):
         for hh_row in agents:  # agents is a list of ints 1-97 from excel_import
             hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             hh_id = return_values(hh_row, 'hh_id')
-            self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
-            if self.total_rice == '-3' or self.total_rice == -3:
-                self.total_rice = 0
-            self.total_dry = return_values(hh_row, 'non_gtgp_dry_mu')
-            if self.total_dry == '-3' or self.total_dry == -3:
-                self.total_dry = 0
-            self.gtgp_rice = return_values(hh_row, 'gtgp_rice_mu')
-            if self.gtgp_rice == '-3' or self.gtgp_rice == -3:
-                self.gtgp_rice = 0
-            self.gtgp_dry = return_values(hh_row, 'gtgp_dry_mu')
-            if self.gtgp_dry == '-3' or self.gtgp_dry == -3:
-                self.gtgp_dry = 0
+            self.hh_size = len(return_values(hh_row, 'age'))
+            # self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
+            # if self.total_rice == '-3' or self.total_rice == -3:
+            #     self.total_rice = 0
+            # self.total_dry = return_values(hh_row, 'non_gtgp_dry_mu')
+            # if self.total_dry == '-3' or self.total_dry == -3:
+            #     self.total_dry = 0
+            # self.gtgp_rice = return_values(hh_row, 'gtgp_rice_mu')
+            # if self.gtgp_rice == '-3' or self.gtgp_rice == -3:
+            #     self.gtgp_rice = 0
+            # self.gtgp_dry = return_values(hh_row, 'gtgp_dry_mu')
+            # if self.gtgp_dry == '-3' or self.gtgp_dry == -3:
+            #     self.gtgp_dry = 0
             self.lodging_prev = return_values(hh_row, 'lodging_prev')
             if self.lodging_prev == '-3' or self.lodging_prev == -3:
                 self.lodging_prev = 0
@@ -228,7 +231,7 @@ class ABM(Model):
                                self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
                                self.num_labor, self.income, self.gtgp_comp, self.total_rice, self.total_dry,
                                self.gtgp_rice, self.gtgp_dry, self.lodging_prev, self.transport_prev, self.other_prev,
-                               self.remittance_prev)
+                               self.remittance_prev, self.hh_size)
             a.admin_village = 1  # see server.py, line 22
             self.space.place_agent(a, hhpos)  # admin_village placeholder
             self.schedule.add(a)
@@ -274,7 +277,6 @@ class ABM(Model):
                                      self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                      self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
                                      self.gtgp_net_income, self.hh_size)
-                # print(lp.age_1, lp.gender_1, landpos, hh_row)
                 lp.gtgp_enrolled = 0
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
@@ -423,6 +425,18 @@ class ABM(Model):
             genderlist = return_values(hh_row, 'gender')
             marriagelist = return_values(hh_row, 'marriage')
             self.migration_network = return_values(hh_row, 'migration_network')[0]
+            # self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
+            # if self.total_rice in ['-3', '-4', -3, None]:
+            #     self.total_rice = 0
+            # self.total_dry = return_values(hh_row, 'non_gtgp_dry_mu')
+            # if self.total_dry in ['-3', '-4', -3, None]:
+            #     self.total_dry = 0
+            # self.gtgp_rice = return_values(hh_row, 'gtgp_rice_mu')
+            # if self.gtgp_rice in ['-3', '-4', -3, None]:
+            #     self.gtgp_rice = 0
+            # self.gtgp_dry = return_values(hh_row, 'gtgp_dry_mu')
+            # if self.gtgp_dry in ['-3', '-4', -3, None]:
+            #     self.gtgp_dry = 0
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
                     self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
@@ -439,8 +453,8 @@ class ABM(Model):
                                           self.education, self.workstatus, self.marriage, self.birth_rate,
                                           self.birth_interval, self.death_rate, self.marriage_rate, self.marriage_flag,
                                           self.mig_flag, self.match_prob, self.immi_marriage_rate, self.past_hh_id,
-                                          self.last_birth_time, self.mig_years, self.migration_network)
-                    # hh_id twice as placeholder test at home
+                                          self.last_birth_time, self.mig_years, self.migration_network,
+                                          self.total_rice, self.total_dry, self.gtgp_rice, self.gtgp_dry)
                     self.schedule.add(ind)
 
     def step(self):

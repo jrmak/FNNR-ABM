@@ -128,6 +128,13 @@ def assign_sheet_parameters(hh_row, variable):
         pass
     return parameters
 
+def get_hh_row(hh_id):
+    """Returns an Excel household row when given the ID"""
+    column_counter = 0
+    for CellObj in sheet['A']:
+        column_counter += 1
+        if CellObj.value == hh_id:
+            return column_counter
 
 def assign_variable_per_hh(x, y):
     """Adds value of a certain variable to that household's list"""
