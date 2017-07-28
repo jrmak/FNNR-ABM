@@ -108,6 +108,16 @@ def assign_sheet_parameters(hh_row, variable):
     elif variable.lower() == 'non_gtgp_output':
         parameters.append(str('KE' + row))
         parameters.append(str('KI' + row))
+    elif variable.lower() == 'pre_gtgp_land_type':
+        parameters.append(str('DC' + row))
+        parameters.append(str('DG' + row))
+    elif variable.lower() == 'non_gtgp_land_type':
+        parameters.append(str('IB' + row))
+        parameters.append(str('IF' + row))
+
+    elif variable.lower() == ('initial_migrants'):
+        parameters.append(str('AIQ' + row))
+        parameters.append(str('AIU' + row))
 
     elif variable.lower() == 'lodging_prev':
         parameters.append(str('VM' + row))
