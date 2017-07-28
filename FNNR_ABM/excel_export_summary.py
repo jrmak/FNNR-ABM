@@ -26,7 +26,7 @@ os.chdir(currentpath)
 # fnnr_export.flush()  # flush memory
 # fnnr_export.close()
 
-def save_summary(steps, show_num_mig, show_marriages, show_births, show_deaths, population):
+def save_summary(steps, show_num_mig, show_out_migrations, show_re_migrations, show_marriages, show_births, show_deaths, population):
     """Exports entries onto a .csv file"""
     try:
         fnnr_export = open('FNNR-ABM_export_summary.csv', 'a+')  # a+ will create the file if it doesn't exist already
