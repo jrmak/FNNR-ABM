@@ -69,8 +69,8 @@ chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
 
 
 model = ABM(100, 10, 10)
-# erase_summary()
-# erase_individual()
+#erase_summary()
+erase_individual()
 for i in range(80):  # sets up model to run for 80 steps
     model.step()
     individuals = 278 + len(birth_list) + len(re_migrants_list) - len(out_migrants_list) - len(death_list)
@@ -78,6 +78,8 @@ for i in range(80):  # sets up model to run for 80 steps
     save_summary(i_counter, show_num_mig(model), show_marriages(model), len(birth_list), str(individuals))
 mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
 mar_plot = model.datacollector2.get_model_vars_dataframe()
+bir_plot = model.datacollector3.get_model_vars_dataframe()
+dea_plot = model.datacollector4.get_model_vars_dataframe()
 # migranttable = migrants.datacollector.get_agent_vars_dataframe()
 # migranttable.head()
 # TypeError: '<' not supported between instances of 'LandParcelAgent' and 'int'
@@ -90,6 +92,17 @@ mar_plot.plot()
 plt.title('Total # of Marriages in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Marriages')
+
+bir_plot.plot()
+plt.title('Total # of Births in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Births')
+
+dea_plot.plot()
+plt.title('Total # of Deaths in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Deaths')
+
 
 plt.show()
 
@@ -105,7 +118,7 @@ class MapLegend(TextElement):
         return ("<img src = 'http://i64.tinypic.com/f41pwi.png'>" + "<br>"
                 + "Non-GTGP Land Parcels: " + str(len(nongtgplist))
                 + " | GTGP Land Parcels: " + str(len(gtgplist))
-                + " | Total Land Parcels: 361"
+                + " | Total Land Parcels: " + str(len(nongtgplist) + len(gtgplist))  # 361?
                 + "<br><br>"
                 + "<h3>Average # of Migrants per Household</h3>")
         # return ("Blue: Household agents | Black: non-GTGP land parcel agents | Yellow: GTGP land parcel agents"

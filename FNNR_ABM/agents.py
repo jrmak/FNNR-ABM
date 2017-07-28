@@ -15,6 +15,8 @@ from excel_export_individual import save
 formermax = []
 single_male_list = []
 married_male_list = []
+initial_migrants_list = []
+household_migrants_list = []
 out_migrants_list = []
 re_migrants_list = []
 birth_list = []
@@ -30,9 +32,8 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                  gtgp_dry, gtgp_rice, total_dry, total_rice,
                  admin_village = 1, nat_village = 1,
                  num_mig = 0, income = 0, mig_prob = 0.5, num_labor = 0, num_non_labor = 0,
-                 min_req_labor = 1, comp_sign = 0.1, gtgp_coef = 0, gtgp_part = 0, gtgp_part_flag = 0,
-                 gtgp_comp = 0, first_step_flag = 0, restaurant_prev = 0, lodging_prev = 0,
-                 transport_prev = 0, sales_prev = 0, other_prev = 0, current_year = 2016, migration_network = 0):
+                 min_req_labor = 1, comp_sign = 0.1, gtgp_coef = 0, gtgp_enrolled = 0, gtgp_part_flag = 0,
+                 gtgp_comp = 0, first_step_flag = 0, current_year = 2016, migration_network = 0):
 
         super().__init__(unique_id, model)
         self.hhpos = hhpos  # resident location
@@ -46,7 +47,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.total_rice = total_rice  # area
         self.num_mig = num_mig  # how many migrants the hh has
 
-        self.gtgp_part = gtgp_part  # binary (GTGP status of household)
+        self.gtgp_enrolled = gtgp_enrolled  # binary (GTGP status of household)
         self.income = randint(5000, 20000)  # yearly household income
         self.mig_prob = mig_prob  # migration probability, preset 0.5
         self.num_labor = num_labor  # people in hh who can work, preset to 15-65
@@ -61,11 +62,11 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.current_year = current_year
         # more attributes will be added later on
 
-        self.restaurant_prev = 0  # will always be 0 because none in survey
-        self.lodging_prev = lodging_prev  # only hh_id 60
-        self.transport_prev = transport_prev
-        self.sales_prev = sales_prev
-        self.other_prev = other_prev
+        # self.restaurant_prev = 0  # will always be 0 because none in survey
+        # self.lodging_prev = lodging_prev  # only hh_id 60
+        # self.transport_prev = transport_prev
+        # self.sales_prev = sales_prev
+        # self.other_prev = other_prev
         self.migration_network = migration_network
 
     def return_labor(self):
@@ -83,10 +84,8 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
                     # ages are strings by default, must convert to float
                     if 15 < float(age) < 59:  # if the person is 15-65 years old,
                         num_labor += 1  # defines number of laborers as people aged 15 < x < 59
-                    elif 0 < float(age) < 15 and float(age) > 59:
-                        self.num_non_labor += 1  # defines non-laborers, may not necessarily be used
                 except:
-                    pass  # covers situations in which age is 'NoneType'
+                    num_labor = 0
             return num_labor
 
     def step(self):
@@ -157,17 +156,17 @@ class IndividualAgent(HouseholdAgent):
 
         self.marriage = marriage
         self.birth_rate = birth_rate
-        self.birth_interval = birth_interval
-        self.death_rate = death_rate
-        self.marriage_rate = marriage_rate
-        self.marriage_flag = marriage_flag
-        self.match_prob = match_prob
-        self.immi_marriage_rate = immi_marriage_rate
+        self.birth_interval = 2
+        self.death_rate = 0.1
+        self.marriage_rate = 0.1
+        self.marriage_flag = 0
+        self.match_prob = 0.05
+        self.immi_marriage_rate = 0.03
         self.mig_flag = mig_flag
         self.past_hh_id = past_hh_id
         self.last_birth_time = last_birth_time
         self.mig_years = mig_years
-        self.remittance_prev = remittance_prev
+        # self.remittance_prev = remittance_prev
 
         self.step_counter = step_counter
 
@@ -177,6 +176,24 @@ class IndividualAgent(HouseholdAgent):
         self.total_rice = total_rice
         self.hh_size = hh_size
         self.hh_row = hh_row
+
+    def create_initial_migrant_list(self):
+        mig = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
+                              self.education, self.workstatus, self.marriage, self.birth_rate,
+                              self.birth_interval, self.death_rate, self.marriage_rate, self.marriage_flag,
+                              self.mig_flag, self.match_prob, self.immi_marriage_rate, self.past_hh_id,
+                              self.last_birth_time, self.mig_years)
+        mig.age = return_values(self.hh_row, 'initial_migrants')[0]
+        if mig.age in [-3, 3, None]:
+            pass
+        else:
+            mig.gender = return_values(self.hh_row, 'initial_migrants')[1]
+            mig.marriage = return_values(self.hh_row, 'initial_migrants')[2]
+            mig.education = return_values(self.hh_row, 'initial_migrants')[3]
+            mig.mig_years = return_values(self.hh_row, 'initial_migrants')[4]
+            mig.individual_id = str(self.hh_id) + 'm'
+            # m is the generic individual id letter for initial migrants in the household
+            initial_migrants_list.append(mig.individual_id)
 
     def match_female(self):
         """Loops through single females and matches to single males; see pseudocode"""
@@ -194,7 +211,7 @@ class IndividualAgent(HouseholdAgent):
                 # if person is a woman,
                 if random() < self.marriage_rate:
                     for male in single_male_list:
-                        if random() < self.match_prob:
+                        if random() < float(self.match_prob):
                             self.marriage_flag = 1
                             self.marriage = 1
                             married_male_list.append(male)
@@ -234,8 +251,7 @@ class IndividualAgent(HouseholdAgent):
     def birth(self):
         """Adds a new IndividualAgent class object"""
         if self.marriage == 1 and self.gender == 2 and self.age < 55 and random() < self.birth_rate:
-            if random() > float(self.birth_rate) and    \
-                            (float(self.mig_years) - float(self.last_birth_time)) > float(self.birth_interval):
+            if (float(self.mig_years) - float(self.last_birth_time)) > float(self.birth_interval):
                 self.last_birth_time = self.mig_years
                 if self.hh_id != 0:
                     ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
@@ -259,10 +275,11 @@ class IndividualAgent(HouseholdAgent):
 
     def death(self):
         """Removes an object from reference"""
-        if self.age > 65 and random() < self.death_rate:
-            self.hh_id = '0'
-            death_list.append(self.individual_id)
-            self.individual_id = '0'
+        if self.age > 65 and random() < self.death_rate and self.individual_id != 0:
+            self.hh_id = 0
+            if self.individual_id not in death_list:
+                death_list.append(self.individual_id)
+            self.individual_id = 0
 
     def youth_education(self):
         """Assigns student working status to those who are young"""
@@ -291,37 +308,32 @@ class IndividualAgent(HouseholdAgent):
         # step 0
         if self.first_step_flag == 0:
             self.hh_row = get_hh_row(int(self.hh_id))  # slowing down formula
-            print(self.hh_row)
+            # print(self.hh_row)
         try:
-             self.num_labor = super().initialize_labor(hh_row)
+             self.num_labor = super().initialize_labor(self.hh_row)
         except:
              self.num_labor = 0
-        self.num_labor = 1
         if self.num_labor == None:
             self.num_labor = 0
-        # try:
-        #     self.total_rice = return_values(get_hh_row(int(self.hh_id)), 'non_gtgp_rice_mu')
-        #     if self.total_rice in ['-3', '-4', -3, None]:
-        #         self.total_rice = 0
-        #     self.total_dry = return_values(get_hh_row(int(self.hh_id)), 'non_gtgp_dry_mu')
-        #     if self.total_dry in ['-3', '-4', -3, None]:
-        #         self.total_dry = 0
-        #     self.gtgp_dry = return_values(get_hh_row(int(self.hh_id)), 'gtgp_dry_mu')
-        #     if self.gtgp_dry in ['-3', '-4', -3, None]:
-        #         self.gtgp_dry = 0
-        #     self.gtgp_rice = return_values(get_hh_row(int(self.hh_id)), 'gtgp_rice_mu')
-        #     if self.gtgp_rice in ['-3', '-4', -3, None]:
-        #         self.gtgp_rice = 0
-        # except:
-        #     self.total_rice = 0
-        #     self.total_dry = 0
-        #     self.gtgp_rice = 0
-        #     self.gtgp_dry = 0
+        try:
+            self.total_rice = return_values(self.hh_row, 'non_gtgp_rice_mu')
+            if self.total_rice in ['-3', '-4', -3, None]:
+                self.total_rice = 0
+            self.total_dry = return_values(self.hh_row, 'non_gtgp_dry_mu')
+            if self.total_dry in ['-3', '-4', -3, None]:
+                self.total_dry = 0
+            self.gtgp_dry = return_values(self.hh_row, 'gtgp_dry_mu')
+            if self.gtgp_dry in ['-3', '-4', -3, None]:
+                self.gtgp_dry = 0
+            self.gtgp_rice = return_values(self.hh_row, 'gtgp_rice_mu')
+            if self.gtgp_rice in ['-3', '-4', -3, None]:
+                self.gtgp_rice = 0
+        except:
+            self.total_rice = 0
+            self.total_dry = 0
+            self.gtgp_rice = 0
+            self.gtgp_dry = 0
         #     pass
-        self.total_rice = 0
-        self.total_dry = 0
-        self.gtgp_rice = 0
-        self.gtgp_dry = 0
         if self.num_labor != 0 and self.num_labor is not None:
             non_gtgp_area = (float(self.total_rice) + float(self.total_dry))    \
                             - (float(self.gtgp_dry) + float(self.gtgp_rice))
@@ -329,42 +341,45 @@ class IndividualAgent(HouseholdAgent):
         else:
             non_gtgp_area = 0
             non_GTGP_land_per_labor = 0
-        # if self.hh_id != 0 and self.hh_id is not None:
-        #     self.migration_network = return_values(get_hh_row(int(self.hh_id)), 'migration_network')
-        # else:
-        #     self.migration_network = 0
-        # if self.migration_network == None:
-        #     self.migration_network = 0
-        self.migration_network = 0
+        if self.hh_id != 0 and self.hh_id is not None:
+            try:
+                self.migration_network = return_values(self.hh_row, 'migration_network')
+            except:
+                self.migration_network = 0
+        else:
+             self.migration_network = 0
+        if self.migration_network == None:
+             self.migration_network = 0
         mig_prob = 0  # pseudocode said to set to 0 initially, but not needed
         self.remittance_prev = 0  # temporary
         prob = exp(2.07 - 0.00015 * float(income_local_off_farm) + 0.67 * float(self.num_labor)
                    + 4.36 * float(self.migration_network) - 0.58 * float(non_GTGP_land_per_labor)
-                   + 0.27 * float(self.gtgp_part) - 0.13 * float(self.age) + 0.07 * float(self.gender)
+                   + 0.27 * float(self.gtgp_enrolled) - 0.13 * float(self.age) + 0.07 * float(self.gender)
                    + 0.17 * float(self.education) + 0.88 * float(self.marriage) +
                    1.39 * float(farm_work) + 0.001 * float(self.remittance_prev))
-        if prob > 1:
-            prob = 1
+        # if prob > 1:
+        #    prob = 1
         mig_prob = prob / (prob + 1)
-        # try:
-        #     if self.hh_id != 0:
-        #         self.hh_size = len(return_values(get_hh_row(int(self.hh_id)), 'age'))
-        #     else:
-        #         self.hh_size = 1
-        # except:
-        #     print(self.hh_id, 'hh id')
-        #     pass
-        self.hh_size = 3  # temporary
-        # print('checkpoint3')
+        # print(self.step_counter, self.num_labor, self.migration_network,
+        #       self.gtgp_enrolled, self.age, farm_work, mig_prob)
+        try:
+            if self.hh_id != 0:
+                self.hh_size = len(return_values(self.hh_row, 'age'))
+            else:
+                self.hh_size = 1
+        except:
+            pass
+        # self.hh_size = 3  # temporary
         if random() < mig_prob and self.hh_size >= 2:
-            self.mig_flag = 1
-            self.num_mig += 1
-            self.hh_size -= 1
-            # one migrant from each household at a time
-            self.past_hh_id = self.hh_id
-            self.hh_id = 0
-            out_migrants_list.append(self.individual_id)
-            self.workstatus = 4
+            if self.hh_id not in household_migrants_list:  # only 1 migrant at a time per hh
+                self.mig_flag = 1
+                self.num_mig += 1
+                self.hh_size -= 1
+                self.past_hh_id = self.hh_id
+                self.hh_id = 0
+                out_migrants_list.append(self.individual_id)
+                household_migrants_list.append(self.hh_id)
+                self.workstatus = 4
 
     def re_migration(self):
         """Describes re-migration process and probability following out-migration"""
@@ -381,9 +396,13 @@ class IndividualAgent(HouseholdAgent):
                 out_migrants_list.remove(self.individual_id)
                 re_migrants_list.append(self.individual_id)
                 self.hh_size += 1
+                if self.hh_id in household_migrants_list:
+                    household_migrants_list.remove(self.hh_id)
 
     def step(self):
         """Step behavior for individual agents; calls above functions"""
+        if self.first_step_flag == 0:
+            self.create_initial_migrant_list()
         if int(self.step_counter) < 5:
             save(self.step_counter, self.current_year, self.hh_id, self.individual_id, self.age, self.education,
                  self.marriage, self.workstatus, self.mig_years, self.past_hh_id, self.num_mig, self.return_labor())
@@ -393,7 +412,8 @@ class IndividualAgent(HouseholdAgent):
         self.youth_education()
         self.out_migration()
         self.re_migration()
-        self.age += 1
+        if self.hh_id != 0:  # if person is still alive,
+            self.age += 1
         self.current_year += 1
         self.first_step_flag = 1  # must be at the end of step()
         # self.step_counter = int(self.step_counter)
@@ -402,10 +422,10 @@ class IndividualAgent(HouseholdAgent):
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
 
-    def __init__(self, unique_id, model, hhpos, hh_row, landpos, hh_id, gtgp_enrolled, age_1,
+    def __init__(self, unique_id, model, hh_id, hh_row, landpos, hhpos, gtgp_enrolled, age_1,
                  gender_1, education_1, land_type, land_time, plant_type, land_area,
                  gtgp_dry, gtgp_rice, total_dry, total_rice,
-                 non_gtgp_output, pre_gtgp_output, hh_size, gtgp_net_income):
+                 non_gtgp_output, pre_gtgp_output, gtgp_net_income, hh_size):
 
         super().__init__(self, unique_id, model, hhpos, hh_row, gtgp_dry, gtgp_rice, total_dry, total_rice)
         self.hh_row = hh_row
@@ -470,8 +490,9 @@ class LandParcelAgent(HouseholdAgent):
         prob = exp(2.52 - 0.012 * self.age_1 - 0.29 * self.gender_1 + 0.01 * self.education_1 + 0.001 * self.hh_size
                    - 2.45 * self.land_type * 0.0006 * self.gtgp_net_income + 0.04 * self.land_time)
         gtgp_part_prob = prob / (prob + 1)
+        # self.hh_size = len(return_values(self.hh_row, 'age'))
         # print(self.hh_id, self.age_1, self.gender_1, self.education_1, self.gtgp_enrolled, 'test1')
-        # print(self.land_type, self.gtgp_net_income, self.land_time, hh_size, 'test')
+        # print(self.land_type, self.gtgp_net_income, self.land_time, self.hh_size, 'test')
         # to-do: verify, check Excel files, add more graphs, hh migrants
         # print(gtgp_part_prob)
         if random() < gtgp_part_prob:  # verify
@@ -498,6 +519,7 @@ class LandParcelAgent(HouseholdAgent):
     def step(self):
         """Step behavior for LandParcelAgent"""
         # self.recalculate_max()
-        result = self.gtgp_participation()
         self.non_gtgp_count()
         self.gtgp_count()
+        self.output()
+        result = self.gtgp_participation()

@@ -21,8 +21,7 @@ except IOError:
     print('Please close Excel and retry.')  # will not work if the .csv is already open
 
 filewriter = csv.writer(fnnr_export)
-filewriter.writerow(['Years Elapsed', 'Average # of Migrants', 'Total # of Marriages', 'Total # of Births',
-                     'Population'])
+filewriter.writerow(['Years Elapsed', 'Average Migrants Per Household', 'Total Marriages', 'Total Births', 'Population'])
 
 fnnr_export.flush()  # flush memory
 fnnr_export.close()

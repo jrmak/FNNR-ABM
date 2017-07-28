@@ -16,8 +16,8 @@ from math import sqrt
 def show_num_mig(model):
     """Returns the average # of migrants / year in each household"""
     num_mig = [agent.num_mig for agent in model.schedule.agents]
-    num_agents = 94  # household agents
-    b = sum(num_mig) / num_agents
+    #num_agents = 94  # household agents
+    b = sum(num_mig) / len(num_mig)
     return b
 
 marriages = []
@@ -34,13 +34,18 @@ def show_marriages(model):
     b = sum(marriages)
     return b
 
-formermax = []
+def show_births(model):
+    b = len(birth_list)
+    return b
 
+def show_deaths(model):
+    b = len(death_list)
+    return b
 
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
     def __init__(self, hh_id, width, height, hh_row = 0, gtgp_land = 0, gtgp_latitude = 0, gtgp_longitude = 0,
-                 num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0, gtgp_part = 0,
+                 num_mig = 0, mig_prob = 0.5, min_req_labor = 0, num_labor = 0,
                  gtgp_coef = 0, gtgp_part_flag = 0, area = 1, maximum = 0, admin_village = 1,
                  gtgp_enrolled = 0, income = 0, gtgp_comp = 0, age = 21, gender = 1, marriage = 0,
                  education = 1, workstatus = 1, birth_rate = 0.1, marriage_rate = 0.1, death_rate = 0.1,
@@ -63,7 +68,6 @@ class ABM(Model):
         self.mig_prob = mig_prob
         self.min_req_labor = min_req_labor
         self.num_labor = num_labor
-        self.gtgp_part = gtgp_part
         self.gtgp_coef = gtgp_coef
         self.gtgp_part_flag = gtgp_part_flag
 
@@ -131,6 +135,13 @@ class ABM(Model):
         self.datacollector2 = DataCollector(
             model_reporters = {'Total # of Marriages in the Reserve': show_marriages})
             # agent_reporters={'Migrants': lambda a: a.marriage})
+
+        self.datacollector3 = DataCollector(
+            model_reporters = {'Total # of Births in the Reserve': show_births})
+
+        self.datacollector4 = DataCollector(
+            model_reporters = {'Total # of Deaths in the Reserve': show_deaths})
+
 
     def return_x(self, hh_id, latitude):
         """Returns latitudes of land parcels for a given household"""
@@ -227,7 +238,7 @@ class ABM(Model):
             if self.remittance_prev == '-3' or self.remittance_prev == -3:
                 self.remittance_prev = 0
             self.hh_id = hh_id
-            a = HouseholdAgent(hh_row, self, hhpos, self.hh_id, self.admin_village, self.gtgp_part, self.gtgp_land,
+            a = HouseholdAgent(hh_row, self, hhpos, self.hh_id, self.admin_village, self.gtgp_enrolled, self.gtgp_land,
                                self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
                                self.num_labor, self.income, self.gtgp_comp, self.total_rice, self.total_dry,
                                self.gtgp_rice, self.gtgp_dry, self.lodging_prev, self.transport_prev, self.other_prev,
@@ -269,6 +280,10 @@ class ABM(Model):
                 self.land_time = return_values(hh_row, 'non_gtgp_travel_time')[landposlist.index(landpos)]
                 try:
                     self.plant_type = return_values(hh_row, 'non_gtgp_plant_type')[landposlist.index(landpos)]
+                except:
+                    pass
+                try:
+                    self.land_type = return_values(hh_row, 'non_gtgp_land_type')[landposlist.index(landpos)]
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
@@ -315,6 +330,10 @@ class ABM(Model):
                     self.plant_type = return_values(hh_row, 'non_gtgp_plant_type')[landposlist.index(landpos)]
                 except:
                     pass
+                try:
+                    self.land_type = return_values(hh_row, 'non_gtgp_land_type')[landposlist.index(landpos)]
+                except:
+                    pass
                 self.hh_size = len(return_values(hh_row, 'age'))
                 lp2 = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
                                          self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
@@ -341,7 +360,7 @@ class ABM(Model):
             self.education_1 = return_values(hh_row, 'education')[0]
             for landpos in landposlist:
                 try:
-                    self.land_area = return_values(hh_row, 'non_gtgp_rice_mu')[0]
+                    self.land_area = return_values(hh_row, 'gtgp_rice_mu')[0]
                 except:
                     pass
                 if self.land_area != 0:
@@ -353,11 +372,15 @@ class ABM(Model):
                 except:
                     pass
                 try:
-                    self.land_time = return_values(hh_row, 'non_gtgp_travel_time')[landposlist.index(landpos)]
+                    self.land_time = return_values(hh_row, 'gtgp_travel_time')[landposlist.index(landpos)]
                 except:
                     pass
                 try:
-                    self.plant_type = return_values(hh_row, 'non_gtgp_plant_type')[landposlist.index(landpos)]
+                    self.plant_type = return_values(hh_row, 'pre_gtgp_plant_type')[landposlist.index(landpos)]
+                except:
+                    pass
+                try:
+                    self.land_type = return_values(hh_row, 'pre_gtgp_land_type')[landposlist.index(landpos)]
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
@@ -386,7 +409,7 @@ class ABM(Model):
             self.education_1 = return_values(hh_row, 'education')[0]
             for landpos in landposlist:
                 try:
-                    self.land_area = return_values(hh_row, 'non_gtgp_rice_mu')[0]
+                    self.land_area = return_values(hh_row, 'gtgp_rice_mu')[0]
                 except:
                     pass
                 if self.land_area != 0:
@@ -398,11 +421,15 @@ class ABM(Model):
                 except:
                     pass
                 try:
-                    self.land_time = return_values(hh_row, 'non_gtgp_travel_time')[landposlist.index(landpos)]
+                    self.land_time = return_values(hh_row, 'gtgp_travel_time')[landposlist.index(landpos)]
                 except:
                     pass
                 try:
-                    self.plant_type = return_values(hh_row, 'non_gtgp_plant_type')[landposlist.index(landpos)]
+                    self.plant_type = return_values(hh_row, 'pre_gtgp_plant_type')[landposlist.index(landpos)]
+                except:
+                    pass
+                try:
+                    self.land_type = return_values(hh_row, 'pre_gtgp_land_type')[landposlist.index(landpos)]
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
@@ -461,4 +488,6 @@ class ABM(Model):
         """Advance the model by one step"""
         self.datacollector.collect(self)
         self.datacollector2.collect(self)
+        self.datacollector3.collect(self)
+        self.datacollector4.collect(self)
         self.schedule.step()
