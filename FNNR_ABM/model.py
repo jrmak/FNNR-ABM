@@ -42,6 +42,14 @@ def show_deaths(model):
     b = len(death_list)
     return b
 
+def show_out_migrations(model):
+    b = len(out_migrants_list)
+    return b
+
+def show_re_migrations(model):
+    b = len(re_migrants_list)
+    return b
+
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
     def __init__(self, hh_id, width, height, hh_row = 0, gtgp_land = 0, gtgp_latitude = 0, gtgp_longitude = 0,
