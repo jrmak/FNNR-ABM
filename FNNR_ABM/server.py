@@ -81,6 +81,7 @@ mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
 mar_plot = model.datacollector2.get_model_vars_dataframe()
 bir_plot = model.datacollector3.get_model_vars_dataframe()
 dea_plot = model.datacollector4.get_model_vars_dataframe()
+#pop_plot = model.datacollector5.get_model_vars_dataframe()
 # migranttable = migrants.datacollector.get_agent_vars_dataframe()
 # migranttable.head()
 # TypeError: '<' not supported between instances of 'LandParcelAgent' and 'int'
@@ -103,6 +104,11 @@ dea_plot.plot()
 plt.title('Total # of Deaths in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Deaths')
+
+#pop_plot.plot()
+#plt.title('Total Population in the Reserve')
+#plt.xlabel('Years (Steps)')
+#plt.ylabel('Population')
 
 
 plt.show()
@@ -154,4 +160,5 @@ server = ModularServer(ABM, [agent_canvas, text0, chart, text1, chart2, text2],
                        "GTGP Enrollment of Land Over Time", 100, 10, 10)
 
 # if __name__ == "__main__":
+server.port = 8521  # default
 server.launch()  # actual run line

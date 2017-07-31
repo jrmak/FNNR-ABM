@@ -176,6 +176,12 @@ class IndividualAgent(HouseholdAgent):
         self.total_rice = total_rice
         self.hh_size = hh_size
         self.hh_row = hh_row
+        try:
+             self.num_labor = super().initialize_labor(self.hh_row)
+        except:
+             self.num_labor = 0
+        if self.num_labor == None:
+            self.num_labor = 0
 
     def create_initial_migrant_list(self):
         mig = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
@@ -309,12 +315,12 @@ class IndividualAgent(HouseholdAgent):
         if self.first_step_flag == 0:
             self.hh_row = get_hh_row(int(self.hh_id))  # slowing down formula
             # print(self.hh_row)
-        try:
-             self.num_labor = super().initialize_labor(self.hh_row)
-        except:
-             self.num_labor = 0
-        if self.num_labor == None:
-            self.num_labor = 0
+        # try:
+        #      self.num_labor = super().initialize_labor(self.hh_row)
+        # except:
+        #      self.num_labor = 0
+        # if self.num_labor == None:
+        #     self.num_labor = 0
         try:
             self.total_rice = return_values(self.hh_row, 'non_gtgp_rice_mu')
             if self.total_rice in ['-3', '-4', -3, None]:
@@ -394,7 +400,8 @@ class IndividualAgent(HouseholdAgent):
                 self.hh_id = self.past_hh_id
                 self.workstatus = 1
                 out_migrants_list.remove(self.individual_id)
-                re_migrants_list.append(self.individual_id)
+                if self.individual_id not in re_migrants_list:
+                    re_migrants_list.append(self.individual_id)
                 self.hh_size += 1
                 if self.hh_id in household_migrants_list:
                     household_migrants_list.remove(self.hh_id)
@@ -504,22 +511,30 @@ class LandParcelAgent(HouseholdAgent):
     #     if int(self.hh_id) in result:
     #         self.gtgp_enrolled = 1
 
-    def non_gtgp_count(self):
+    def non_gtgp_count(self, nongtgplist, gtgplist):
         if self.gtgp_enrolled == 0 and self.unique_id not in nongtgplist:
-            nongtgplist.append(self.unique_id)
+            if len(nongtgplist) + len(gtgplist) != 772:
+                nongtgplist.append(self.unique_id)
+            else:
+                nongtgplist = []
+                nongtgplist.append(self.unique_id)
         return len(nongtgplist)
 
-    def gtgp_count(self):
+    def gtgp_count(self, gtgplist, nongtgplist):
         if self.gtgp_enrolled == 1 and self.unique_id not in gtgplist:
             if self.unique_id in nongtgplist:
                 nongtgplist.remove(self.unique_id)
-            gtgplist.append(self.unique_id)
+            if len(nongtgplist) + len(gtgplist) != 772:
+                gtgplist.append(self.unique_id)
+            else:
+                gtgplist = []
+                gtgplist.append(self.unique_id)
         return len(gtgplist)
 
     def step(self):
         """Step behavior for LandParcelAgent"""
         # self.recalculate_max()
-        self.non_gtgp_count()
-        self.gtgp_count()
+        self.non_gtgp_count(nongtgplist, gtgplist)
+        self.gtgp_count(gtgplist, nongtgplist)
         self.output()
         result = self.gtgp_participation()
