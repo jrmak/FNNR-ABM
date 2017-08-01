@@ -11,7 +11,7 @@ import inspect
 # Directory in which source file is located, exact name of source file + extension
 currentpath = str(inspect.getfile(inspect.currentframe()))[:-16] # 'removes excel_import.py' at end
 os.chdir(currentpath)
-currentbook = 'FNNR_2016_Survey_psuedo_0721.xlsx'
+currentbook = 'FNNR_2016_Survey_psuedo_0726.xlsx'
 
 
 # openpyxl commands
@@ -119,15 +119,19 @@ def assign_sheet_parameters(hh_row, variable):
         parameters.append(str('AIQ' + row))
         parameters.append(str('AIU' + row))
 
-    elif variable.lower() == 'lodging_prev':
-        parameters.append(str('VM' + row))
-        parameters.append(str('VM' + row))
-    elif variable.lower() == 'transport_prev':
-        parameters.append(str('VS' + row))
-        parameters.append(str('VS' + row))
-    elif variable.lower() == 'other_prev':
-        parameters.append(str('WF' + row))
-        parameters.append(str('WF' + row))
+    elif variable.lower() == ('income_local_off_farm'):
+        parameters.append(str('AIW' + row))
+        parameters.append(str('AIW' + row))
+
+    # elif variable.lower() == 'lodging_prev':
+    #     parameters.append(str('VM' + row))
+    #     parameters.append(str('VM' + row))
+    # elif variable.lower() == 'transport_prev':
+    #     parameters.append(str('VS' + row))
+    #     parameters.append(str('VS' + row))
+    # elif variable.lower() == 'other_prev':
+    #     parameters.append(str('WF' + row))
+    #     parameters.append(str('WF' + row))
     elif variable.lower() == 'remittance_prev':
         parameters.append(str('AHT' + row))
         parameters.append(str('AHT' + row))

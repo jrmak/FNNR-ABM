@@ -10,29 +10,38 @@ from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 from agents import *
 from excel_import import *
-from math import sqrt
+# from math import sqrt
 
+
+# def show_num_mig(model):  # wrong formula
+#     """Returns the average # of migrants for each household"""
+#     num_mig = [agent.num_mig for agent in model.schedule.agents]
+#     b = sum(num_mig) / len(num_mig)
+#     # print(sum(num_mig))  # varies, up to about 2000
+#     # print(len(num_mig))  # 1101 always, not sure why
+#     return b
 
 def show_num_mig(model):
-    """Returns the average # of migrants / year in each household"""
-    num_mig = [agent.num_mig for agent in model.schedule.agents]
-    #num_agents = 94  # household agents
-    b = sum(num_mig) / len(num_mig)
+    b = len(out_migrants_list)
     return b
 
-marriages = []
-def show_marriages(model):
-    for agent in model.schedule.agents:
-        try:
-            if agent.marriage_flag == 0 or agent.marriage_flag == 1:
-                marriage_flag = agent.marriage_flag
-                if marriage_flag == 1:
-                    marriages.append(marriage_flag)
-        except:
-            marriage_flag = 0
-            pass
-    b = sum(marriages)
+def show_num_mig_per_year(model):
+    """Returns the average # of migrants / year in each household"""
+    b = len(out_migrants_list) / 94
     return b
+
+def show_re_mig(model):
+    b = len(re_migrants_list)
+    return b
+
+def show_re_mig_per_year(model):
+    """Returns the average # of re-migrants for each household"""
+    b = len(re_migrants_list) / 94
+    return b
+
+def show_marriages(model):
+    b = len(new_married_list)
+    return float(b)
 
 def show_births(model):
     b = len(birth_list)
@@ -42,13 +51,33 @@ def show_deaths(model):
     b = len(death_list)
     return b
 
-def show_out_migrations(model):
-    b = len(out_migrants_list)
-    return b
+old_mcounter = []
+def show_marriages_per_year(model):
+    global old_mcounter
+    mar_list_change = len(new_married_list) - sum(old_mcounter)
+    old_mcounter = [len(new_married_list)]
+    return mar_list_change
 
-def show_re_migrations(model):
-    b = len(re_migrants_list)
-    return b
+old_bcounter = []
+def show_births_per_year(model):
+    global old_bcounter
+    birth_list_change = len(birth_list) - sum(old_bcounter)
+    old_bcounter = [len(birth_list)]
+    return birth_list_change
+
+old_dcounter = []
+def show_deaths_per_year(model):
+    global old_dcounter
+    death_list_change = len(death_list) - sum(old_dcounter)
+    old_dcounter = [len(death_list)]
+    return death_list_change
+
+def show_pop(model):
+    individuals = 278 + len(birth_list) + len(re_migrants_list) - len(out_migrants_list) - len(death_list)
+    return individuals
+
+def show_gtgp_per_hh(model):
+    return len(gtgplist) / 94
 
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
@@ -136,19 +165,41 @@ class ABM(Model):
 
         # DataCollector: part of Mesa library
         self.datacollector = DataCollector(
-            model_reporters = {'Average Number of Migrants': show_num_mig}
+            model_reporters = {'Number of Migrants': show_num_mig}
             )
-            # agent_reporters={'Migrants': lambda a: a.num_mig})
 
         self.datacollector2 = DataCollector(
-            model_reporters = {'Total # of Marriages in the Reserve': show_marriages})
-            # agent_reporters={'Migrants': lambda a: a.marriage})
+            model_reporters={'Number of Re-migrants': show_re_mig})
 
         self.datacollector3 = DataCollector(
-            model_reporters = {'Total # of Births in the Reserve': show_births})
+            model_reporters={'Migrants Per Household Per Year': show_num_mig_per_year})
 
         self.datacollector4 = DataCollector(
+            model_reporters={'Re-migrants Per Household Per Year': show_re_mig_per_year})
+
+        self.datacollector5 = DataCollector(
+            model_reporters = {'Total # of Marriages in the Reserve': show_marriages})
+
+        self.datacollector6 = DataCollector(
+            model_reporters = {'Total # of Births in the Reserve': show_births})
+
+        self.datacollector7 = DataCollector(
             model_reporters = {'Total # of Deaths in the Reserve': show_deaths})
+
+        self.datacollector8 = DataCollector(
+            model_reporters={'Marriages Per Year': show_marriages_per_year})
+
+        self.datacollector9 = DataCollector(
+            model_reporters={'Births Per Year': show_births_per_year})
+
+        self.datacollector10 = DataCollector(
+            model_reporters={'Deaths Per Year': show_deaths_per_year})
+
+        self.datacollector11 = DataCollector(
+            model_reporters = {'Population in the Reserve': show_pop})
+
+        self.datacollector12 = DataCollector(
+            model_reporters = {'Average GTGP Parcels Per Household': show_gtgp_per_hh})
 
 
     def return_x(self, hh_id, latitude):
@@ -233,18 +284,18 @@ class ABM(Model):
             # self.gtgp_dry = return_values(hh_row, 'gtgp_dry_mu')
             # if self.gtgp_dry == '-3' or self.gtgp_dry == -3:
             #     self.gtgp_dry = 0
-            self.lodging_prev = return_values(hh_row, 'lodging_prev')
-            if self.lodging_prev == '-3' or self.lodging_prev == -3:
-                self.lodging_prev = 0
-            self.transport_prev = return_values(hh_row, 'transport_prev')
-            if self.transport_prev == '-3' or self.transport_prev == -3:
-                self.transport_prev = 0
-            self.other_prev = return_values(hh_row, 'other_prev')
-            if self.other_prev == '-3' or self.other_prev == -3:
-                self.other_prev = 0
-            self.remittance_prev = return_values(hh_row, 'remittance_prev')
-            if self.remittance_prev == '-3' or self.remittance_prev == -3:
-                self.remittance_prev = 0
+            # self.lodging_prev = return_values(hh_row, 'lodging_prev')
+            # if self.lodging_prev == '-3' or self.lodging_prev == -3:
+            #     self.lodging_prev = 0
+            # self.transport_prev = return_values(hh_row, 'transport_prev')
+            # if self.transport_prev == '-3' or self.transport_prev == -3:
+            #     self.transport_prev = 0
+            # self.other_prev = return_values(hh_row, 'other_prev')
+            # if self.other_prev == '-3' or self.other_prev == -3:
+            #     self.other_prev = 0
+            # self.remittance_prev = return_values(hh_row, 'remittance_prev')
+            # if self.remittance_prev == '-3' or self.remittance_prev == -3:
+            #     self.remittance_prev = 0
             self.hh_id = hh_id
             a = HouseholdAgent(hh_row, self, hhpos, self.hh_id, self.admin_village, self.gtgp_enrolled, self.gtgp_land,
                                self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
@@ -498,4 +549,12 @@ class ABM(Model):
         self.datacollector2.collect(self)
         self.datacollector3.collect(self)
         self.datacollector4.collect(self)
+        self.datacollector5.collect(self)
+        self.datacollector6.collect(self)
+        self.datacollector7.collect(self)
+        self.datacollector8.collect(self)
+        self.datacollector9.collect(self)
+        self.datacollector10.collect(self)
+        self.datacollector11.collect(self)
+        self.datacollector12.collect(self)
         self.schedule.step()

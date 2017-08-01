@@ -11,7 +11,7 @@ from mesa.visualization.modules import ChartModule, TextElement
 from model import *
 from agents import *
 from excel_export_summary import *
-from excel_export_individual import *
+from excel_export_household import *
 from SimpleContinuousModule import SimpleCanvas
 import matplotlib.pyplot as plt
 import inspect
@@ -70,25 +70,49 @@ chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
 
 model = ABM(100, 10, 10)
 erase_summary()
-erase_individual()
-for i in range(80):  # sets up model to run for 80 steps
+erase_household()
+global i_counter
+for i in range(81):  # sets up model to run for 80 steps
     model.step()
-    individuals = 278 + len(birth_list) + len(re_migrants_list) - len(out_migrants_list) - len(death_list)
+    # individuals = 278 + len(birth_list) + len(re_migrants_list) - len(out_migrants_list) - len(death_list)
     i_counter = i
-    save_summary(i_counter, show_num_mig(model), len(out_migrants_list), len(re_migrants_list),
-                 show_marriages(model), len(birth_list), len(death_list), str(individuals))
+    save_summary(i_counter, show_num_mig(model), show_num_mig_per_year(model), show_re_mig(model),                     \
+                 show_re_mig_per_year(model), show_marriages(model), show_births(model), show_deaths(model),
+                 show_marriages_per_year(model), show_births_per_year(model), show_deaths_per_year(model),
+                 show_pop(model), show_gtgp_per_hh(model))
+# 1 at the end of the variable name means that it's per year instead of accumulative
 mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
-mar_plot = model.datacollector2.get_model_vars_dataframe()
-bir_plot = model.datacollector3.get_model_vars_dataframe()
-dea_plot = model.datacollector4.get_model_vars_dataframe()
-#pop_plot = model.datacollector5.get_model_vars_dataframe()
-# migranttable = migrants.datacollector.get_agent_vars_dataframe()
-# migranttable.head()
-# TypeError: '<' not supported between instances of 'LandParcelAgent' and 'int'
+re_mig_plot = model.datacollector2.get_model_vars_dataframe()
+mig_plot1 = model.datacollector3.get_model_vars_dataframe()  # see model.py
+re_mig_plot1 = model.datacollector4.get_model_vars_dataframe()
+mar_plot = model.datacollector5.get_model_vars_dataframe()
+bir_plot = model.datacollector6.get_model_vars_dataframe()
+dea_plot = model.datacollector7.get_model_vars_dataframe()
+mar_plot1 = model.datacollector8.get_model_vars_dataframe()
+bir_plot1 = model.datacollector9.get_model_vars_dataframe()
+dea_plot1 = model.datacollector10.get_model_vars_dataframe()
+pop_plot = model.datacollector11.get_model_vars_dataframe()
+gtgp_plot = model.datacollector12.get_model_vars_dataframe()
+
 mig_plot.plot()
+plt.title('Total # of Out-Migrants in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Migrants')
+
+re_mig_plot.plot()
+plt.title('Total # of Re-migrants in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Re-migrants')
+
+mig_plot1.plot()
 plt.title('Average Number of Out-Migrants Per Household')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Migrants')
+
+re_mig_plot1.plot()
+plt.title('Average Number of Re-Migrants Per Household')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Re-migrants')
 
 mar_plot.plot()
 plt.title('Total # of Marriages in the Reserve')
@@ -105,13 +129,32 @@ plt.title('Total # of Deaths in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Deaths')
 
-#pop_plot.plot()
-#plt.title('Total Population in the Reserve')
-#plt.xlabel('Years (Steps)')
-#plt.ylabel('Population')
+mar_plot1.plot()
+plt.title('Marriages in the Reserve, Per Year')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Marriages')
 
+bir_plot1.plot()
+plt.title('Births in the Reserve, Per Year')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Births')
 
-plt.show()
+dea_plot1.plot()
+plt.title('Deaths in the Reserve, Per Year')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Deaths')
+
+pop_plot.plot()
+plt.title('Total Population in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('Population')
+
+gtgp_plot.plot()
+plt.title('Average # of GTGP Parcels Per Household')
+plt.xlabel('Years (Steps)')
+plt.ylabel('GTGP Parcels')
+
+plt.show() # comment or uncomment this line to see or hide the graphs
 
 # The text elements below update with every step.
 
@@ -125,14 +168,14 @@ class MapLegend(TextElement):
         return ("<img src = 'http://i64.tinypic.com/f41pwi.png'>" + "<br>"
                 + "Non-GTGP Land Parcels: " + str(len(nongtgplist))
                 + " | GTGP Land Parcels: " + str(len(gtgplist))
-                + " | Total Land Parcels: " + str(len(nongtgplist) + len(gtgplist))  # 361?
-                + "<br><br>"
-                + "<h3>Average # of Migrants per Household</h3>")
-        # return ("Blue: Household agents | Black: non-GTGP land parcel agents | Yellow: GTGP land parcel agents"
-        #         )
+                + " | Total Land Parcels: " + str(len(nongtgplist) + len(gtgplist))
+                + " | Step: " + str(i_counter)
+                + "<br><br></h3>")
 
+#+ "<h3>Average # of Migrants per Household
 
 class Migrants(TextElement):
+    # not used below
     def __init__(self):
         pass
 
@@ -144,6 +187,7 @@ class Migrants(TextElement):
 
 
 class Marriages(TextElement):
+    # not used below
     def __init__(self):
         pass
 
@@ -153,10 +197,10 @@ class Marriages(TextElement):
                 )
 
 text0 = MapLegend()
-text1 = Migrants()
-text2 = Marriages()
+text1 = Migrants()  # not used below
+text2 = Marriages()  # not used
 
-server = ModularServer(ABM, [agent_canvas, text0, chart, text1, chart2, text2],
+server = ModularServer(ABM, [agent_canvas, text0],
                        "GTGP Enrollment of Land Over Time", 100, 10, 10)
 
 # if __name__ == "__main__":
