@@ -1,7 +1,9 @@
 Version History:
 
 Pseudocode Version 10 (0726)
-Fix imports
+8/1/2017 - 8/6/2017 - Break
+v1.85 - 7/31/2017 - Final bug fixes before break, changed individual summary output file to household summary
+v1.83 - v1.84 - 7/27 - 7/28/2017 - Addition of more graphs, bug fixing code for latest pseudocode version
 
 Pseudocode Version 9 (0724)
 v1.81 - v1.82 - 7/24 - 7/26/2017 - Updating code to new pseudocode version (imports and debugging)
@@ -62,8 +64,8 @@ Other Activity History
 6/7/2017 - Began document: 'FNNR-ABM User Manual' (Python installation instructions)
 
 Hours/Days of Work Reported (Assuming 4-hour days)
-Days of work completed - 43 (as of end of 7/26)
-Days reported and submitted on SDSURF EMP timesheet so far - 20
+Days of work completed - 46 (as of end of 7/31)
+Days reported and submitted on SDSURF EMP timesheet so far - 43 + 5 extra days will be put in (as discussed)
 
 To-do List
 - Complete export file for step-by-step data to write to *IN PROGRESS
