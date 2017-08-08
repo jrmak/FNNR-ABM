@@ -51,19 +51,26 @@ def show_deaths(model):
     b = len(death_list)
     return b
 
-old_mcounter = []
+
 def show_marriages_per_year(model):
     global old_mcounter
+    if len(new_married_list) == 0:
+        old_mcounter = []
     mar_list_change = len(new_married_list) - sum(old_mcounter)
     old_mcounter = [len(new_married_list)]
     return mar_list_change
 
 old_bcounter = []
 def show_births_per_year(model):
-    global old_bcounter
-    birth_list_change = len(birth_list) - sum(old_bcounter)
-    old_bcounter = [len(birth_list)]
-    return birth_list_change
+    # global old_bcounter
+    # birth_list_change = len(birth_list) - sum(old_bcounter)
+    # old_bcounter = [len(birth_list)]
+    # #print(birth_list_change)
+    # return birth_list_change
+    if total_birth_change != []:
+        return total_birth_change[-1]
+    else:
+        return 0
 
 old_dcounter = []
 def show_deaths_per_year(model):

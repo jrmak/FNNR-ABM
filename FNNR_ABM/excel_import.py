@@ -150,6 +150,24 @@ def get_hh_row(hh_id):
         if CellObj.value == hh_id:
             return column_counter
 
+
+def initialize_labor(hh_row):
+    num_labor = 0
+    # There are 94 total households, but ids range from 1-169.
+    # for clarity: hh_row refers to the Excel spreadsheet row, 3-96 (representing 94 households).
+    # hh_id refers to household ids as assigned in the Excel column, numbering from 1-169.
+    agelist = return_values(hh_row, 'age')  # find the ages of people in hh
+    if agelist is not None:  # if there are people in the household,
+        for age in agelist:  # for each person (can't use self.age because not a Household-level attribute),
+            try:
+                # ages are strings by default, must convert to float
+                if 15 < float(age) < 59:  # if the person is 15-65 years old,
+                    num_labor += 1  # defines number of laborers as people aged 15 < x < 59
+            except:
+                num_labor = 0
+        return num_labor
+
+
 def assign_variable_per_hh(x, y):
     """Adds value of a certain variable to that household's list"""
     var = []
