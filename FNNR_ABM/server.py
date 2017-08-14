@@ -73,9 +73,8 @@ erase_summary()
 erase_household()
 initialize_household()
 global i_counter
-for i in range(81):  # sets up model to run for 80 steps
+for i in range(80):  # sets up model to run for 80 steps
     model.step()
-    # individuals = 278 + len(birth_list) + len(re_migrants_list) - len(out_migrants_list) - len(death_list)
     i_counter = i
     save_summary(i_counter, show_num_mig(model), show_num_mig_per_year(model), show_re_mig(model),                     \
                  show_re_mig_per_year(model), show_marriages(model), show_births(model), len(death_list),
