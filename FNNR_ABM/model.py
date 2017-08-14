@@ -51,26 +51,19 @@ def show_deaths(model):
     b = len(death_list)
     return b
 
-
+old_mcounter = []
 def show_marriages_per_year(model):
     global old_mcounter
-    if len(new_married_list) == 0:
-        old_mcounter = []
-    mar_list_change = len(new_married_list) - sum(old_mcounter)
+    marriage_list_change = len(new_married_list) - sum(old_mcounter)
     old_mcounter = [len(new_married_list)]
-    return mar_list_change
+    return marriage_list_change
 
 old_bcounter = []
 def show_births_per_year(model):
-    # global old_bcounter
-    # birth_list_change = len(birth_list) - sum(old_bcounter)
-    # old_bcounter = [len(birth_list)]
-    # #print(birth_list_change)
-    # return birth_list_change
-    if total_birth_change != []:
-        return total_birth_change[-1]
-    else:
-        return 0
+    global old_bcounter
+    birth_list_change = len(birth_list) - sum(old_bcounter)
+    old_bcounter = [len(birth_list)]
+    return birth_list_change
 
 old_dcounter = []
 def show_deaths_per_year(model):
@@ -194,13 +187,13 @@ class ABM(Model):
             model_reporters = {'Total # of Deaths in the Reserve': show_deaths})
 
         self.datacollector8 = DataCollector(
-            model_reporters={'Marriages Per Year': show_marriages_per_year})
+            model_reporters = {'Marriages Per Year': show_marriages_per_year})
 
         self.datacollector9 = DataCollector(
-            model_reporters={'Births Per Year': show_births_per_year})
+            model_reporters = {'Births Per Year': show_births_per_year})
 
         self.datacollector10 = DataCollector(
-            model_reporters={'Deaths Per Year': show_deaths_per_year})
+            model_reporters = {'Deaths Per Year': show_deaths_per_year})
 
         self.datacollector11 = DataCollector(
             model_reporters = {'Population in the Reserve': show_pop})
@@ -276,41 +269,13 @@ class ABM(Model):
     def make_hh_agents(self):
         """Create the household agents"""
         for hh_row in agents:  # agents is a list of ints 1-97 from excel_import
-            hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
-            hh_id = return_values(hh_row, 'hh_id')
-            self.hh_size = len(return_values(hh_row, 'age'))
-            # self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
-            # if self.total_rice == '-3' or self.total_rice == -3:
-            #     self.total_rice = 0
-            # self.total_dry = return_values(hh_row, 'non_gtgp_dry_mu')
-            # if self.total_dry == '-3' or self.total_dry == -3:
-            #     self.total_dry = 0
-            # self.gtgp_rice = return_values(hh_row, 'gtgp_rice_mu')
-            # if self.gtgp_rice == '-3' or self.gtgp_rice == -3:
-            #     self.gtgp_rice = 0
-            # self.gtgp_dry = return_values(hh_row, 'gtgp_dry_mu')
-            # if self.gtgp_dry == '-3' or self.gtgp_dry == -3:
-            #     self.gtgp_dry = 0
-            # self.lodging_prev = return_values(hh_row, 'lodging_prev')
-            # if self.lodging_prev == '-3' or self.lodging_prev == -3:
-            #     self.lodging_prev = 0
-            # self.transport_prev = return_values(hh_row, 'transport_prev')
-            # if self.transport_prev == '-3' or self.transport_prev == -3:
-            #     self.transport_prev = 0
-            # self.other_prev = return_values(hh_row, 'other_prev')
-            # if self.other_prev == '-3' or self.other_prev == -3:
-            #     self.other_prev = 0
-            # self.remittance_prev = return_values(hh_row, 'remittance_prev')
-            # if self.remittance_prev == '-3' or self.remittance_prev == -3:
-            #     self.remittance_prev = 0
-            self.hh_id = hh_id
-            a = HouseholdAgent(hh_row, self, hhpos, self.hh_id, self.admin_village, self.gtgp_enrolled, self.gtgp_land,
-                               self.gtgp_coef, self.mig_prob, self.num_mig, self.min_req_labor,
-                               self.num_labor, self.income, self.gtgp_comp, self.total_rice, self.total_dry,
-                               self.gtgp_rice, self.gtgp_dry, self.lodging_prev, self.transport_prev, self.other_prev,
-                               self.remittance_prev, self.hh_size)
+            self.hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
+            self.hh_id = return_values(hh_row, 'hh_id')
+            a = HouseholdAgent(hh_row, self, self.hhpos, self.hh_id, self.gtgp_dry, self.gtgp_rice,
+                               self.total_dry, self.total_rice, self.admin_village)
             a.admin_village = 1  # see server.py, line 22
-            self.space.place_agent(a, hhpos)  # admin_village placeholder
+            self.space.place_agent(a, self.hhpos)  # admin_village placeholder
+            #print(a.hhpos, 'hhpos')
             self.schedule.add(a)
 
     def make_land_agents(self):
@@ -357,7 +322,7 @@ class ABM(Model):
                                      self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
                                      self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                      self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                     self.gtgp_net_income, self.hh_size)
+                                     self.gtgp_net_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
                 lp.gtgp_enrolled = 0
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
@@ -405,7 +370,7 @@ class ABM(Model):
                                          self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
                                          self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                          self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.hh_size)
+                                         self.gtgp_net_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
                 lp2.gtgp_enrolled = 0
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
@@ -454,7 +419,7 @@ class ABM(Model):
                                          self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
                                          self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                          self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.hh_size)
+                                         self.gtgp_net_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
                 lp3.gtgp_enrolled = 1
                 self.space.place_agent(lp3, landpos)
                 self.schedule.add(lp3)
@@ -503,7 +468,7 @@ class ABM(Model):
                                          self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
                                          self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                          self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.hh_size)
+                                         self.gtgp_net_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
                 lp4.gtgp_enrolled = 1
                 self.space.place_agent(lp4, landpos)
                 self.schedule.add(lp4)
@@ -542,10 +507,10 @@ class ABM(Model):
                         self.workstatus == 1
                     else:
                         self.workstatus == 0
+                    IndividualAgent.create_initial_migrant_list(self)
                     ind = IndividualAgent(hh_row, self, self.hh_id, self.individual_id, self.age, self.gender,
-                                          self.education, self.workstatus, self.marriage, self.birth_rate,
-                                          self.birth_interval, self.death_rate, self.marriage_rate, self.marriage_flag,
-                                          self.mig_flag, self.match_prob, self.immi_marriage_rate, self.past_hh_id,
+                                          self.education, self.workstatus, self.marriage, self.marriage_flag,
+                                          self.mig_flag, self.past_hh_id,
                                           self.last_birth_time, self.mig_years, self.migration_network,
                                           self.total_rice, self.total_dry, self.gtgp_rice, self.gtgp_dry)
                     self.schedule.add(ind)

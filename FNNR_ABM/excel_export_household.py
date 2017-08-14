@@ -24,7 +24,7 @@ def initialize_household():
     fnnr_export.close()
 
 
-def save(step_counter, current_year, hh_id, num_labor, num_mig, income, hh_size):
+def save(step_counter, current_year, hh_id, num_labor, num_mig, hh_size):
     """Exports entries onto a .csv file"""
     try:
         fnnr_export = open('FNNR-ABM_export_household.csv', 'a+')  # a+ will create the file if it doesn't exist already
@@ -42,13 +42,24 @@ def save(step_counter, current_year, hh_id, num_labor, num_mig, income, hh_size)
     fnnr_export.writelines(',')
     fnnr_export.writelines(str(num_mig))
     fnnr_export.writelines(',')
-    fnnr_export.writelines(str(income))
-    fnnr_export.writelines(',')
     fnnr_export.writelines(str(hh_size))
     fnnr_export.writelines('\n')
+
     fnnr_export.flush()  # flush memory
     fnnr_export.close()
 
+def save_land(gtgp_net_income):
+    """Exports entries onto a .csv file"""
+    try:
+        fnnr_export = open('FNNR-ABM_export_household.csv', 'a+')  # a+ will create the file if it doesn't exist already
+        # a is also preferred to w here to append, rather than overwrite, values
+    except IOError:
+        print('Please close Excel and retry.')  # will not work if the .csv is already open
+
+    fnnr_export.writelines(str(gtgp_net_income))
+    fnnr_export.writelines('\n')
+    fnnr_export.flush()  # flush memory
+    fnnr_export.close()
 
 def erase_household():
     try:
