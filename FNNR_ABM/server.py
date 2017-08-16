@@ -129,20 +129,20 @@ plt.title('Total # of Deaths in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Deaths')
 
-mar_plot1.plot()
-plt.title('Marriages in the Reserve, Per Year')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Marriages')
-
-bir_plot1.plot()
-plt.title('Births in the Reserve, Per Year')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Births')
-
-dea_plot1.plot()
-plt.title('Deaths in the Reserve, Per Year')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Deaths')
+# mar_plot1.plot()
+# plt.title('Marriages in the Reserve, Per Year')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Marriages')
+#
+# bir_plot1.plot()
+# plt.title('Births in the Reserve, Per Year')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Births')
+#
+# dea_plot1.plot()
+# plt.title('Deaths in the Reserve, Per Year')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Deaths')
 
 pop_plot.plot()
 plt.title('Total Population in the Reserve')
@@ -205,4 +205,4 @@ server = ModularServer(ABM, [agent_canvas, text0],
 
 # if __name__ == "__main__":
 server.port = 8521  # default
-server.launch()  # actual run line
+#server.launch()  # actual run line

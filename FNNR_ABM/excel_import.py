@@ -123,15 +123,6 @@ def assign_sheet_parameters(hh_row, variable):
         parameters.append(str('AIW' + row))
         parameters.append(str('AIW' + row))
 
-    # elif variable.lower() == 'lodging_prev':
-    #     parameters.append(str('VM' + row))
-    #     parameters.append(str('VM' + row))
-    # elif variable.lower() == 'transport_prev':
-    #     parameters.append(str('VS' + row))
-    #     parameters.append(str('VS' + row))
-    # elif variable.lower() == 'other_prev':
-    #     parameters.append(str('WF' + row))
-    #     parameters.append(str('WF' + row))
     elif variable.lower() == 'remittance_prev':
         parameters.append(str('AHT' + row))
         parameters.append(str('AHT' + row))
@@ -159,14 +150,22 @@ def initialize_labor(hh_row):
     agelist = return_values(hh_row, 'age')  # find the ages of people in hh
     if agelist is not None:  # if there are people in the household,
         for age in agelist:  # for each person (can't use self.age because not a Household-level attribute),
-            try:
                 # ages are strings by default, must convert to float
-                if 15 < float(age) < 59:  # if the person is 15-65 years old,
-                    num_labor += 1  # defines number of laborers as people aged 15 < x < 59
-            except:
-                num_labor = 0
-        return num_labor
+            if 15 < float(age) < 59:  # if the person is 15-65 years old,
+                num_labor += 1  # defines number of laborers as people aged 15 < x < 59
+            #except:
+            #    num_labor = 0
+    else:
+        print(hh_row, 'excpet')
+    return num_labor
 
+def initialize_migrants(hh_row):
+    if_migrant = return_values(hh_row, 'initial_migrants')
+    if if_migrant is not None and if_migrant[0] != -3:
+        num_mig = 1
+    else:
+        num_mig = 0
+    return num_mig
 
 def assign_variable_per_hh(x, y):
     """Adds value of a certain variable to that household's list"""
