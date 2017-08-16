@@ -172,10 +172,10 @@ class ABM(Model):
             model_reporters={'Number of Re-migrants': show_re_mig})
 
         self.datacollector3 = DataCollector(
-            model_reporters={'Migrants Per Household Per Year': show_num_mig_per_year})
+            model_reporters={'Migrants Per Household at a Given Point in Time': show_num_mig_per_year})
 
         self.datacollector4 = DataCollector(
-            model_reporters={'Re-migrants Per Household Per Year': show_re_mig_per_year})
+            model_reporters={'Cumulative Re-migrants Per Household': show_re_mig_per_year})
 
         self.datacollector5 = DataCollector(
             model_reporters = {'Total # of Marriages in the Reserve': show_marriages})
@@ -271,6 +271,7 @@ class ABM(Model):
         for hh_row in agents:  # agents is a list of ints 1-97 from excel_import
             self.hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             self.hh_id = return_values(hh_row, 'hh_id')
+            self.admin_village = 1
             a = HouseholdAgent(hh_row, self, self.hhpos, self.hh_id, self.gtgp_dry, self.gtgp_rice,
                                self.total_dry, self.total_rice, self.admin_village)
             a.admin_village = 1  # see server.py, line 22

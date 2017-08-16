@@ -19,7 +19,7 @@ except IOError:
 def initialize_household():
     filewriter = csv.writer(fnnr_export)
     filewriter.writerow(['Step', 'Current Year', 'Household ID', 'Laborers in Household',
-                        'Migrants from Household', 'Household Income', 'Household Size'])
+                        'Migrants from Household', 'Household Size'])
     fnnr_export.flush()  # flush memory
     fnnr_export.close()
 
@@ -67,4 +67,5 @@ def erase_household():
         fnnr_export.truncate()
     except IOError:
         print('Please close Excel and retry.')  # will not work if the .csv is already open
+        pass
     fnnr_export.close()
