@@ -79,6 +79,9 @@ def show_pop(model):
 def show_gtgp_per_hh(model):
     return len(gtgplist) / 94
 
+def show_non_gtgp_per_hh(model):
+    return len(nongtgplist) / 94
+
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
     def __init__(self, hh_id, width, height, hh_row = 0, gtgp_land = 0, gtgp_latitude = 0, gtgp_longitude = 0,
@@ -201,6 +204,8 @@ class ABM(Model):
         self.datacollector12 = DataCollector(
             model_reporters = {'Average GTGP Parcels Per Household': show_gtgp_per_hh})
 
+        self.datacollector13 = DataCollector(
+            model_reporters = {'Average Non-GTGP Parcels Per Household': show_non_gtgp_per_hh})
 
     def return_x(self, hh_id, latitude):
         """Returns latitudes of land parcels for a given household"""
@@ -530,4 +535,5 @@ class ABM(Model):
         self.datacollector10.collect(self)
         self.datacollector11.collect(self)
         self.datacollector12.collect(self)
+        self.datacollector13.collect(self)
         self.schedule.step()

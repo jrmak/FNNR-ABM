@@ -10,6 +10,7 @@ from random import *  # random # generator
 from excel_import import *
 from math import sqrt, exp
 from excel_export_household import save, save_land
+from mesa.time import StagedActivation
 
 single_male_list = []
 married_male_list = []
@@ -105,12 +106,12 @@ class IndividualAgent(HouseholdAgent):
         self.workstatus = workstatus
 
         self.marriage = marriage
-        self.birth_rate = 0.123
+        self.birth_rate = 0.0123
         self.birth_interval = 2
         self.birth_flag = 0
-        self.death_rate = 0.077
+        self.death_rate = 0.0077
         self.death_flag = 0
-        self.marriage_rate = 0.087
+        self.marriage_rate = 0.0087
         self.marriage_flag = 0
         self.match_prob = 0.05
         self.immi_marriage_rate = 0.03
@@ -217,11 +218,11 @@ class IndividualAgent(HouseholdAgent):
     def birth(self):
         """Adds a new IndividualAgent class object"""
         if random() < self.birth_rate:
-            self.birth_flag = 1
-        if self.marriage == 1 and self.gender == 2 and self.age < 55 and self.birth_flag == 1:
+            self.birth_flag += 1
+        if self.marriage == 1 and self.gender == 2 and self.age < 55 and self.birth_flag > 0:
             if (float(self.step_counter) - float(self.last_birth_time)) > float(self.birth_interval):
                 self.last_birth_time = self.step_counter
-                if self.hh_id != 'Dead' and self.hh_id != 'Migrated':
+                if self.hh_id != 'Dead':
                     ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                                           self.education, self.workstatus, self.marriage, self.birth_rate,
                                           self.birth_interval, self.death_rate, self.marriage_rate, self.marriage_flag,
@@ -235,20 +236,23 @@ class IndividualAgent(HouseholdAgent):
                     # k is the generic individual id letter for newborn children in the household
                     ind.workstatus = 6
                     birth_list.append(ind.individual_id)
-                    self.birth_flag = 0
+                    StagedActivation(self).add(ind)
+                    #self.birth_flag -= 1
 
 
     def death(self):
         """Removes an object from reference"""
         if random() < self.death_rate:
-            self.death_flag = 1
-        if self.age > 65 and self.individual_id != 0 and self.death_flag == 1   \
-                and self.individual_id not in out_migrants_list:
+            self.death_flag += 1
+        if self.age > 65 and self.death_flag > 0:
                 self.hh_id = 'Dead'
                 if self.individual_id not in death_list:
                     death_list.append(self.individual_id)
                 # self.individual_id = 0
-                self.death_flag = 0
+                self.num_mig -= 1
+                if self.hh_id in household_migrants_list:
+                    household_migrants_list.remove(self.hh_id)
+                self.death_flag -= 1
 
     def youth_education(self):
         """Assigns student working status to those who are young"""
@@ -331,8 +335,10 @@ class IndividualAgent(HouseholdAgent):
                     self.num_labor -= 1
                 self.hh_size -= 1
                 self.past_hh_id = self.hh_id
-                household_migrants_list.append(self.hh_id)
-                out_migrants_list.append(self.individual_id)
+                if self.hh_id not in household_migrants_list:
+                    household_migrants_list.append(self.hh_id)
+                if self.individual_id not in out_migrants_list:
+                    out_migrants_list.append(self.individual_id)
                 self.hh_id = 'Migrated'
                 self.workstatus = 4
                 if self.individual_id in re_migrants_list:
@@ -352,7 +358,7 @@ class IndividualAgent(HouseholdAgent):
             if random() < re_mig_prob:
                 self.hh_id = self.past_hh_id
                 self.workstatus = 1
-                out_migrants_list.remove(self.individual_id)
+                #out_migrants_list.remove(self.individual_id)
                 if self.individual_id not in re_migrants_list:
                     re_migrants_list.append(self.individual_id)
                 self.hh_size += 1
@@ -365,6 +371,8 @@ class IndividualAgent(HouseholdAgent):
 
     def step(self):
         """Step behavior for individual agents; calls above functions"""
+        if self.individual_id[-1] in '0123456789':
+            print('true', self.individual_id)
         if self.hh_id != 'Migrated' and self.hh_id != 'Dead':
             self.match_female()
             self.birth()
@@ -502,7 +510,7 @@ class LandParcelAgent(HouseholdAgent):
 
     def step(self):
         """Step behavior for LandParcelAgent"""
-        # self.recalculate_max()
+
         self.non_gtgp_count(nongtgplist, gtgplist)
         self.gtgp_count(gtgplist, nongtgplist)
         self.output()
