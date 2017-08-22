@@ -79,7 +79,7 @@ for i in range(80):  # sets up model to run for 80 steps
     save_summary(i_counter, show_num_mig(model), show_num_mig_per_year(model), show_re_mig(model),                     \
                  show_re_mig_per_year(model), show_marriages(model), show_births(model), len(death_list),
                  show_marriages_per_year(model), show_births_per_year(model), show_deaths_per_year(model),
-                 show_pop(model), show_gtgp_per_hh(model))
+                 show_pop(model), show_gtgp_per_hh(model), show_non_gtgp_per_hh(model))
 # 1 at the end of the variable name means that it's per year instead of accumulative
 mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
 re_mig_plot = model.datacollector2.get_model_vars_dataframe()
@@ -93,6 +93,7 @@ bir_plot1 = model.datacollector9.get_model_vars_dataframe()
 dea_plot1 = model.datacollector10.get_model_vars_dataframe()
 pop_plot = model.datacollector11.get_model_vars_dataframe()
 gtgp_plot = model.datacollector12.get_model_vars_dataframe()
+non_gtgp_plot = model.datacollector13.get_model_vars_dataframe()
 
 mig_plot.plot()
 plt.title('Total # of Out-Migrants in the Reserve')
@@ -153,6 +154,11 @@ gtgp_plot.plot()
 plt.title('Average # of GTGP Parcels Per Household')
 plt.xlabel('Years (Steps)')
 plt.ylabel('GTGP Parcels')
+
+non_gtgp_plot.plot()
+plt.title('Average # of Non-GTGP Parcels Per Household')
+plt.xlabel('Years (Steps)')
+plt.ylabel('Non-GTGP Parcels')
 
 plt.show() # comment or uncomment this line to see or hide the graphs
 

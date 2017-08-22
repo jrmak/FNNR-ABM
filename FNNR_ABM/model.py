@@ -79,6 +79,9 @@ def show_pop(model):
 def show_gtgp_per_hh(model):
     return len(gtgplist) / 94
 
+def show_non_gtgp_per_hh(model):
+    return len(nongtgplist) / 94
+
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
     def __init__(self, hh_id, width, height, hh_row = 0, gtgp_land = 0, gtgp_latitude = 0, gtgp_longitude = 0,
@@ -91,7 +94,7 @@ class ABM(Model):
                  gender_1 = 0, education_1 = 0, land_type = 0, land_time = 0, lodging_prev = 0, transport_prev = 0,
                  other_prev = 0, remittance_prev = 0, total_rice = 0, total_dry = 0, gtgp_rice = 0, gtgp_dry = 0,
                  pre_gtgp_output = 0, non_gtgp_output = 0, plant_type = 0, land_area = 0, gtgp_net_income = 0,
-                 hh_size = 0):
+                 hh_size = 0, land_income = 0):
 
                  # default values set for now, will define when model runs agents
 
@@ -140,6 +143,7 @@ class ABM(Model):
         self.land_time = land_time
         self.plant_type = plant_type
         self.land_area = land_area
+        self.land_income = land_income
 
         self.lodging_prev = lodging_prev
         self.transport_prev = transport_prev
@@ -201,6 +205,13 @@ class ABM(Model):
         self.datacollector12 = DataCollector(
             model_reporters = {'Average GTGP Parcels Per Household': show_gtgp_per_hh})
 
+        self.datacollector13 = DataCollector(
+            model_reporters = {'Average Non-GTGP Parcels Per Household': show_non_gtgp_per_hh})
+
+    def make_birth_agents(self, ind):
+        self.schedule = StagedActivation(self)
+        self.schedule.add(ind)
+        self.running = True
 
     def return_x(self, hh_id, latitude):
         """Returns latitudes of land parcels for a given household"""
@@ -323,7 +334,7 @@ class ABM(Model):
                                      self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
                                      self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                      self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                     self.gtgp_net_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
+                                     self.gtgp_net_income, self.land_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
                 lp.gtgp_enrolled = 0
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
@@ -371,7 +382,7 @@ class ABM(Model):
                                          self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
                                          self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                          self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
+                                         self.gtgp_net_income, self.land_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
                 lp2.gtgp_enrolled = 0
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
@@ -420,7 +431,7 @@ class ABM(Model):
                                          self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
                                          self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                          self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
+                                         self.gtgp_net_income, self.land_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
                 lp3.gtgp_enrolled = 1
                 self.space.place_agent(lp3, landpos)
                 self.schedule.add(lp3)
@@ -469,7 +480,7 @@ class ABM(Model):
                                          self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
                                          self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
                                          self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
+                                         self.gtgp_net_income, self.land_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
                 lp4.gtgp_enrolled = 1
                 self.space.place_agent(lp4, landpos)
                 self.schedule.add(lp4)
@@ -530,4 +541,5 @@ class ABM(Model):
         self.datacollector10.collect(self)
         self.datacollector11.collect(self)
         self.datacollector12.collect(self)
+        self.datacollector13.collect(self)
         self.schedule.step()

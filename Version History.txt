@@ -1,7 +1,11 @@
 Version History:
+Pseudocode Version 11 (0814)
+*Debugging, income formulas
 
 Pseudocode Version 10 (0726)
-8/1/2017 - 8/6/2017 - Break
+v1.89 - 8/19/2017 - Further changes to birth/death/marriage/migration formulas
+v1.86-1.88 - 8/8/2017, 8/14/2017, 8/15/2017 - Fixed bugs in output household file display, removed extraneous code, now debugging formulas
+8/1/2017 - 8/9/2017 - Break/vacation *End of pay period
 v1.85 - 7/31/2017 - Final bug fixes before break, changed individual summary output file to household summary
 v1.83 - v1.84 - 7/27 - 7/28/2017 - Addition of more graphs, bug fixing code for latest pseudocode version
 

@@ -28,7 +28,7 @@ os.chdir(currentpath)
 
 def save_summary(steps, show_num_mig, show_num_mig_per_year, show_re_mig, show_re_mig_per_year, show_marriages,
                  show_births, show_deaths, show_marriages_per_year, show_births_per_year, show_deaths_per_year,
-                 population, show_gtgp_per_hh):
+                 population, show_gtgp_per_hh, show_non_gtgp_per_hh):
     """Exports entries onto a .csv file"""
     try:
         fnnr_export = open('FNNR-ABM_export_summary.csv', 'a+')  # a+ will create the file if it doesn't exist already
@@ -41,7 +41,7 @@ def save_summary(steps, show_num_mig, show_num_mig_per_year, show_re_mig, show_r
         filewriter.writerow(
             ['Years Elapsed', 'Total Out-Migrants', 'Average Out-Migrants', 'Total Re-Migrants', 'Average Re-Migrants',
              'Total Marriages', 'Total Births', 'Total Deaths', 'New Marriages', 'New Births', 'New Deaths',
-             'Population', 'GTGP Parcels Per Household'])
+             'Population', 'GTGP Parcels Per Household', 'Non-GTGP Parcels Per Household'])
     fnnr_export.writelines(str(steps))
     fnnr_export.writelines(',')
     fnnr_export.writelines(str(show_num_mig))
@@ -68,6 +68,7 @@ def save_summary(steps, show_num_mig, show_num_mig_per_year, show_re_mig, show_r
     fnnr_export.writelines(',')
     fnnr_export.writelines(str(show_gtgp_per_hh))
     fnnr_export.writelines(',')
+    fnnr_export.writelines(str(show_non_gtgp_per_hh))
     fnnr_export.writelines('\n')
     fnnr_export.flush()  # flush memory
     fnnr_export.close()
