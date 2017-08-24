@@ -10,7 +10,6 @@ from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 from agents import *
 from excel_import import *
-# from math import sqrt
 
 
 # def show_num_mig(model):  # wrong formula
@@ -26,11 +25,12 @@ def show_num_mig(model):
     return b
 
 def show_num_mig_per_year(model):
-    """Returns the average # of migrants / year in each household"""
+    """Returns the average # of migrants in each household"""
     b = len(out_migrants_list) / 94
     return b
 
 def show_re_mig(model):
+    """Returns the average # of migrants in each household"""
     b = len(re_migrants_list)
     return b
 
@@ -40,19 +40,23 @@ def show_re_mig_per_year(model):
     return b
 
 def show_marriages(model):
+    """Returns the total # of marriages in the reserve"""
     b = len(new_married_list)
     return float(b)
 
 def show_births(model):
+    """Returns the total # of births in the reserve"""
     b = len(birth_list)
     return b
 
 def show_deaths(model):
+    """Returns the total # of deaths in the reserve"""
     b = len(death_list)
     return b
 
 old_mcounter = []
 def show_marriages_per_year(model):
+    """Returns the marriages that happen for each year in the reserve"""
     global old_mcounter
     marriage_list_change = len(new_married_list) - sum(old_mcounter)
     old_mcounter = [len(new_married_list)]
@@ -60,6 +64,7 @@ def show_marriages_per_year(model):
 
 old_bcounter = []
 def show_births_per_year(model):
+    """Returns the births that happen for each year in the reserve"""
     global old_bcounter
     birth_list_change = len(birth_list) - sum(old_bcounter)
     old_bcounter = [len(birth_list)]
@@ -67,6 +72,7 @@ def show_births_per_year(model):
 
 old_dcounter = []
 def show_deaths_per_year(model):
+    """Returns the deaths that happen for each year in the reserve"""
     global old_dcounter
     death_list_change = len(death_list) - sum(old_dcounter)
     old_dcounter = [len(death_list)]
@@ -176,7 +182,7 @@ class ABM(Model):
             model_reporters={'Number of Re-migrants': show_re_mig})
 
         self.datacollector3 = DataCollector(
-            model_reporters={'Migrants Per Household at a Given Point in Time': show_num_mig_per_year})
+            model_reporters={'Cumulative Migrants Per Household': show_num_mig_per_year})
 
         self.datacollector4 = DataCollector(
             model_reporters={'Cumulative Re-migrants Per Household': show_re_mig_per_year})
