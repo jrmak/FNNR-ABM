@@ -22,6 +22,7 @@ birth_list = []
 death_list = []
 nongtgplist = []
 gtgplist = []
+hhlist = []
 household_income = [0] * 94
 
 
@@ -80,6 +81,131 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         # if int(self.step_counter) < 5:
         #     save(self.step_counter, self.current_year, self.hh_id, self.num_labor, self.num_mig,
         #          self.hh_size)
+        self.step_counter += 1
+        if self.hh_id in hhlist:
+            hhlist.remove(self.hh_id)
+
+
+class LandParcelAgent(HouseholdAgent):
+    """Sets land parcel agents; superclass is HouseholdAgent"""
+
+    def __init__(self, unique_id, model, hh_id, hh_row, landpos, hhpos, gtgp_enrolled, age_1,
+                 gender_1, education_1, land_type, land_time, plant_type, land_area,
+                 gtgp_dry, gtgp_rice, total_dry, total_rice,
+                 non_gtgp_output, pre_gtgp_output, gtgp_net_income, land_income, hh_size,
+                 num_mig, num_labor, admin_village):
+
+        super().__init__(self, unique_id, hhpos, hh_row, gtgp_dry, gtgp_rice, total_dry, total_rice, admin_village)
+        self.hh_row = hh_row
+        self.landpos = landpos
+        self.gtgp_enrolled = gtgp_enrolled
+        self.age_1 = age_1
+        self.gender_1 = gender_1
+        self.education_1 = education_1
+        # self.area = area
+        self.land_type = land_type
+        self.land_time = land_time
+        self.gtgp_net_income = gtgp_net_income
+        self.land_income = land_income
+        self.plant_type = plant_type
+
+        self.gtgp_dry = gtgp_dry
+        self.gtgp_rice = gtgp_rice
+        self.total_dry = total_dry
+        self.total_rice = total_rice
+
+        self.non_gtgp_output = non_gtgp_output
+        self.pre_gtgp_output = pre_gtgp_output
+        self.hh_size = hh_size
+
+        self.num_mig = num_mig
+        self.num_labor = num_labor
+        self.step_counter = 0
+
+    def output(self):
+        if self.plant_type == 1:
+            unit_price = 0.7
+        elif self.plant_type == 2:
+            unit_price = 0.8
+        elif self.plant_type == 3:
+            unit_price = 0.9
+        elif self.plant_type == 4:
+            unit_price = 2.3
+        elif self.plant_type == 5:
+            unit_price = 0
+        else:
+            unit_price = 1
+        if self.gtgp_enrolled == 1:
+            land_output = float(self.pre_gtgp_output)
+        else:
+            land_output = float(self.non_gtgp_output)
+        crop_income = land_output * unit_price
+        unit_comp = 270  # scenarios at the end of pseudocode
+        self.total_rice = return_values(self.hh_row, 'non_gtgp_rice_mu')
+        if self.total_rice in ['-3', '-4', -3, None]:
+            self.total_rice = 0
+        self.total_dry = return_values(self.hh_row, 'non_gtgp_dry_mu')
+        if self.total_dry in ['-3', '-4', -3, None]:
+            self.total_dry = 0
+        self.land_area = float(self.total_dry) + float(self.total_rice)
+        comp_amount = self.land_area * unit_comp
+        self.gtgp_net_income = comp_amount - crop_income
+        self.land_income = comp_amount + crop_income
+
+    def gtgp_participation(self):
+        """Initializes labor and determines non-GTGP and GTGP staus"""
+        if self.first_step_flag == 0:
+            # self.num_labor = self.initialize_labor(self.hh_row)
+            self.first_step_flag = 1  # prevents above lines from repeating after initialization
+        minimum_non_gtgp = 0.3
+        non_gtgp_area = (float(self.total_dry) + float(self.total_rice)) - (float(self.gtgp_dry) + float(self.gtgp_rice))
+        if non_gtgp_area < minimum_non_gtgp:
+            gtgp_part_prob = 0
+        prob = exp(2.52 - 0.012 * self.age_1 - 0.29 * self.gender_1 + 0.01 * self.education_1 + 0.001 * self.hh_size
+                   - 2.45 * self.land_type * 0.0006 * self.gtgp_net_income + 0.04 * self.land_time)
+        gtgp_part_prob = prob / (prob + 1)
+        # self.hh_size = len(return_values(self.hh_row, 'age'))
+        # print(self.hh_id, self.age_1, self.gender_1, self.education_1, self.gtgp_enrolled, 'test1')
+        # print(self.land_type, self.gtgp_net_income, self.land_time, self.hh_size, 'test')
+        if random() < gtgp_part_prob:  # verify
+            self.gtgp_enrolled = 1
+        return self.gtgp_enrolled
+
+    # def gtgp_convert(self):
+    #     result = super(LandParcelAgent, self).gtgp_enroll()
+    #     if int(self.hh_id) in result:
+    #         self.gtgp_enrolled = 1
+
+    def non_gtgp_count(self, nongtgplist, gtgplist):
+        if self.gtgp_enrolled == 0 and self.unique_id not in nongtgplist:
+            if len(nongtgplist) + len(gtgplist) != 722:
+                nongtgplist.append(self.unique_id)
+            else:
+                nongtgplist = []
+                nongtgplist.append(self.unique_id)
+        return len(nongtgplist)
+
+    def gtgp_count(self, gtgplist, nongtgplist):
+        if self.gtgp_enrolled == 1 and self.unique_id not in gtgplist:
+            if self.unique_id in nongtgplist:
+                nongtgplist.remove(self.unique_id)
+            if len(nongtgplist) + len(gtgplist) != 722:
+                gtgplist.append(self.unique_id)
+            else:
+                gtgplist = []
+                gtgplist.append(self.unique_id)
+        return len(gtgplist)
+
+    def step(self):
+        """Step behavior for LandParcelAgent"""
+        self.non_gtgp_count(nongtgplist, gtgplist)
+        self.gtgp_count(gtgplist, nongtgplist)
+        self.output()
+        self.gtgp_participation()
+        household_income[self.hh_row - 3] = (household_income[self.hh_row - 3]
+                                                      + self.land_income)
+        #if int(self.step_counter) < 5:
+        #    save_land(household_income[self.hh_row - 1])
         self.step_counter += 1
 
 
@@ -370,140 +496,24 @@ class IndividualAgent(HouseholdAgent):
         # self.step_counter = int(self.step_counter)
         if int(self.step_counter) < 5:
             if str(self.individual_id)[-1] == 'a' and self.hh_id != 'Dead'  \
-                    and (self.gender == 1 or self.marriage == 0):
-                save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
-                     self.hh_size)
+                and (self.gender == 1 or self.marriage == 0)    \
+                and self.hh_id not in hhlist:
+                    hhlist.append(self.hh_id)
+                    save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
+                         self.hh_size, household_income[self.hh_row - 3])
             elif str(self.individual_id)[-1] == 'b' and self.hh_id != 'Dead'  \
-                    and (self.gender == 1 or self.marriage == 0):
-                save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
-                     self.hh_size)
-            else:
-                save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
-                     self.hh_size)
+                and (self.gender == 1 or self.marriage == 0)    \
+                and self.hh_id not in hhlist:
+                    hhlist.append(self.hh_id)
+                    save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
+                        self.hh_size, household_income[self.hh_row - 3])
+            elif str(self.individual_id)[-1] == 'c' and self.hh_id != 'Dead' \
+                and (self.gender == 1 or self.marriage == 0)    \
+                and self.hh_id not in hhlist:
+                    hhlist.append(self.hh_id)
+                    save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
+                        self.hh_size, household_income[self.hh_row - 3])
         self.current_year += 1
         self.step_counter += 1
         self.first_step_flag = 1  # must be at the end of step()
 
-
-class LandParcelAgent(HouseholdAgent):
-    """Sets land parcel agents; superclass is HouseholdAgent"""
-
-    def __init__(self, unique_id, model, hh_id, hh_row, landpos, hhpos, gtgp_enrolled, age_1,
-                 gender_1, education_1, land_type, land_time, plant_type, land_area,
-                 gtgp_dry, gtgp_rice, total_dry, total_rice,
-                 non_gtgp_output, pre_gtgp_output, gtgp_net_income, land_income, hh_size,
-                 num_mig, num_labor, admin_village):
-
-        super().__init__(self, unique_id, hhpos, hh_row, gtgp_dry, gtgp_rice, total_dry, total_rice, admin_village)
-        self.hh_row = hh_row
-        self.landpos = landpos
-        self.gtgp_enrolled = gtgp_enrolled
-        self.age_1 = age_1
-        self.gender_1 = gender_1
-        self.education_1 = education_1
-        # self.area = area
-        self.land_type = land_type
-        self.land_time = land_time
-        self.gtgp_net_income = gtgp_net_income
-        self.land_income = land_income
-        self.plant_type = plant_type
-
-        self.gtgp_dry = gtgp_dry
-        self.gtgp_rice = gtgp_rice
-        self.total_dry = total_dry
-        self.total_rice = total_rice
-
-        self.non_gtgp_output = non_gtgp_output
-        self.pre_gtgp_output = pre_gtgp_output
-        self.hh_size = hh_size
-
-        self.num_mig = num_mig
-        self.num_labor = num_labor
-        self.step_counter = 0
-
-    def output(self):
-        if self.plant_type == 1:
-            unit_price = 0.7
-        elif self.plant_type == 2:
-            unit_price = 0.8
-        elif self.plant_type == 3:
-            unit_price = 0.9
-        elif self.plant_type == 4:
-            unit_price = 2.3
-        elif self.plant_type == 5:
-            unit_price = 0
-        else:
-            unit_price = 1
-        if self.gtgp_enrolled == 1:
-            land_output = float(self.pre_gtgp_output)
-        else:
-            land_output = float(self.non_gtgp_output)
-        crop_income = land_output * unit_price
-        unit_comp = 270  # scenarios at the end of pseudocode
-        self.total_rice = return_values(self.hh_row, 'non_gtgp_rice_mu')
-        if self.total_rice in ['-3', '-4', -3, None]:
-            self.total_rice = 0
-        self.total_dry = return_values(self.hh_row, 'non_gtgp_dry_mu')
-        if self.total_dry in ['-3', '-4', -3, None]:
-            self.total_dry = 0
-        self.land_area = float(self.total_dry) + float(self.total_rice)
-        comp_amount = self.land_area * unit_comp
-        self.gtgp_net_income = comp_amount - crop_income
-        self.land_income = comp_amount + crop_income
-
-    def gtgp_participation(self):
-        """Initializes labor and determines non-GTGP and GTGP staus"""
-        if self.first_step_flag == 0:
-            # self.num_labor = self.initialize_labor(self.hh_row)
-            self.first_step_flag = 1  # prevents above lines from repeating after initialization
-        minimum_non_gtgp = 0.3
-        non_gtgp_area = (float(self.total_dry) + float(self.total_rice)) - (float(self.gtgp_dry) + float(self.gtgp_rice))
-        if non_gtgp_area < minimum_non_gtgp:
-            gtgp_part_prob = 0
-        prob = exp(2.52 - 0.012 * self.age_1 - 0.29 * self.gender_1 + 0.01 * self.education_1 + 0.001 * self.hh_size
-                   - 2.45 * self.land_type * 0.0006 * self.gtgp_net_income + 0.04 * self.land_time)
-        gtgp_part_prob = prob / (prob + 1)
-        # self.hh_size = len(return_values(self.hh_row, 'age'))
-        # print(self.hh_id, self.age_1, self.gender_1, self.education_1, self.gtgp_enrolled, 'test1')
-        # print(self.land_type, self.gtgp_net_income, self.land_time, self.hh_size, 'test')
-        if random() < gtgp_part_prob:  # verify
-            self.gtgp_enrolled = 1
-        return self.gtgp_enrolled
-
-    # def gtgp_convert(self):
-    #     result = super(LandParcelAgent, self).gtgp_enroll()
-    #     if int(self.hh_id) in result:
-    #         self.gtgp_enrolled = 1
-
-    def non_gtgp_count(self, nongtgplist, gtgplist):
-        if self.gtgp_enrolled == 0 and self.unique_id not in nongtgplist:
-            if len(nongtgplist) + len(gtgplist) != 722:
-                nongtgplist.append(self.unique_id)
-            else:
-                nongtgplist = []
-                nongtgplist.append(self.unique_id)
-        return len(nongtgplist)
-
-    def gtgp_count(self, gtgplist, nongtgplist):
-        if self.gtgp_enrolled == 1 and self.unique_id not in gtgplist:
-            if self.unique_id in nongtgplist:
-                nongtgplist.remove(self.unique_id)
-            if len(nongtgplist) + len(gtgplist) != 722:
-                gtgplist.append(self.unique_id)
-            else:
-                gtgplist = []
-                gtgplist.append(self.unique_id)
-        return len(gtgplist)
-
-    def step(self):
-        """Step behavior for LandParcelAgent"""
-        household_income[self.hh_row - 1] = 0
-        self.non_gtgp_count(nongtgplist, gtgplist)
-        self.gtgp_count(gtgplist, nongtgplist)
-        self.output()
-        self.gtgp_participation()
-        household_income[self.hh_row - 3] = (household_income[self.hh_row - 3]
-                                                      + self.land_income)
-        #if int(self.step_counter) < 5:
-        #    save_land(household_income[self.hh_row - 1])
-        self.step_counter += 1
