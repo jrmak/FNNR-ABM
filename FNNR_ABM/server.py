@@ -96,12 +96,12 @@ gtgp_plot = model.datacollector12.get_model_vars_dataframe()
 non_gtgp_plot = model.datacollector13.get_model_vars_dataframe()
 
 mig_plot.plot()
-plt.title('Total # of Out-Migrants in the Reserve')
+plt.title('Cumulative # of Out-Migrants in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Migrants')
 
 re_mig_plot.plot()
-plt.title('Total # of Re-migrants in the Reserve')
+plt.title('Cumulative # of Re-migrants in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Re-migrants')
 
