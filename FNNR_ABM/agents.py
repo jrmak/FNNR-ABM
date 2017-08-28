@@ -24,6 +24,7 @@ nongtgplist = []
 gtgplist = []
 hhlist = []
 household_income = [0] * 94
+exception_counter = []
 
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
@@ -33,14 +34,20 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
         super().__init__(unique_id, model)
         # self.hhpos = hhpos
+        self.model = model
         self.hh_id = hh_id
         self.admin_village = admin_village
         self.nat_village = 1
         try:
             self.hh_row = get_hh_row(int(self.hh_id))
         except:
-            print(self.hh_id)
-            self.hh_row = None
+            if 'k' in self.hh_id:
+                self.hh_id = self.hh_id[:self.hh_id.index('k')]
+            if 'j' in self.hh_id:
+                self.hh_id = self.hh_id[:self.hh_id.index('j')]
+            else:
+                self.hh_id = self.hh_id[:-1]
+            self.hh_row = get_hh_row(int(self.hh_id))
         self.gtgp_enrolled = 0  # binary (GTGP status of household)
         self.income = 0  # will re-set later
         self.mig_prob = 0.5  # migration probability, preset 0.5
@@ -52,6 +59,7 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         self.comp_sign = 0.1  # influence of GTGP income on migration decisions
         self.gtgp_coef = uniform(0, 0.55)  # compared to mig_prob, which is 0.5, should give ~10% chance of > 0.5
         self.gtgp_part_flag = 0  # binary; further enrollment of GTGP
+        self.mig_remittances = return_values(self.hh_row, 'mig_remittances')
 
         self.first_step_flag = 0
         self.current_year = 2016
@@ -74,6 +82,11 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
         # if int(self.step_counter) < 5:
         #     save(self.step_counter, self.current_year, self.hh_id, self.num_labor, self.num_mig,
         #          self.hh_size)
+        if self.step_counter == 0:
+            if self.mig_remittances is not None and int(self.mig_remittances) > 0:
+                household_income[self.hh_row - 3] = int(self.mig_remittances)
+            else:
+                household_income[self.hh_row - 3] = 0
         self.step_counter += 1
         if self.hh_id in hhlist:
             hhlist.remove(self.hh_id)
@@ -194,19 +207,19 @@ class LandParcelAgent(HouseholdAgent):
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
     def __init__(self, unique_id, model, hh_id, individual_id, age, gender, education,
-                 workstatus, marriage, admin_village = 0):
-
+                 marriage, admin_village = 0):
 
         super().__init__(unique_id, model, hh_id, admin_village)
 
-        self.hh_id = int(hh_id)
+        self.hh_id = hh_id
         self.individual_id = individual_id
-        print(self.hh_id, self.individual_id, age, gender, education, workstatus,
-              marriage, admin_village, 'test except hhrow')
         self.age = age
         self.gender = gender
         self.education = education
-        self.workstatus = workstatus
+        if 15 < self.age < 59:
+            self.workstatus = 1
+        else:
+            self.workstatus = 0
         self.marriage = marriage
 
         self.birth_rate = 0.0123
@@ -230,16 +243,23 @@ class IndividualAgent(HouseholdAgent):
         try:
             self.hh_row = get_hh_row(int(self.hh_id))
         except:
-            print(self.hh_id, 'except hhrow')
+            if 'k' in self.hh_id:
+                self.hh_id = self.hh_id[:self.hh_id.index('k')]
+            if 'j' in self.hh_id:
+                self.hh_id = self.hh_id[:self.hh_id.index('j')]
+            else:
+                self.hh_id = self.hh_id[:-1]
+            self.hh_row = get_hh_row(int(self.hh_id))
         if self.hh_row is not None and self.hh_row <= 96:
             self.num_labor = initialize_labor(int(self.hh_row) - 2)
             self.num_mig = initialize_migrants(int(self.hh_row) - 2)
         self.admin_village = 0
-
+        # print(self.hh_id, self.individual_id, self.age, self.gender, self.education, 'break', self.workstatus,
+        #      self.marriage, self.admin_village, self.workstatus, self.marriage, 'test except hhrow')
 
     def create_initial_migrant_list(self):
         mig = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
-                              self.education, self.workstatus, self.marriage, self.admin_village)
+                              self.education, self.marriage, self.admin_village)
         mig.age = return_values(self.hh_row, 'initial_migrants')[0]
         if mig.age in [-3, 3, None]:
             pass
@@ -253,6 +273,8 @@ class IndividualAgent(HouseholdAgent):
                 # m is the generic individual id letter for initial migrants in the household
                 initial_migrants_list.append(mig.individual_id)
                 #out_migrants_list.append(mig.individual_id)
+                #self.model.schedule.add(mig)
+                #self.running = True
                 #household_migrants_list.append(self.hh_id)
 
     def match_female(self):
@@ -269,14 +291,16 @@ class IndividualAgent(HouseholdAgent):
                 if random() < self.marriage_rate:
                     for male in single_male_list:
                         if random() < float(self.match_prob):
+                            self.past_hh_id = self.hh_id
                             self.marriage_flag = 1
                             self.marriage = 1
                             married_male_list.append(male)
                             if 'k' not in male:
                                 self.hh_id = male.strip(male[-1])
+                                self.individual_id = self.hh_id + 'j'
                             else:
-                                self.hh_id = male.strip(male[male.index('k'):])
-                            self.individual_id = self.hh_id + 'j'
+                                self.hh_id = male[:male.index('k')]
+                                self.individual_id = self.hh_id + 'j' + '-' + str(self.step_counter)
                             new_married_list.append(self.individual_id)
                             single_male_list.remove(male)
                             pass
@@ -309,29 +333,27 @@ class IndividualAgent(HouseholdAgent):
 
     def birth(self):
         """Adds a new IndividualAgent class object"""
-        #if random() < self.birth_rate:
-        #    self.birth_flag += 1
         if self.marriage == 1 and self.gender == 2 and self.age < 55:
             if (float(self.step_counter) - float(self.last_birth_time)) > float(self.birth_interval):
                 self.last_birth_time = self.step_counter
                 if self.hh_id != 'Dead':
-                    ind = IndividualAgent(self, self.hh_id, self.individual_id, self.age, self.gender,
+                    ind = IndividualAgent(self.hh_id, self, self.individual_id, self.age, self.gender,
                                           self.education, self.workstatus, self.marriage, self.admin_village)
                     ind.age = 0
                     ind.gender = choice([1, 2])
                     ind.education = 0
-                    ind.marriage = 0
                     ind.workstatus = 6
+                    ind.marriage = 0
                     ind.hh_id = self.hh_id
                     ind.individual_id = str(self.hh_id) + 'k' + '-' + str(self.step_counter)
                     # k is the generic individual id letter for newborn children in the household
                     birth_list.append(ind.individual_id)
-                    self.model.schedule.add(ind)
-                    self.running = True
-                    # print(ind.hh_id, ind.individual_id, ind.age, ind.gender, 'work ind')
-
-                    # except:
-                    #     print(ind.hh_id, ind.individual_id, ind.age, ind.gender, 'except ind')
+                    try:
+                        self.model.schedule.add(ind)
+                        self.running = True
+                    except:
+                        # print(self.hh_id, self.past_hh_id, self.individual_id, self.model, self.step_counter)
+                        pass
 
     def death(self):
         """Removes an object from reference"""
@@ -445,6 +467,7 @@ class IndividualAgent(HouseholdAgent):
                 prob = 1
             re_mig_prob = prob / (prob + 1)
             if random() < re_mig_prob:
+                self.remittances = 0
                 self.hh_id = self.past_hh_id
                 self.workstatus = 1
                 #out_migrants_list.remove(self.individual_id)
@@ -473,21 +496,23 @@ class IndividualAgent(HouseholdAgent):
                                                       + self.remittance)
         # self.step_counter = int(self.step_counter)
         if int(self.step_counter) < 5:
+            # can change 5 to any number of steps, but code will take longer to run
+            # selects one individual to represent the household
             if str(self.individual_id)[-1] == 'a' and self.hh_id != 'Dead'  \
-                and (self.gender == 1 or self.marriage == 0)    \
-                and self.hh_id not in hhlist:
+                and (self.gender == 1 or self.marriage == 0) \
+                and self.hh_id != 'Migrated' and self.hh_id not in hhlist:
                     hhlist.append(self.hh_id)
                     save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
                          self.hh_size, household_income[self.hh_row - 3])
             elif str(self.individual_id)[-1] == 'b' and self.hh_id != 'Dead'  \
-                and (self.gender == 1 or self.marriage == 0)    \
-                and self.hh_id not in hhlist:
+                and (self.gender == 1 or self.marriage == 0) \
+                and self.hh_id != 'Migrated' and self.hh_id not in hhlist:
                     hhlist.append(self.hh_id)
                     save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
                         self.hh_size, household_income[self.hh_row - 3])
             elif str(self.individual_id)[-1] == 'c' and self.hh_id != 'Dead' \
-                and (self.gender == 1 or self.marriage == 0)    \
-                and self.hh_id not in hhlist:
+                and (self.gender == 1 or self.marriage == 0) \
+                and self.hh_id != 'Migrated' and self.hh_id not in hhlist:
                     hhlist.append(self.hh_id)
                     save(self.step_counter, self.current_year, self.individual_id[:-1], self.num_labor, self.num_mig,
                         self.hh_size, household_income[self.hh_row - 3])

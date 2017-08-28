@@ -120,6 +120,10 @@ def assign_sheet_parameters(hh_row, variable):
         parameters.append(str('AIQ' + row))
         parameters.append(str('AIU' + row))
 
+    elif variable.lower() == ('mig_remittances'):
+        parameters.append(str('AIV' + row))
+        parameters.append(str('AIV' + row))
+
     elif variable.lower() == ('income_local_off_farm'):
         parameters.append(str('AIW' + row))
         parameters.append(str('AIW' + row))
