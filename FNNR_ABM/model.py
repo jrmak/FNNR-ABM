@@ -478,6 +478,7 @@ class ABM(Model):
             agelist = return_values(hh_row, 'age')  # find the ages of people in hh
             genderlist = return_values(hh_row, 'gender')
             marriagelist = return_values(hh_row, 'marriage')
+            educationlist = return_values(hh_row, 'education')
             self.migration_network = return_values(hh_row, 'migration_network')[0]
             # self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
             # if self.total_rice in ['-3', '-4', -3, None]:
@@ -494,18 +495,17 @@ class ABM(Model):
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
                     self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
-                    # if agelist is not None and agelist is not []:
                     self.age = agelist[i]
                     # if genderlist is not None and genderlist is not []:
                     self.gender = genderlist[i]
+                    try:
+                        self.education = educationlist[i]
+                    except:
+                        self.education = 0
                     self.marriage = marriagelist[i]
-                    if 15 < self.age < 59:
-                        self.workstatus == 1
-                    else:
-                        self.workstatus == 0
                     IndividualAgent.create_initial_migrant_list(self)
-                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
-                                          self.education, self.workstatus, self.marriage, self.admin_village)
+                    ind = IndividualAgent(self.individual_id, self, self.hh_id, self.individual_id, self.age, self.gender,
+                                          self.education, self.marriage, self.admin_village)
                     self.schedule.add(ind)
 
     def step(self):
