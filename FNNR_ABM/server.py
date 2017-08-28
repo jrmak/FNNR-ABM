@@ -206,9 +206,9 @@ text0 = MapLegend()
 text1 = Migrants()  # not used below
 text2 = Marriages()  # not used
 
-server = ModularServer(ABM, [agent_canvas, text0],
-                       "GTGP Enrollment of Land Over Time", 100, 10, 10)
+# server = ModularServer(ABM, [agent_canvas, text0],
+#                        "GTGP Enrollment of Land Over Time", 100, 10, 10)
 
 # if __name__ == "__main__":
-server.port = 8521  # default
-#server.launch()  # actual run line
+# server.port = 8521  # default
+# server.launch()  # actual run line

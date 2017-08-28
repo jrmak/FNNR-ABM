@@ -29,29 +29,22 @@ household_income = [0] * 94
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
     def __init__(self, unique_id, model, hh_id,
-                 gtgp_dry, gtgp_rice, total_dry, total_rice,
-                 admin_village, hhpos):
+                 admin_village):
 
         super().__init__(unique_id, model)
-        if hhpos != 1:
-            self.hhpos = hhpos  # resident location
-        else:
-            pass
+        # self.hhpos = hhpos
         self.hh_id = hh_id
         self.admin_village = admin_village
         self.nat_village = 1
-        self.gtgp_dry = gtgp_dry  # area
-        self.gtgp_rice = gtgp_rice  # area
-        self.total_dry = total_dry  # area
-        self.total_rice = total_rice  # area
-        if type(self.hh_id) == int:
-            self.hh_row = self.hh_row = get_hh_row(int(self.hh_id))
-        else:
-            self.hh_row = 0
+        try:
+            self.hh_row = get_hh_row(int(self.hh_id))
+        except:
+            print(self.hh_id)
+            self.hh_row = None
         self.gtgp_enrolled = 0  # binary (GTGP status of household)
         self.income = 0  # will re-set later
         self.mig_prob = 0.5  # migration probability, preset 0.5
-        if self.hh_row is not None and self.hh_row <= 96:
+        if self.hh_row is not None and self.hh_row <= 94:
             self.num_mig = initialize_migrants(self.hh_row)  # how many migrants the hh has
             self.num_labor = initialize_labor(self.hh_row)
         self.min_req_labor = 1  # preset
@@ -89,37 +82,31 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
 
-    def __init__(self, unique_id, model, hh_id, hh_row, landpos, hhpos, gtgp_enrolled, age_1,
-                 gender_1, education_1, land_type, land_time, plant_type, land_area,
-                 gtgp_dry, gtgp_rice, total_dry, total_rice,
-                 non_gtgp_output, pre_gtgp_output, gtgp_net_income, land_income, hh_size,
-                 num_mig, num_labor, admin_village):
+    def __init__(self, unique_id, model, hh_id, hh_row, landpos, gtgp_enrolled, age_1,
+                 gender_1, education_1, gtgp_dry, gtgp_rice, total_dry, total_rice, admin_village):
 
-        super().__init__(self, unique_id, hhpos, hh_row, gtgp_dry, gtgp_rice, total_dry, total_rice, admin_village)
+        super().__init__(self, unique_id, hh_id, admin_village)
         self.hh_row = hh_row
         self.landpos = landpos
         self.gtgp_enrolled = gtgp_enrolled
         self.age_1 = age_1
         self.gender_1 = gender_1
         self.education_1 = education_1
-        # self.area = area
-        self.land_type = land_type
-        self.land_time = land_time
-        self.gtgp_net_income = gtgp_net_income
-        self.land_income = land_income
-        self.plant_type = plant_type
+        self.land_type = 0
+        self.land_time = 0
+        self.gtgp_net_income = 0
+        self.land_income = 0
+        self.plant_type = 0
 
         self.gtgp_dry = gtgp_dry
         self.gtgp_rice = gtgp_rice
         self.total_dry = total_dry
         self.total_rice = total_rice
 
-        self.non_gtgp_output = non_gtgp_output
-        self.pre_gtgp_output = pre_gtgp_output
-        self.hh_size = hh_size
+        self.non_gtgp_output = 0
+        self.pre_gtgp_output = 0
+        self.hh_size = 0
 
-        self.num_mig = num_mig
-        self.num_labor = num_labor
         self.step_counter = 0
 
     def output(self):
@@ -171,11 +158,6 @@ class LandParcelAgent(HouseholdAgent):
             self.gtgp_enrolled = 1
         return self.gtgp_enrolled
 
-    # def gtgp_convert(self):
-    #     result = super(LandParcelAgent, self).gtgp_enroll()
-    #     if int(self.hh_id) in result:
-    #         self.gtgp_enrolled = 1
-
     def non_gtgp_count(self, nongtgplist, gtgplist):
         if self.gtgp_enrolled == 0 and self.unique_id not in nongtgplist:
             if len(nongtgplist) + len(gtgplist) != 722:
@@ -212,24 +194,21 @@ class LandParcelAgent(HouseholdAgent):
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
     def __init__(self, unique_id, model, hh_id, individual_id, age, gender, education,
-                 workstatus, marriage, gtgp_dry, gtgp_rice, total_dry, total_rice,
-                 admin_village = 0, hhpos = 0):
+                 workstatus, marriage, admin_village = 0):
 
 
-        super().__init__(unique_id, model, hh_id,
-                 gtgp_dry, gtgp_rice, total_dry, total_rice,
-                 admin_village, hhpos)
+        super().__init__(unique_id, model, hh_id, admin_village)
 
+        self.hh_id = int(hh_id)
         self.individual_id = individual_id
-        self.hh_id = hh_id
-        self.hhpos = hhpos
-
+        print(self.hh_id, self.individual_id, age, gender, education, workstatus,
+              marriage, admin_village, 'test except hhrow')
         self.age = age
         self.gender = gender
         self.education = education
         self.workstatus = workstatus
-
         self.marriage = marriage
+
         self.birth_rate = 0.0123
         self.birth_interval = 2
         self.birth_flag = 0
@@ -247,24 +226,20 @@ class IndividualAgent(HouseholdAgent):
 
         self.step_counter = 0
 
-        self.gtgp_dry = 0
-        self.gtgp_rice = 0
-        self.total_dry = 0
-        self.total_rice = 0
         self.hh_size = 0
-        self.hh_row = get_hh_row(int(self.hh_id))
+        try:
+            self.hh_row = get_hh_row(int(self.hh_id))
+        except:
+            print(self.hh_id, 'except hhrow')
         if self.hh_row is not None and self.hh_row <= 96:
             self.num_labor = initialize_labor(int(self.hh_row) - 2)
             self.num_mig = initialize_migrants(int(self.hh_row) - 2)
-        else:
-            print(self.hh_row, self.hh_id, 'except')
         self.admin_village = 0
 
 
     def create_initial_migrant_list(self):
         mig = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
-                              self.education, self.workstatus, self.marriage,
-                              self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice)
+                              self.education, self.workstatus, self.marriage, self.admin_village)
         mig.age = return_values(self.hh_row, 'initial_migrants')[0]
         if mig.age in [-3, 3, None]:
             pass
@@ -297,10 +272,10 @@ class IndividualAgent(HouseholdAgent):
                             self.marriage_flag = 1
                             self.marriage = 1
                             married_male_list.append(male)
-                            if male[-1] not in '0123456789':
+                            if 'k' not in male:
                                 self.hh_id = male.strip(male[-1])
                             else:
-                                self.hh_id = male.strip(male[-3])
+                                self.hh_id = male.strip(male[male.index('k'):])
                             self.individual_id = self.hh_id + 'j'
                             new_married_list.append(self.individual_id)
                             single_male_list.remove(male)
@@ -340,21 +315,23 @@ class IndividualAgent(HouseholdAgent):
             if (float(self.step_counter) - float(self.last_birth_time)) > float(self.birth_interval):
                 self.last_birth_time = self.step_counter
                 if self.hh_id != 'Dead':
-                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
-                                          self.education, self.workstatus, self.marriage,
-                                          self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
-                                          self.admin_village)
+                    ind = IndividualAgent(self, self.hh_id, self.individual_id, self.age, self.gender,
+                                          self.education, self.workstatus, self.marriage, self.admin_village)
                     ind.age = 0
-                    ind.gender = choice([0, 1])
+                    ind.gender = choice([1, 2])
                     ind.education = 0
                     ind.marriage = 0
+                    ind.workstatus = 6
                     ind.hh_id = self.hh_id
                     ind.individual_id = str(self.hh_id) + 'k' + '-' + str(self.step_counter)
                     # k is the generic individual id letter for newborn children in the household
-                    ind.workstatus = 6
                     birth_list.append(ind.individual_id)
                     self.model.schedule.add(ind)
+                    self.running = True
+                    # print(ind.hh_id, ind.individual_id, ind.age, ind.gender, 'work ind')
 
+                    # except:
+                    #     print(ind.hh_id, ind.individual_id, ind.age, ind.gender, 'except ind')
 
     def death(self):
         """Removes an object from reference"""

@@ -246,26 +246,26 @@ class ABM(Model):
             convertedlist.append(pos)
         return convertedlist
 
-    def determine_hhpos(self, hh_id, latitude, longitude):
+    def determine_hhpos(self, hh_row, latitude, longitude):
         """Determine position of agent on map"""
         x = convert_fraction_lat(
             convert_decimal(
-                str(return_values(hh_id, latitude))
+                str(return_values(hh_row, latitude))
                 )
             )[0] * self.space.x_max
 
         y = convert_fraction_long(
             convert_decimal(
-                str(return_values(hh_id, longitude))
+                str(return_values(hh_row, longitude))
                 )
             )[0] * self.space.y_max
         pos = (x, y)
         return pos
 
-    def determine_landpos(self, hh_id, latitude, longitude):
+    def determine_landpos(self, hh_row, latitude, longitude):
         """Combines previous functions to return a list of land parcel coordinates"""
-        latlist = self.return_x(hh_id, latitude)
-        longlist = self.return_y(hh_id, longitude)
+        latlist = self.return_x(hh_row, latitude)
+        longlist = self.return_y(hh_row, longitude)
         return self.return_lp_pos_list(latlist, longlist)
 
     # Create agents
@@ -275,11 +275,9 @@ class ABM(Model):
             self.hhpos = self.determine_hhpos(hh_row, 'house_latitude', 'house_longitude')
             self.hh_id = return_values(hh_row, 'hh_id')
             self.admin_village = 1
-            a = HouseholdAgent(hh_row, self, self.hhpos, self.hh_id, self.gtgp_dry, self.gtgp_rice,
-                               self.total_dry, self.total_rice, self.admin_village)
+            a = HouseholdAgent(self, self.hhpos, self.hh_id, self.admin_village)
             a.admin_village = 1  # see server.py, line 22
             self.space.place_agent(a, self.hhpos)  # admin_village placeholder
-            #print(a.hhpos, 'hhpos')
             self.schedule.add(a)
 
     def make_land_agents(self):
@@ -322,12 +320,10 @@ class ABM(Model):
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
-                lp = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
-                                     self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
-                                     self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
-                                     self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                     self.gtgp_net_income, self.land_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
-                lp.gtgp_enrolled = 0
+                lp = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
+                                     self.age_1, self.gender_1, self.education_1,
+                                     self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
+                                     self.admin_village)
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
                 #except:
@@ -370,12 +366,10 @@ class ABM(Model):
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
-                lp2 = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
-                                         self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
-                                         self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
-                                         self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.land_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
-                lp2.gtgp_enrolled = 0
+                lp2 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
+                                     self.age_1, self.gender_1, self.education_1,
+                                     self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
+                                     self.admin_village)
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
 
@@ -419,11 +413,10 @@ class ABM(Model):
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
-                lp3 = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
-                                         self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
-                                         self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
-                                         self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.land_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
+                lp3 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
+                                     self.age_1, self.gender_1, self.education_1,
+                                     self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
+                                     self.admin_village)
                 lp3.gtgp_enrolled = 1
                 self.space.place_agent(lp3, landpos)
                 self.schedule.add(lp3)
@@ -468,11 +461,10 @@ class ABM(Model):
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
-                lp4 = LandParcelAgent(hh_id, self, landpos, hh_row, hhpos, hh_id, self.gtgp_enrolled,
-                                         self.age_1, self.gender_1, self.education_1, self.land_type, self.land_time,
-                                         self.plant_type, self.land_area, self.total_rice, self.total_dry, self.gtgp_rice,
-                                         self.gtgp_dry, self.non_gtgp_output, self.pre_gtgp_output,
-                                         self.gtgp_net_income, self.land_income, self.hh_size, self.num_mig, self.num_labor, self.admin_village)
+                lp4 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
+                                     self.age_1, self.gender_1, self.education_1,
+                                     self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
+                                     self.admin_village)
                 lp4.gtgp_enrolled = 1
                 self.space.place_agent(lp4, landpos)
                 self.schedule.add(lp4)
@@ -512,9 +504,8 @@ class ABM(Model):
                     else:
                         self.workstatus == 0
                     IndividualAgent.create_initial_migrant_list(self)
-                    ind = IndividualAgent(hh_row, self, self.hh_id, self.individual_id, self.age, self.gender,
-                                          self.education, self.workstatus, self.marriage,
-                                          self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice)
+                    ind = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
+                                          self.education, self.workstatus, self.marriage, self.admin_village)
                     self.schedule.add(ind)
 
     def step(self):

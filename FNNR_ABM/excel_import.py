@@ -26,7 +26,8 @@ def assign_sheet_parameters(hh_row, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
     """Will create a new function when this list gets long enough"""
     parameters = []
-    row = str(int(hh_row) + 2)  # For example, row 3 in the Excel file corresponds to Household ID #1
+    row = str(int(hh_row) + 2)
+    # print(row) # For example, row 3 in the Excel file corresponds to Household ID #1
     # all lowercase!
     if variable.lower() == 'gtgp_area':
         parameters.append(str('DM' + row))
@@ -156,7 +157,7 @@ def initialize_labor(hh_row):
             #except:
             #    num_labor = 0
     else:
-        print(hh_row, 'excpet')
+        print(hh_row, 'except')
     return num_labor
 
 def initialize_migrants(hh_row):
