@@ -24,8 +24,8 @@ nongtgplist = []
 gtgplist = []
 hhlist = []
 household_income = [0] * 94
-exception_counter = []
-
+birth_flag_list = []
+marriage_flag_list = []
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data and head-of-house info"""
@@ -236,6 +236,8 @@ class IndividualAgent(HouseholdAgent):
         self.last_birth_time = 0
         self.mig_years = 0
         self.remittance = 0
+        self.husband_id = 0
+        self.past_individual_id = 0
 
         self.step_counter = 0
 
@@ -279,34 +281,38 @@ class IndividualAgent(HouseholdAgent):
 
     def match_female(self):
         """Loops through single females and matches to single males; see pseudocode"""
-        self.marriage_flag = 0
         global single_male_list  # debug suggestion: return it at step 0
-        if 20 < self.age and self.gender == 1 and self.individual_id not in single_male_list:
+        if self.age > 20 and self.gender == 1 and self.individual_id not in single_male_list    \
+                and self.individual_id not in married_male_list:
             single_male_list.append(self.individual_id)
             shuffle(single_male_list)  # randomizes males to go through
-        if self.marriage != 1:
-            self.marriage = 0  # set default to 0
-            if 20 < self.age and self.gender == 2 and self.marriage == 0:
-                # if person is a woman,
-                if random() < self.marriage_rate:
-                    for male in single_male_list:
-                        if random() < float(self.match_prob):
-                            self.past_hh_id = self.hh_id
-                            self.marriage_flag = 1
-                            self.marriage = 1
-                            married_male_list.append(male)
-                            if 'k' not in male:
-                                self.hh_id = male.strip(male[-1])
-                                self.individual_id = self.hh_id + 'j'
-                            else:
-                                self.hh_id = male[:male.index('k')]
-                                self.individual_id = self.hh_id + 'j' + '-' + str(self.step_counter)
-                            new_married_list.append(self.individual_id)
-                            single_male_list.remove(male)
-                            pass
-        if 20 < self.age and self.gender == 1:
             if self.individual_id in married_male_list:
                 self.marriage = 1
+        if random() < self.marriage_rate:
+            marriage_flag_list.append(1)
+        if self.age > 20 and self.gender == 2 and self.marriage != 1   \
+            and self.past_individual_id == 0 and 'j' not in self.individual_id  \
+            and marriage_flag_list != []:
+            # if person is a woman,
+            self.past_individual_id = self.individual_id
+            self.past_hh_id = self.hh_id
+            self.marriage_flag = 1
+            self.marriage = 1
+            loop = 0
+            for male in single_male_list:
+                if random() < float(self.match_prob) and loop == 0:
+                    married_male_list.append(male)
+                    self.husband_id = male
+                    if 'k' not in male:
+                        self.hh_id = male.strip(male[-1])
+                        self.individual_id = self.hh_id + 'j'
+                    else:
+                        self.hh_id = male[:male.index('k')]
+                        self.individual_id = self.hh_id + 'j' + '-' + str(self.step_counter)
+                    new_married_list.append(self.individual_id)
+                    single_male_list.remove(male)
+                    marriage_flag_list.remove(1)
+                    loop = 1  # same thing as using a While loop
 
     def immigration_marriage(self):
         """Adds a 3% chance that an additional immigrant marriage takes place along with a given marriage"""
@@ -333,7 +339,10 @@ class IndividualAgent(HouseholdAgent):
 
     def birth(self):
         """Adds a new IndividualAgent class object"""
-        if self.marriage == 1 and self.gender == 2 and self.age < 55:
+        birth_rate = 0.01
+        if random() < birth_rate:
+            birth_flag_list.append(1)
+        if self.marriage == 1 and self.gender == 2 and self.age < 55 and birth_flag_list != []:
             if (float(self.step_counter) - float(self.last_birth_time)) > float(self.birth_interval):
                 self.last_birth_time = self.step_counter
                 if self.hh_id != 'Dead':
@@ -348,12 +357,20 @@ class IndividualAgent(HouseholdAgent):
                     ind.individual_id = str(self.hh_id) + 'k' + '-' + str(self.step_counter)
                     # k is the generic individual id letter for newborn children in the household
                     birth_list.append(ind.individual_id)
+                    birth_flag_list.remove(1)
                     try:
                         self.model.schedule.add(ind)
                         self.running = True
                     except:
-                        # print(self.hh_id, self.past_hh_id, self.individual_id, self.model, self.step_counter)
-                        pass
+                        self.model.model.schedule.add(ind)
+                        self.running = True
+                    #if self.past_individual_id is not 0:
+                    #    print('success', 'past:',self.past_individual_id, 'ind_id:', self.individual_id,
+                    #          'hus:', self.husband_id, self.model, self.step_counter, 'success')
+                    #except:
+                        #print('fail', 'past:', self.past_individual_id, 'ind_id:',
+                        #      self.individual_id, 'hus:', self.husband_id, self.model, self.step_counter, 'fail')
+                        #pass
 
     def death(self):
         """Removes an object from reference"""
