@@ -259,30 +259,31 @@ class IndividualAgent(HouseholdAgent):
         # print(self.hh_id, self.individual_id, self.age, self.gender, self.education, 'break', self.workstatus,
         #      self.marriage, self.admin_village, self.workstatus, self.marriage, 'test except hhrow')
 
-    def create_initial_migrant_list(self):
+    def create_initial_migrant_list(self, hh_row):
+        self.hh_row = hh_row
         mig = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                               self.education, self.marriage, self.admin_village)
-        mig.age = return_values(self.hh_row, 'initial_migrants')[0]
-        if mig.age in [-3, 3, None]:
-            pass
-        else:
+        try:
+            mig.age = return_values(self.hh_row, 'initial_migrants')[0]
+            mig.gender = return_values(self.hh_row, 'initial_migrants')[1]
+            mig.marriage = return_values(self.hh_row, 'initial_migrants')[2]
+            mig.education = return_values(self.hh_row, 'initial_migrants')[3]
+            mig.mig_years = return_values(self.hh_row, 'initial_migrants')[4]
+            mig.individual_id = str(self.hh_id) + 'm'
+            # m is the generic individual id letter for initial migrants in the household
             if mig.individual_id not in initial_migrants_list and self.hh_id not in household_migrants_list:
-                mig.gender = return_values(self.hh_row, 'initial_migrants')[1]
-                mig.marriage = return_values(self.hh_row, 'initial_migrants')[2]
-                mig.education = return_values(self.hh_row, 'initial_migrants')[3]
-                mig.mig_years = return_values(self.hh_row, 'initial_migrants')[4]
-                mig.individual_id = str(self.hh_id) + 'm'
-                # m is the generic individual id letter for initial migrants in the household
                 initial_migrants_list.append(mig.individual_id)
-                #out_migrants_list.append(mig.individual_id)
-                #self.model.schedule.add(mig)
-                #self.running = True
-                #household_migrants_list.append(self.hh_id)
+                out_migrants_list.append(mig.individual_id)
+                self.schedule.add(mig)
+                self.running = True
+                # household_migrants_list.append(self.hh_id)
+        except: # NoneType; also, migrant in row 15 with -3 education
+            pass
 
     def match_female(self):
         """Loops through single females and matches to single males; see pseudocode"""
         global single_male_list  # debug suggestion: return it at step 0
-        if self.age > 20 and self.gender == 1 and self.individual_id not in single_male_list    \
+        if int(self.age) > 20 and self.gender == 1 and self.individual_id not in single_male_list    \
                 and self.individual_id not in married_male_list:
             single_male_list.append(self.individual_id)
             shuffle(single_male_list)  # randomizes males to go through
@@ -362,9 +363,13 @@ class IndividualAgent(HouseholdAgent):
                         self.model.schedule.add(ind)
                         self.running = True
                     except:
-                        self.model.model.schedule.add(ind)
-                        self.running = True
-                    #if self.past_individual_id is not 0:
+                        try:
+                            self.model.model.schedule.add(ind)
+                            self.running = True
+                        except:
+                            self.model.model.model.schedule.add(ind)
+                            self.running = True
+                            #if self.past_individual_id is not 0:
                     #    print('success', 'past:',self.past_individual_id, 'ind_id:', self.individual_id,
                     #          'hus:', self.husband_id, self.model, self.step_counter, 'success')
                     #except:

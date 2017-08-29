@@ -503,7 +503,7 @@ class ABM(Model):
                     except:
                         self.education = 0
                     self.marriage = marriagelist[i]
-                    IndividualAgent.create_initial_migrant_list(self)
+                    IndividualAgent.create_initial_migrant_list(self, hh_row)
                     ind = IndividualAgent(self.individual_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                                           self.education, self.marriage, self.admin_village)
                     self.schedule.add(ind)
