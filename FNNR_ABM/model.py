@@ -200,11 +200,6 @@ class ABM(Model):
         self.datacollector13 = DataCollector(
             model_reporters = {'Average Non-GTGP Parcels Per Household': show_non_gtgp_per_hh})
 
-    def make_birth_agents(self, ind):
-        self.schedule = StagedActivation(self)
-        self.schedule.add(ind)
-        self.running = True
-
     def return_x(self, hh_id, latitude):
         """Returns latitudes of land parcels for a given household"""
         convertedlist = []
@@ -389,7 +384,7 @@ class ABM(Model):
             self.education_1 = return_values(hh_row, 'education')[0]
             for landpos in landposlist:
                 try:
-                    self.land_area = return_values(hh_row, 'gtgp_rice_mu')[0]
+                    self.land_area = return_values(hh_row, 'gtgp_rice_mu')[landposlist.index(landpos)]
                 except:
                     pass
                 if self.land_area != 0:
@@ -507,6 +502,35 @@ class ABM(Model):
                     ind = IndividualAgent(self.individual_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                                           self.education, self.marriage, self.admin_village)
                     self.schedule.add(ind)
+
+temporarylist = ['11', '16', '31', '39', '41', '57', '72', '91', '101', '104', '108',
+                 '109', '113', '120', '123', '148', '149', '153', '161', '166']
+
+def make_individual_2014_agents(self):
+    for hh_id in temporarylist:
+        self.hh_id = hh_id
+        self.hh_row = get_hh_row(self.hh_id)
+        individual_id_list = return_values(hh_row, 'name')
+        agelist = return_values_2014(hh_row, 'age')  # find the ages of people in hh
+        genderlist = return_values_2014(hh_row, 'gender')
+        marriagelist = return_values_2014(hh_row, 'marriage')
+        educationlist = return_values_2014(hh_row, 'education')
+        self.migration_network = return_values_2014(hh_row, 'migration_network')[0]
+        if individual_id_list is not None and individual_id_list is not []:
+            for i in range(len(individual_id_list)):
+                self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
+                self.age = agelist[i]
+                self.gender = genderlist[i]
+                try:
+                    self.education = educationlist[i]
+                except:
+                    self.education = 0
+                self.marriage = marriagelist[i]
+                IndividualAgent.create_initial_migrant_list_2014(self, hh_row)
+                ind = IndividualAgent(self.individual_id, self, self.hh_id, self.individual_id, self.age,
+                                      self.gender,
+                                      self.education, self.marriage, self.admin_village)
+                self.schedule.add(ind)
 
     def step(self):
         """Advance the model by one step"""
