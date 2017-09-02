@@ -7,11 +7,12 @@ It also converts the imported data into workable values.
 
 from openpyxl import *
 import inspect
+from excel_import import *
 
 # Directory in which source file is located, exact name of source file + extension
-currentpath = str(inspect.getfile(inspect.currentframe()))[:-16] # 'removes excel_import.py' at end
+currentpath = str(inspect.getfile(inspect.currentframe()))[:-21] # 'removes excel_import_2014.py' at end
 os.chdir(currentpath)
-currentbook = '2014_survey_validation.xlsx'
+currentbook = '2014_survey_validation_edited.xlsx'
 
 
 # openpyxl commands
@@ -26,7 +27,7 @@ def assign_sheet_parameters_2014(hh_row, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
     """Will create a new function when this list gets long enough"""
     parameters = []
-    row = str(int(hh_row) + 1)
+    row = str(int(hh_row) + 2)
     # print(row) # For example, row 3 in the Excel file corresponds to Household ID #1
     # all lowercase!
     if variable.lower() == '2014_hh_id':
@@ -57,6 +58,9 @@ def assign_sheet_parameters_2014(hh_row, variable):
         parameters.append(str('BG' + row))
         parameters.append(str('BG' + row))
     elif variable.lower() == 'non_gtgp_area':
+        parameters.append(str('BW' + row))
+        parameters.append(str('CA' + row))
+    elif variable.lower() == 'non_gtgp_rice_mu':
         parameters.append(str('BW' + row))
         parameters.append(str('CA' + row))
     elif variable.lower() == 'non_gtgp_plant_type':
@@ -102,13 +106,13 @@ def assign_sheet_parameters_2014(hh_row, variable):
         pass
     return parameters
 
-def get_hh_row(hh_id):
-    """Returns an Excel household row when given the ID"""
-    column_counter = 0
-    for CellObj in sheet['A']:
-        column_counter += 1
-        if CellObj.value == hh_id:
-            return column_counter
+# def get_hh_row(hh_id):
+#     """Returns an Excel household row when given the ID"""
+#     column_counter = 0
+#     for CellObj in sheet['A']:
+#         column_counter += 1
+#         if CellObj.value == hh_id:
+#             return column_counter
 
 
 def initialize_labor_2014(hh_row):
@@ -145,3 +149,25 @@ def return_values_2014(hh_row, var):
     # print(variable_per_hh) # Example: ['1', '2', '1'] for genders in a household
     if variable_per_hh != []:
         return variable_per_hh
+
+def initialize_labor_2014(hh_row):
+    num_labor = 0
+    agelist = return_values_2014(hh_row, 'age')  # find the ages of people in hh
+    if agelist is not None:  # if there are people in the household,
+        for age in agelist:  # for each person (can't use self.age because not a Household-level attribute),
+                # ages are strings by default, must convert to float
+            if 15 < float(age) < 59:  # if the person is 15-65 years old,
+                num_labor += 1  # defines number of laborers as people aged 15 < x < 59
+            #except:
+            #    num_labor = 0
+    else:
+        print(hh_row, 'except')
+    return num_labor
+
+def initialize_migrants_2014(hh_row):
+    if_migrant = return_values_2014(hh_row, 'initial_migrants')
+    if if_migrant is not None and if_migrant[0] != -3:
+        num_mig = 1
+    else:
+        num_mig = 0
+    return num_mig
