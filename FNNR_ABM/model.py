@@ -10,6 +10,7 @@ from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 from agents import *
 from excel_import import *
+from model_2014 import *
 
 
 # def show_num_mig(model):  # wrong formula
@@ -156,6 +157,7 @@ class ABM(Model):
         self.schedule = StagedActivation(self)
         self.make_hh_agents()
         self.make_land_agents()
+        self.make_land_agents_2014()
         self.make_individual_agents()
         self.running = True
 
@@ -296,16 +298,10 @@ class ABM(Model):
             landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
             self.age_1 = return_values(hh_row, 'age')[0]
             self.gender_1 = return_values(hh_row, 'gender')[0]
+            if self.gender_1 not in [1, 2, '1', '2']:
+                print(self.gender_1)
             self.education_1 = return_values(hh_row, 'education')[0]
             for landpos in landposlist:
-                try:
-                    self.land_area = return_values(hh_row, 'non_gtgp_rice_mu')[0]
-                except:
-                    pass
-                if self.land_area != 0:
-                    self.land_type = 0
-                # print(hh_row, return_values(hh_row, 'non_gtgp_output'))
-                # print([landposlist.index(landpos)])
                 try:
                     self.non_gtgp_output = return_values(hh_row, 'non_gtgp_output')[landposlist.index(landpos)]
                 except:
@@ -507,6 +503,111 @@ class ABM(Model):
                     ind = IndividualAgent(self.individual_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                                           self.education, self.marriage, self.admin_village)
                     self.schedule.add(ind)
+
+    temporarylist = ['11', '16', '31', '39', '41', '57', '72', '91', '101', '104', '108',
+                     '109', '113', '120', '123', '148', '149', '153', '161', '166']
+
+    def make_individual_2014_agents(self):
+        for hh_id in temporarylist:
+            self.hh_id = hh_id
+            self.hh_row = get_hh_row(self.hh_id)
+            individual_id_list = return_values(hh_row, 'name')
+            agelist = return_values_2014(hh_row, 'age')  # find the ages of people in hh
+            genderlist = return_values_2014(hh_row, 'gender')
+            marriagelist = return_values_2014(hh_row, 'marriage')
+            educationlist = return_values_2014(hh_row, 'education')
+            self.migration_network = return_values_2014(hh_row, 'migration_network')[0]
+            if individual_id_list is not None and individual_id_list is not []:
+                for i in range(len(individual_id_list)):
+                    self.individual_id = str(self.hh_id) + str(individual_id_list[i]) + '_2014'  # example: 2c
+                    self.age = agelist[i]
+                    self.gender = genderlist[i]
+                    try:
+                        self.education = educationlist[i]
+                    except:
+                        self.education = 0
+                    self.marriage = marriagelist[i]
+                    IndividualAgent.create_initial_migrant_list_2014(self, hh_row)
+                    ind = IndividualAgent(self.individual_id, self, self.hh_id, self.individual_id, self.age,
+                                          self.gender,
+                                          self.education, self.marriage, self.admin_village)
+
+    import excel_import
+
+    def make_land_agents_2014(self):
+        """Create the land agents on the map; adding output and time later"""
+
+        # add non-gtgp rice paddies
+        for hh_row in agents:  # from excel_import
+            hh_id = return_values_2014(hh_row, 'hh_id')
+            self.age_1 = return_values_2014(hh_row, 'age')[0]
+            self.gender_1 = return_values_2014(hh_row, 'gender')[0]
+            self.education_1 = return_values_2014(hh_row, 'education')[0]
+            for i in range(len(return_values_2014(hh_row, 'non_gtgp_rice_mu'))):
+                try:
+                    self.non_gtgp_output = return_values_2014(hh_row, 'non_gtgp_output')[i]
+                except:
+                    pass
+                try:
+                    self.land_time = return_values_2014(hh_row, 'non_gtgp_travel_time')[i]
+                except:
+                    pass
+                try:
+                    self.plant_type = return_values_2014(hh_row, 'non_gtgp_plant_type')[i]
+                except:
+                    pass
+                try:
+                    self.land_type = return_values_2014(hh_row, 'non_gtgp_land_type')[i]
+                except:
+                    pass
+                self.hh_size = len(return_values_2014(hh_row, 'age'))
+                landpos = 0
+                self.gtgp_dry = 0
+                self.gtgp_rice = 0
+                self.total_dry = 0
+                self.total_rice = 0
+                lp2014 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
+                                         self.age_1, self.gender_1, self.education_1,
+                                         self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
+                                         self.admin_village)
+                self.schedule.add(lp2014)
+
+        # add non-gtgp rice paddies
+        for hh_row in agents:  # from excel_import
+            hh_id = return_values_2014(hh_row, 'hh_id')
+            self.hh_id = hh_id
+            self.age_1 = return_values_2014(hh_row, 'age')[0]
+            self.gender_1 = return_values_2014(hh_row, 'gender')[0]
+            self.education_1 = return_values_2014(hh_row, 'education')[0]
+            for i in range(len(return_values_2014(hh_row, 'non_gtgp_rice_mu'))):
+                try:
+                    self.land_area = return_values_2014(hh_row, 'non_gtgp_rice_mu')[i]
+                except:
+                    pass
+                if self.land_area != 0:
+                    self.land_type = 0
+                try:
+                    self.non_gtgp_output = return_values_2014(hh_row, 'non_gtgp_output')[i]
+                except:
+                    pass
+                try:
+                    self.land_time = return_values_2014(hh_row, 'non_gtgp_travel_time')[i]
+                except:
+                    pass
+                try:
+                    self.plant_type = return_values_2014(hh_row, 'non_gtgp_plant_type')[i]
+                except:
+                    pass
+                try:
+                    self.land_type = return_values_2014(hh_row, 'non_gtgp_land_type')[i]
+                except:
+                    pass
+                self.hh_size = len(return_values_2014(hh_row, 'age'))
+                lp2014_gtgp = LandParcelAgent(hh_id, self, self.hh_id, hh_row, landpos, self.gtgp_enrolled,
+                                              self.age_1, self.gender_1, self.education_1,
+                                              self.gtgp_rice, self.total_dry, self.gtgp_dry, self.total_rice,
+                                              self.admin_village)
+                self.schedule.add(lp2014_gtgp)
 
     def step(self):
         """Advance the model by one step"""
