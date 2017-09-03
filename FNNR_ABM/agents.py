@@ -27,6 +27,11 @@ marriage_flag_list = []
 nongtgplist = []
 gtgplist = []
 hhlist = []
+
+# each index represents a household
+num_mig_list = [0] * 94
+num_labor_list = [0] * 94
+hh_size_list = [0] * 94
 household_income = [0] * 94
 
 single_male_list_2014 = []
@@ -43,6 +48,10 @@ marriage_flag_list_2014 = []
 nongtgplist_2014 = []
 gtgplist_2014 = []
 hhlist_2014 = []
+
+num_mig_list_2014 = [0] * 94
+num_labor_list_2014 = [0] * 94
+hh_size_list_2014 = [0] * 94
 household_income_2014 = [0] * 94
 
 
@@ -51,12 +60,11 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     def __init__(self, unique_id, model, hh_id, admin_village):
 
         super().__init__(unique_id, model)
-        self.model = model
         self.hh_id = hh_id
         self.admin_village = admin_village
+
         try:
             self.hh_row = get_hh_row(int(self.hh_id)) - 2
-            #if self.hh_row < 3 or self.hh_row > 96:
             # household ids go from 1-169; household row refers to the Excel file, 1-94
         except:  # just in case an error sets individual ids as household ids
             if 'k' in self.hh_id:  # k is the tag for the second generation of people
@@ -105,7 +113,9 @@ class LandParcelAgent(HouseholdAgent):
     """Sets land parcel agents; superclass is HouseholdAgent"""
 
     def __init__(self, unique_id, model, hh_id, hh_row, landpos, gtgp_enrolled, age_1,
-                 gender_1, education_1, gtgp_dry, gtgp_rice, total_dry, total_rice, admin_village):
+                 gender_1, education_1, gtgp_dry, gtgp_rice, total_dry, total_rice,
+                 land_type, land_time, plant_type, non_gtgp_output, pre_gtgp_output,
+                 admin_village):
 
         super().__init__(self, unique_id, hh_id, admin_village)
         self.hh_row = hh_row
@@ -114,20 +124,21 @@ class LandParcelAgent(HouseholdAgent):
         self.age_1 = age_1  # calculated in model.py
         self.gender_1 = gender_1
         self.education_1 = education_1
-        self.land_type = 0  # calculated later
-        self.land_time = 0
-        self.gtgp_net_income = 0
-        self.land_income = 0
-        self.plant_type = 0
+        self.land_type = land_type
+        self.land_time = land_time
+        self.gtgp_net_income = 0  # calculated later
+        self.land_income = 0  # calculated later
+        self.plant_type = plant_type
         # print(self.hh_row, self.landpos, self.gtgp_enrolled, self.age_1, self.gender_1, self.education_1)
 
         self.gtgp_dry = gtgp_dry  # calculated in model.py
         self.gtgp_rice = gtgp_rice
         self.total_dry = total_dry
         self.total_rice = total_rice
+        # print(self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice)
 
-        self.non_gtgp_output = 0  # will calculate later
-        self.pre_gtgp_output = 0
+        self.non_gtgp_output = non_gtgp_output
+        self.pre_gtgp_output = pre_gtgp_output
 
         self.step_counter = 0
 
@@ -168,21 +179,17 @@ class LandParcelAgent(HouseholdAgent):
             # self.num_labor = self.initialize_labor(self.hh_row)
             self.first_step_flag = 1  # prevents above lines from repeating after initialization
         minimum_non_gtgp = 0.3  # set in pseudo-code
+        if self.total_dry == None:
+            self.total_dry = 0
+        if self.total_rice == None:
+            self.total_rice = 0
+        if self.gtgp_dry == None:
+            self.gtgp_dry = 0
+        if self.gtgp_rice == None:
+            self.gtgp_rice = 0
         non_gtgp_area = (float(self.total_dry) + float(self.total_rice)) - (float(self.gtgp_dry) + float(self.gtgp_rice))
         if non_gtgp_area < minimum_non_gtgp:
             gtgp_part_prob = 0
-        if self.gtgp_enrolled == 0:
-            self.land_type = 0
-            self.land_time = 0
-            #self.land_type = float(return_values(self.hh_row, 'non_gtgp_land_type'))
-            #self.land_time = float(return_values(self.hh_row, 'non_gtgp_travel_time'))
-        elif self.gtgp_enrolled == 1:
-            self.land_type = 0
-            self.land_time = 0
-
-            #self.land_type = float(return_values(self.hh_row, 'pre_gtgp_land_type'))
-            #self.land_time = float(return_values(self.hh_row, 'pre_gtgp_travel_time'))
-            # temporary!
         try:
             prob = exp(2.52 - 0.012 * float(self.age_1) - 0.29 * float(self.gender_1) + 0.01 * float(self.education_1)
                    + 0.001 * float(self.hh_size) - 2.45 * self.land_type * 0.0006 * float(self.gtgp_net_income)
@@ -235,7 +242,7 @@ class LandParcelAgent(HouseholdAgent):
 class IndividualAgent(HouseholdAgent):
     """Sets Individual agents; superclass is HouseholdAgent"""
     def __init__(self, unique_id, model, hh_id, individual_id, age, gender, education,
-                 marriage, admin_village = 1):  # admin_village is a placeholder
+                 marriage, admin_village):  # admin_village is a placeholder
 
         super().__init__(unique_id, model, hh_id, admin_village)
 
@@ -301,7 +308,6 @@ class IndividualAgent(HouseholdAgent):
             self.num_labor = 0
             self.num_mig = 0
         self.admin_village = 0
-
 
     def create_initial_migrant_list(self, hh_row):
         """Creates a list of initial migrants from exported data"""
@@ -380,13 +386,13 @@ class IndividualAgent(HouseholdAgent):
             marriage_flag_list.append(1)  #
         if self.age > 20 and self.gender == 2 and self.marriage != 1:
             if self.past_individual_id == 0 and 'j' not in self.individual_id  \
-            and marriage_flag_list != []:
-            # if person is a woman,
-                self.past_individual_id = self.individual_id
-                self.past_hh_id = self.hh_id
-                self.marriage_flag = 1
-                self.marriage = 1
-                loop = 0 # same thing as using a While loop
+                and marriage_flag_list != []:
+                    # if person is a woman,
+                    self.past_individual_id = self.individual_id
+                    self.past_hh_id = self.hh_id
+                    self.marriage_flag = 1
+                    self.marriage = 1
+                    loop = 0  # same thing as using a While loop
                 if '2014' not in self.individual_id:
                     for male in single_male_list:
                         if random() < float(self.match_prob) and loop == 0:
