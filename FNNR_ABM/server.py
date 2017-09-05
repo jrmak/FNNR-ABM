@@ -12,6 +12,7 @@ from model import *
 from agents import *
 from excel_export_summary import *
 from excel_export_household import *
+from excel_export_household_2014 import *
 from SimpleContinuousModule import SimpleCanvas
 import matplotlib.pyplot as plt
 import inspect
@@ -72,13 +73,15 @@ model = ABM(100, 10, 10)
 erase_summary()
 erase_household()
 initialize_household()
+erase_household_2014()
+initialize_household_2014()
 global i_counter
 for i in range(100):  # sets up model to run for 80 steps
     model.step()
     i_counter = i
     save_summary(i_counter, show_num_mig(model), show_num_mig_per_year(model), show_re_mig(model),                     \
                  show_re_mig_per_year(model), show_marriages(model), show_births(model), len(death_list),
-                 show_marriages_per_year(model), show_births_per_year(model), show_deaths_per_year(model),
+                 show_num_labor(model), show_hh_size(model), show_income(model),
                  show_pop(model), show_gtgp_per_hh(model), show_non_gtgp_per_hh(model))
 # 1 at the end of the variable name means that it's per year instead of accumulative
 mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
@@ -94,9 +97,11 @@ dea_plot1 = model.datacollector10.get_model_vars_dataframe()
 pop_plot = model.datacollector11.get_model_vars_dataframe()
 gtgp_plot = model.datacollector12.get_model_vars_dataframe()
 non_gtgp_plot = model.datacollector13.get_model_vars_dataframe()
+hh_size_plot = model.datacollector14.get_model_vars_dataframe()
+num_labor_plot = model.datacollector15.get_model_vars_dataframe()
 
 mig_plot.plot()
-plt.title('Cumulative # of Out-Migrants in the Reserve')
+plt.title('Instant # of Out-Migrants in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Migrants')
 
@@ -109,11 +114,11 @@ mig_plot1.plot()
 plt.title('Average Number of Out-Migrants Per Household')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Migrants')
-
-re_mig_plot1.plot()
-plt.title('Average Number of Re-Migrants Per Household')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Re-migrants')
+#
+# re_mig_plot1.plot()
+# plt.title('Average Number of Re-Migrants Per Household')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Re-migrants')
 
 mar_plot.plot()
 plt.title('Total # of Marriages in the Reserve')
@@ -159,6 +164,17 @@ non_gtgp_plot.plot()
 plt.title('Average # of Non-GTGP Parcels Per Household')
 plt.xlabel('Years (Steps)')
 plt.ylabel('Non-GTGP Parcels')
+
+hh_size_plot.plot()
+plt.title('Average Household Size')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of People in Household')
+
+num_labor_plot.plot()
+plt.title('Average # of Laborers in Household')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Laborers in Household')
+
 
 plt.show() # comment or uncomment this line to see or hide the graphs
 
