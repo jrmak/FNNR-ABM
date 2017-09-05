@@ -21,7 +21,6 @@ sheet = wbglobal.active
 # a list of 94 hh_ids; hardcoded since number from excel file not likely to change
 agents = list(range(1, 95))  # range(1, 95) goes 1-94
 
-
 def assign_sheet_parameters(hh_row, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
     """Will create a new function when this list gets long enough"""
@@ -72,9 +71,10 @@ def assign_sheet_parameters(hh_row, variable):
         parameters.append(str('JP' + row))
         parameters.append(str('JT' + row))
 
-    elif variable.lower() == 'num_mig':
-        parameters.append(str('ZV' + row))
-        parameters.append(str('ZZ' + row))
+    # elif variable.lower() == 'num_mig':
+    #     parameters.append(str('ZV' + row))
+    #     parameters.append(str('ZZ' + row))
+
     elif variable.lower() == 'migration_network':
         parameters.append(str('AIP' + row))
         parameters.append(str('AIP' + row))
@@ -148,6 +148,7 @@ def get_hh_row(hh_id):
 
 
 def initialize_labor(hh_row):
+    """Returns an initial # of laborers for a given household"""
     num_labor = 0
     # There are 94 total households, but ids range from 1-169.
     # for clarity: hh_row refers to the Excel spreadsheet row, 3-96 (representing 94 households).
