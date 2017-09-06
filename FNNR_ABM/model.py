@@ -222,7 +222,7 @@ class ABM(Model):
             model_reporters = {'Average Household Size': show_hh_size})
 
         self.datacollector15 = DataCollector(
-            model_reporters = {'# of Laborers': show_num_labor})
+            model_reporters = {'# of Laborers Per Household': show_num_labor})
 
     def make_birth_agents(self, ind):
         self.schedule = StagedActivation(self)

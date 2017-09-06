@@ -64,7 +64,7 @@ hardcoded_remittances = [(2, 3000), (3, 10000), (4, 5000), (7, 2000), (16, 2000)
 for (x, y) in hardcoded_remittances:
     household_income_2014[x - 2] = y
 
-for hh_row in range(2, 22):
+for hh_row in agents:  # list from excel_import.py, numbered 1-95
     if return_values(hh_row, 'initial_migrants') is not None:
         num_mig_list[hh_row - 2] = 1
     else:
@@ -72,11 +72,12 @@ for hh_row in range(2, 22):
     num_labor_list[hh_row - 2] = initialize_labor(hh_row)
     hh_size_list[hh_row - 2] = len(return_values(hh_row, 'age'))
 
+for hh_row in range(2, 22):
     if return_values_2014(hh_row, 'initial_migrants') is not None:
-
         num_mig_list_2014[hh_row - 2] = 1
     else:
         num_mig_list_2014[hh_row - 2] = 0
+
     num_labor_list_2014[hh_row - 2] = initialize_labor_2014(hh_row)
     hh_size_list_2014[hh_row - 2] = len(return_values_2014(hh_row, 'age'))
 
@@ -613,7 +614,7 @@ class IndividualAgent(Agent):
             farm_work = 1  # converts working status into binary farm work status
         else:
             farm_work = 0
-
+        self.mig_flag = 0
         if self.num_labor != 0 and self.num_labor is not None and '2014' not in self.individual_id:
             non_gtgp_area = (float(self.total_rice) + float(self.total_dry)) \
                             - (float(self.gtgp_dry) + float(self.gtgp_rice))
@@ -670,8 +671,10 @@ class IndividualAgent(Agent):
                         re_migrants_list.remove(self.individual_id)
 
                 elif '2014' in self.individual_id:
-                    household_migrants_list_2014.append(self.hh_id)
-                    out_migrants_list_2014.append(self.individual_id)
+                    if self.hh_id not in household_migrants_list_2014:
+                        household_migrants_list_2014.append(self.hh_id)
+                    if self.individual_id not in out_migrants_list_2014:
+                        out_migrants_list_2014.append(self.individual_id)
                     if self.individual_id in re_migrants_list_2014:
                         re_migrants_list_2014.remove(self.individual_id)
 
@@ -684,40 +687,44 @@ class IndividualAgent(Agent):
 
             prob = exp(-1.2 + 0.06 * self.age - 0.08 * self.mig_years)
             re_mig_prob = prob / (prob + 1)
-            if '2014' not in self.individual_id:
-                if random() < re_mig_prob:
+            if random() < re_mig_prob:
+                if '2014' not in self.individual_id:
                     household_income[self.hh_row - 3] = household_income[self.hh_row - 3]\
                                                         - self.remittance
-            elif '2014' in self.individual_id:
-                if random() < re_mig_prob:
-                    household_income_2014[self.hh_row - 3] = household_income_2014[self.hh_row - 3] \
+                elif '2014' in self.individual_id and self.hh_row < 22:
+                    household_income_2014[self.hh_row - 2] = household_income_2014[self.hh_row - 2] \
                                                         - self.remittance
-                    self.remittance = 0
-                    if self.hh_id == 'Migrated':
-                        self.hh_id = self.past_hh_id
-                    self.workstatus = 1
-                    if self.individual_id in out_migrants_list:
-                        out_migrants_list.remove(self.individual_id)
-                    elif self.individual_id in out_migrants_list_2014:
-                        out_migrants_list_2014.remove(self.individual_id)
-                    if self.individual_id not in re_migrants_list and '2014' not in self.individual_id:
-                        re_migrants_list.append(self.individual_id)
-                    elif self.individual_id not in re_migrants_list_2014 and '2014' in self.individual_id:
-                        re_migrants_list_2014.append(self.individual_id)
+                self.remittance = 0
+                if self.hh_id == 'Migrated':
+                    self.hh_id = self.past_hh_id
+                self.workstatus = 1
+                if self.individual_id in out_migrants_list:
+                    out_migrants_list.remove(self.individual_id)
+                elif self.individual_id in out_migrants_list_2014:
+                    out_migrants_list_2014.remove(self.individual_id)
+                if self.individual_id not in re_migrants_list and '2014' not in self.individual_id:
+                    re_migrants_list.append(self.individual_id)
+                elif self.individual_id not in re_migrants_list_2014 and '2014' in self.individual_id:
+                    re_migrants_list_2014.append(self.individual_id)
 
-                    self.hh_size += 1
+                self.hh_size += 1
+                self.num_mig -= 1
+
+                if '2014' not in self.individual_id:
                     hh_size_list[self.hh_row - 3] += 1
-                    self.num_mig -= 1
                     num_mig_list[self.hh_row - 3] -= 1
+                elif '2014' in self.individual_id and self.hh_row < 22:
+                    hh_size_list_2014[self.hh_row - 3] += 1
+                    num_mig_list_2014[self.hh_row - 3] -= 1
 
-                    if self.hh_id in household_migrants_list:
-                        household_migrants_list.remove(self.hh_id)
-                    elif self.hh_id in household_migrants_list_2014:
-                        household_migrants_list_2014.remove(self.hh_id)
+                if self.hh_id in household_migrants_list:
+                    household_migrants_list.remove(self.hh_id)
+                elif self.hh_id in household_migrants_list_2014:
+                    household_migrants_list_2014.remove(self.hh_id)
 
-                    if 15 < self.age < 65:
-                        self.num_labor += 1
-                        num_labor_list[self.hh_row - 3] += 1
+                if 15 < self.age < 65:
+                    self.num_labor += 1
+                    num_labor_list[self.hh_row - 3] += 1
 
 
     def step(self):
