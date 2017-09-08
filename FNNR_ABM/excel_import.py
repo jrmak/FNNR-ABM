@@ -161,8 +161,6 @@ def initialize_labor(hh_row):
                 num_labor += 1  # defines number of laborers as people aged 15 < x < 59
             #except:
             #    num_labor = 0
-    else:
-        print(hh_row, 'except')
     return num_labor
 
 def initialize_migrants(hh_row):

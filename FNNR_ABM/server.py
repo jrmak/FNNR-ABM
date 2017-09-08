@@ -11,6 +11,7 @@ from mesa.visualization.modules import ChartModule, TextElement
 from model import *
 from agents import *
 from excel_export_summary import *
+from excel_export_summary_2014 import *
 from excel_export_household import *
 from excel_export_household_2014 import *
 from SimpleContinuousModule import SimpleCanvas
@@ -83,6 +84,12 @@ for i in range(100):  # sets up model to run for 80 steps
                  show_re_mig_per_year(model), show_marriages(model), show_births(model), len(death_list),
                  show_num_labor(model), show_hh_size(model), show_income(model),
                  show_pop(model), show_gtgp_per_hh(model), show_non_gtgp_per_hh(model))
+    # save_summary_2014(i_counter, show_num_mig_2014(model), show_num_mig_per_year_2014(model), show_re_mig_2014(model), \
+    #                 show_re_mig_per_year_2014(model), show_marriages_2014(model),
+    #                 show_births_2014(model), len(death_list_2014), show_num_labor_2014(model),
+    #                 show_hh_size_2014(model), show_income_2014(model), show_pop_2014(model),
+    #                 show_gtgp_per_hh_2014(model), show_non_gtgp_per_hh_2014(model))
+
 # 1 at the end of the variable name means that it's per year instead of accumulative
 mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
 re_mig_plot = model.datacollector2.get_model_vars_dataframe()
