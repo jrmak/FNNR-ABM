@@ -105,6 +105,95 @@ def show_non_gtgp_per_hh(model):
     """Returns the average # of non-GTGP land parcels per household"""
     return len(nongtgplist) / 94
 
+
+def show_num_mig(model):
+    b = len(out_migrants_list)
+    return b
+
+def show_num_mig_per_year(model):
+    """Returns the average # of migrants in each household"""
+    b = len(out_migrants_list) / 94
+    return b
+
+# def show_num_mig_per_year(model):
+#     return (sum(num_mig_list) / 94)
+
+def show_re_mig(model):
+    """Returns the cumulative # of re-migrants"""
+    b = len(re_migrants_list)
+    return b
+
+def show_re_mig_per_year(model):
+    """Returns the average # of re-migrants for each household"""
+    b = len(re_migrants_list) / 94
+    return b
+
+def show_marriages(model):
+    """Returns the total # of marriages in the reserve"""
+    b = len(new_married_list)
+    return float(b)
+
+def show_births(model):
+    """Returns the total # of births in the reserve"""
+    b = len(birth_list)
+    return b
+
+def show_deaths(model):
+    """Returns the total # of deaths in the reserve"""
+    b = len(death_list)
+    return b
+
+def show_hh_size(model):
+    """Returns the average household size in the reserve"""
+    return sum(hh_size_list) / 94
+
+def show_num_labor(model):
+    """Returns the average # of laborers per household in the reserve"""
+    return sum(num_labor_list) / 94
+
+def show_income(model):
+    """Returns the average household income in the reserve"""
+    return sum(household_income) / 94
+
+old_mcounter = []
+def show_marriages_per_year(model):
+    """Returns the marriages that happen for each year in the reserve"""
+    global old_mcounter
+    marriage_list_change = len(new_married_list) - sum(old_mcounter)
+    old_mcounter = [len(new_married_list)]
+    return marriage_list_change
+
+old_bcounter = []
+def show_births_per_year(model):
+    """Returns the births that happen for each year in the reserve"""
+    global old_bcounter
+    birth_list_change = len(birth_list) - sum(old_bcounter)
+    old_bcounter = [len(birth_list)]
+    return birth_list_change
+
+old_dcounter = []
+def show_deaths_per_year(model):
+    """Returns the deaths that happen for each year in the reserve"""
+    global old_dcounter
+    death_list_change = len(death_list) - sum(old_dcounter)
+    old_dcounter = [len(death_list)]
+    return death_list_change
+
+def show_pop(model):
+    """Returns the population for each year in the reserve"""
+    individuals = 278 + len(birth_list) - len(out_migrants_list) - len(death_list)
+    # 278 = original individual count, excluding initial migrants
+    # out_migrants_list at step 0 includes initial migrants
+    return individuals
+
+def show_gtgp_per_hh(model):
+    """Returns the average # of GTGP land parcels per household"""
+    return len(gtgplist) / 94
+
+def show_non_gtgp_per_hh(model):
+    """Returns the average # of non-GTGP land parcels per household"""
+    return len(nongtgplist) / 94
+
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
     def __init__(self, hh_id, width, height):
@@ -320,12 +409,14 @@ class ABM(Model):
             self.gtgp_dry = return_values(hh_row, 'non_gtgp_dry_mu')
             if self.gtgp_dry in ['-3', '-4', -3, None]:
                 self.gtgp_dry = 0
+
             landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
             self.age_1 = return_values(hh_row, 'age')[0]
             self.gender_1 = return_values(hh_row, 'gender')[0]
             if self.gender_1 not in [1, 2, '1', '2']:
                 print(self.gender_1)
             self.education_1 = return_values(hh_row, 'education')[0]
+
             for landpos in landposlist:
                 try:
                     self.pre_gtgp_output = return_values(hh_row, 'pre_gtgp_output')[landposlist.index(landpos)]
@@ -350,6 +441,8 @@ class ABM(Model):
                                      self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
                                      self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
                                      self.pre_gtgp_output)
+                if self.gtgp_enrolled == 0 and self not in nongtgplist:
+                    nongtgplist.append(self)
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
                 #except:
@@ -406,6 +499,8 @@ class ABM(Model):
                                      self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
                                      self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
                                      self.pre_gtgp_output)
+                if self.gtgp_enrolled == 0 and self not in nongtgplist:
+                    nongtgplist.append(self)
                 self.space.place_agent(lp2, landpos)
                 self.schedule.add(lp2)
 
@@ -456,12 +551,14 @@ class ABM(Model):
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
+                self.gtgp_enrolled = 1
                 lp3 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
                                      self.age_1, self.gender_1, self.education_1,
                                      self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
                                      self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
                                      self.pre_gtgp_output)
-                lp3.gtgp_enrolled = 1
+                if self.gtgp_enrolled == 1 and self not in gtgplist:
+                    gtgplist.append(self)
                 self.space.place_agent(lp3, landpos)
                 self.schedule.add(lp3)
 
@@ -514,12 +611,14 @@ class ABM(Model):
                 except:
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
+                self.gtgp_enrolled = 1
                 lp4 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
                                      self.age_1, self.gender_1, self.education_1,
                                      self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
                                      self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
                                      self.pre_gtgp_output)
-                lp4.gtgp_enrolled = 1
+                if self.gtgp_enrolled == 1 and self not in gtgplist:
+                    gtgplist.append(self)
                 self.space.place_agent(lp4, landpos)
                 self.schedule.add(lp4)
 
@@ -553,7 +652,7 @@ class ABM(Model):
         for hh_id in hh_list_2014:
             self.hh_id = hh_id
             self.hh_row = range(2,22)
-            individual_id_list = return_values(hh_row, 'name')
+            individual_id_list = return_values_2014(hh_row, 'name')
             agelist = return_values_2014(hh_row, 'age')  # find the ages of people in hh
             genderlist = return_values_2014(hh_row, 'gender')
             marriagelist = return_values_2014(hh_row, 'marriage')
@@ -574,15 +673,15 @@ class ABM(Model):
                     self.marriage = marriagelist[i]
                     IndividualAgent.create_initial_migrant_list(self, hh_row)
                     ind = IndividualAgent(hh_id, self, self.hh_id, self.individual_id, self.age,
-                                          self.gender,
-                                          self.education, self.marriage, self.past_hh_id, self.non_gtgp_area, self.step_counter)
+                                          self.gender, self.education, self.marriage,
+                                          self.past_hh_id, self.non_gtgp_area, self.step_counter)
                     self.schedule.add(ind)
 
     def make_land_agents_2014(self):
         """Create the land agents on the map; adding output and time later"""
 
         # add non-gtgp rice paddies
-        for hh_row in agents:  # from excel_import
+        for hh_row in range(2, 22):  # from excel_import
             hh_id = return_values_2014(hh_row, 'hh_id')
             self.age_1 = return_values_2014(hh_row, 'age')[0]
             self.gender_1 = return_values_2014(hh_row, 'gender')[0]
@@ -619,10 +718,12 @@ class ABM(Model):
                                          self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
                                          self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
                                          self.pre_gtgp_output)
+                if self.gtgp_enrolled == 1 and self not in gtgplist_2014:
+                    gtgplist_2014.append(self)
                 self.schedule.add(lp2014)
 
         # add non-gtgp rice paddies
-        for hh_row in agents:  # from excel_import
+        for hh_row in range(2, 22):  # from excel_import
             hh_id = return_values_2014(hh_row, 'hh_id')
             self.hh_id = hh_id
             self.age_1 = return_values_2014(hh_row, 'age')[0]
