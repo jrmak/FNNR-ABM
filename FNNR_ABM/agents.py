@@ -72,7 +72,7 @@ for (x, y) in hardcoded_remittances:
 for hh_row in agents:  # list from excel_import.py, numbered 1-95
     if return_values(hh_row, 'initial_migrants') is not None:
         num_mig_list[hh_row - 1] = 1
-        cumulative_mig_list[hh_row -1] = 1
+        cumulative_mig_list[hh_row - 1] = 1
 
     else:
         num_mig_list[hh_row - 1] = 0
@@ -269,7 +269,7 @@ class LandParcelAgent(Agent):
         """Counts GTGP land parcels for graphing"""
         if self.gtgp_enrolled == 1 and self not in gtgplist_2014 and self in nongtgplist_2014:
             nongtgplist_2014.remove(self)
-            gtgplist_2014.append(self)
+            #gtgplist_2014.append(self)
 
 
     def step(self):
@@ -293,14 +293,14 @@ class LandParcelAgent(Agent):
 class IndividualAgent(Agent):
     """Sets Individual agents; superclass is HouseholdAgent"""
     def __init__(self, unique_id, model, hh_id, individual_id, age, gender, education,
-                 marriage, past_hh_id, non_gtgp_area, step_counter, age_at_step_0):
+                 marriage, past_hh_id, non_gtgp_area, step_counter, income_local_off_farm):
 
         super().__init__(unique_id, model)
 
         self.hh_id = hh_id
         self.individual_id = str(individual_id)
         self.age = age
-        self.age_at_step_0 = age_at_step_0  # see aging function
+        self.income_local_off_farm = income_local_off_farm
 
         self.gender = gender
         self.education = education
@@ -324,7 +324,7 @@ class IndividualAgent(Agent):
         self.past_hh_id = past_hh_id
         self.last_birth_time = 0
         self.mig_years = 0
-        self.remittance = 0
+        self.local_income_off_farm = 0
 
         self.work_flag = 0
         self.retire_flag = 0
@@ -383,7 +383,7 @@ class IndividualAgent(Agent):
         self.hh_row = hh_row
         mig = IndividualAgent(self.hh_id, self, self.hh_id, self.individual_id, self.age, self.gender,
                               self.education, self.marriage, self.past_hh_id, self.non_gtgp_area, self.step_counter,
-                              self.age_at_step_0)
+                              self.income_local_off_farm)
         try:
             if '2014' not in self.individual_id:
                 mig.age = return_values(self.hh_row, 'initial_migrants')[0]
@@ -392,7 +392,9 @@ class IndividualAgent(Agent):
                 mig.education = return_values(self.hh_row, 'initial_migrants')[3]
                 mig.mig_years = return_values(self.hh_row, 'initial_migrants')[4]
                 mig.individual_id = str(self.hh_id) + 'm'
-                mig.age_at_step_0 = mig.age
+                mig.remittance = normalvariate(1200, 16000)
+                if mig.remittance < 0:
+                    mig.remittance = 0
                 mig.past_hh_id = str(self.hh_id)
                 # m is the generic individual id letter for initial migrants in the household
                 if mig.individual_id not in initial_migrants_list and self.hh_id not in household_migrants_list:
@@ -695,9 +697,10 @@ class IndividualAgent(Agent):
                             num_mig_list[self.hh_row - 1] += 1
                             cumulative_mig_list[self.hh_row - 1] += 1
                             hh_size_list[self.hh_row - 1] -= 1
+
                         elif '2014' in self.individual_id and self.hh_row < 22:
                             household_income_2014[self.hh_row - 1] = (household_income_2014[self.hh_row - 1]
-                                                                 + self.remittance)
+                                                                      + self.remittance)
                             num_mig_list_2014[self.hh_row - 1] += 1
                             cumulative_mig_list_2014[self.hh_row - 1] += 1
                             hh_size_list_2014[self.hh_row - 1] -= 1
@@ -739,7 +742,8 @@ class IndividualAgent(Agent):
             self.mig_remittances = household_income[self.hh_row - 1]
             # else:
             #     self.mig_remittances = household_income[self.hh_row - 1]
-        if self.individual_id in out_migrants_list or self.individual_id in out_migrants_list_2014:
+        if self.individual_id in out_migrants_list or self.individual_id in out_migrants_list_2014  \
+                and self.hh_id in household_migrants_list:
             self.mig_years += 1
 
             prob = exp(-1.2 + 0.06 * self.age - 0.08 * self.mig_years)
@@ -814,10 +818,17 @@ class IndividualAgent(Agent):
         if self.hh_id != 'Dead':
             self.re_migration()
             self.age += 1
+
+        if self.step_counter == 0 and '2014' not in self.individual_id:
+            household_income[self.hh_row - 1] = household_income[self.hh_row - 1] + self.local_income_off_farm
+        elif self.step_counter == 0 and '2014' in self.individual_id:
+            household_income_2014[self.hh_row - 1] = household_income_2014[self.hh_row - 1] + self.local_income_off_farm
+
+
         # self.step_counter = int(self.step_counter)
         if int(self.step_counter) < 5:
             # can change 5 to any number of steps, but code will take longer to run
-            # selects one individual to represent the household
+            # selects one individual to represent the household in calculating hh size, etc.
             if str(self.individual_id)[-1] == 'a' and self.hh_id != 'Dead'  \
                 and (self.gender == 1 or self.marriage == 0) \
                 and self.hh_id != 'Migrated' and self.hh_id not in hhlist:

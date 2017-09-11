@@ -2,8 +2,6 @@
 
 """
 This document runs the server and helps visualize the agents.
-Currently: the two example graphs for migration and marriage that pop up (static, 100 steps, made with matplotlib)
-are the same as the two graphs in the web browser simulation (dynamic number of steps, made with Mesa/Charts.js).
 """
 
 from mesa.visualization.ModularVisualization import ModularServer
@@ -16,7 +14,6 @@ from excel_export_household import *
 from excel_export_household_2014 import *
 from SimpleContinuousModule import SimpleCanvas
 import matplotlib.pyplot as plt
-import inspect
 
 
 def agent_draw(agent):
@@ -73,8 +70,9 @@ chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
 model = ABM(100, 10, 10)
 erase_summary()
 erase_household()
-initialize_household()
 erase_household_2014()
+erase_summary_2014()
+initialize_household()
 initialize_household_2014()
 global i_counter
 for i in range(81):  # sets up model to run for 80 steps
@@ -258,10 +256,10 @@ plt.ylabel('Income (Yuan)')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Laborers in Household')
 #
-# income_plot_2014.plot()
-# plt.title('Average Yearly Household Income (2014 data)')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('Income (Yuan)')
+income_plot_2014.plot()
+plt.title('Average Yearly Household Income (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('Income (Yuan)')
 
 plt.show() # comment or uncomment this line to see or hide the graphs
 

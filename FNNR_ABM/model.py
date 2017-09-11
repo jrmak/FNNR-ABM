@@ -28,11 +28,11 @@ def show_num_mig_per_year(model):
     return len(out_migrants_list) / 94
 
 def show_cumulative_re_mig(model):
-    """Returns the 'instant' # of out-migrants from the reserve at any given time"""
+    """Returns the cumulative # of re-migrants"""
     return len(re_migrants_list)
 
 def show_re_mig(model):
-    """Returns the cumulative # of re-migrants"""
+    """Returns the 'instant' # of out-migrants from the reserve at any given time"""
     return sum(re_mig_list)
 
 def show_re_mig_per_year(model):
@@ -82,51 +82,63 @@ def show_non_gtgp_per_hh(model):
 
 def show_cumulative_mig_2014(model):
     """Returns the cumulative # of migrants"""
-    return len(cumulative_mig_list_2014)
+    return sum(cumulative_mig_list_2014)
+
 
 def show_num_mig_2014(model):
     """Returns the 'instant' # of out-migrants from the reserve at any given time"""
     return len(out_migrants_list_2014)
 
+
 def show_num_mig_per_year_2014(model):
     """Returns the average # of migrants from each household at a given time"""
     return len(out_migrants_list_2014) / 20
+
 
 def show_cumulative_re_mig_2014(model):
     """Returns the cumulative # of re-migrants"""
     return len(re_migrants_list_2014)
 
+
 def show_re_mig_2014(model):
     """Returns the cumulative # of re-migrants"""
     return sum(re_mig_list_2014)
+
 
 def show_re_mig_per_year_2014(model):
     """Returns the average cumulative # of re-migrants for each household"""
     return len(re_migrants_list_2014) / 20
 
+
 def show_marriages_2014(model):
     """Returns the total # of marriages in the reserve"""
     return float(len(new_married_list_2014))
+
 
 def show_births_2014(model):
     """Returns the total # of births in the reserve"""
     return len(birth_list_2014)
 
+
 def show_deaths_2014(model):
     """Returns the total # of deaths in the reserve"""
     return len(death_list_2014)
+
 
 def show_hh_size_2014(model):
     """Returns the average household size in the reserve"""
     return sum(hh_size_list_2014) / 20
 
+
 def show_num_labor_2014(model):
     """Returns the average # of laborers per household in the reserve"""
     return sum(num_labor_list_2014) / 20
 
+
 def show_income_2014(model):
     """Returns the average household income in the reserve"""
     return sum(household_income_2014) / 20
+
 
 def show_pop_2014(model):
     """Returns the population for each year in the reserve"""
@@ -137,11 +149,16 @@ def show_pop_2014(model):
 
 def show_gtgp_per_hh_2014(model):
     """Returns the average # of GTGP land parcels per household"""
+    #len(gtgplist_2014) / 20,
+    #      'gtgp'
+    #      )
     return len(gtgplist_2014) / 20
 
 def show_non_gtgp_per_hh_2014(model):
     """Returns the average # of non-GTGP land parcels per household"""
+    #print(len(nongtgplist_2014))
     return len(nongtgplist_2014) / 20
+
 
 class ABM(Model):
     """Handles agent creation, placement, and value changes"""
@@ -160,6 +177,7 @@ class ABM(Model):
         self.num_labor = 0
         self.gtgp_coef = 0
         self.gtgp_part_flag = 0
+        self.income_local_off_farm = 0
 
         self.area = 0
         self.admin_village = 0
@@ -677,7 +695,7 @@ class ABM(Model):
                     ind = IndividualAgent(hh_id, self, self.hh_id, self.individual_id, self.age,
                                           self.gender, self.education, self.marriage,
                                           self.past_hh_id, self.non_gtgp_area, self.step_counter,
-                                          self.age_at_step_0)
+                                          self.income_local_off_farm)
                     self.schedule.add(ind)
 
     def make_land_agents_2014(self):
@@ -731,10 +749,8 @@ class ABM(Model):
                 pass
                 self.hh_size = len(return_values_2014(hh_row, 'age'))
                 landpos = 0
-                if self.non_gtgp_output < 10:
-                    self.gtgp_enrolled = 1
-                if self.gtgp_enrolled == 1 and self not in gtgplist_2014:
-                    gtgplist_2014.append(self)
+                self.gtgp_enrolled = 0
+                nongtgplist_2014.append(self)
                 lp2014 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
                                          self.age_1, self.gender_1, self.education_1,
                                          self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
@@ -775,11 +791,11 @@ class ABM(Model):
                     except:
                         pass
                     try:
-                        self.land_time = return_values_2014(hh_row, 'non_gtgp_travel_time')[i]
+                        self.land_time = return_values_2014(hh_row, 'gtgp_travel_time')[i]
                     except:
                         pass
                     try:
-                        self.plant_type = return_values_2014(hh_row, 'non_gtgp_plant_type')[i]
+                        self.plant_type = return_values_2014(hh_row, 'pre_gtgp_plant_type')[i]
                     except:
                         pass
                     try:
@@ -789,6 +805,8 @@ class ABM(Model):
             except TypeError:  # None
                 pass
                 self.hh_size = len(return_values_2014(hh_row, 'age'))
+                #gtgplist_2014.append(self)
+                self.gtgp_enrolled = 1
                 lp2014_gtgp = LandParcelAgent(hh_id, self, self.hh_id, hh_row, landpos, self.gtgp_enrolled,
                                               self.age_1, self.gender_1, self.education_1,
                                               self.gtgp_rice, self.total_dry, self.gtgp_dry, self.total_rice,
