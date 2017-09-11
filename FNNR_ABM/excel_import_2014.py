@@ -10,24 +10,20 @@ import inspect
 from excel_import import *
 
 # Directory in which source file is located, exact name of source file + extension
-currentpath = str(inspect.getfile(inspect.currentframe()))[:-21] # 'removes excel_import_2014.py' at end
-os.chdir(currentpath)
-currentbook = '2014_survey_validation_edited.xlsx'
+currentpath2014 = str(inspect.getfile(inspect.currentframe()))[:-21] # 'removes excel_import_2014.py' at end
+os.chdir(currentpath2014)
+currentbook2014 = '2014_survey_validation_edited.xlsx'
 
 
 # openpyxl commands
-wbglobal = load_workbook(currentbook)
-sheet = wbglobal.active
-
-# a list of 94 hh_ids; hardcoded since number from excel file not likely to change
-agents = list(range(1, 95))  # range(1, 95) goes 1-94
-
+wbglobal2014 = load_workbook(currentbook2014)
+sheet2014 = wbglobal2014.active
 
 def assign_sheet_parameters_2014(hh_row, variable):
     """Given a household id and name of variable, returns cell range for given variable"""
     """Will create a new function when this list gets long enough"""
     parameters = []
-    row = str(int(hh_row) + 2)
+    row = str(int(hh_row))
     # print(row) # For example, row 3 in the Excel file corresponds to Household ID #1
     # all lowercase!
     if variable.lower() == '2014_hh_id':
@@ -60,9 +56,23 @@ def assign_sheet_parameters_2014(hh_row, variable):
     elif variable.lower() == 'non_gtgp_area':
         parameters.append(str('BW' + row))
         parameters.append(str('CA' + row))
+    elif variable.lower() == 'gtgp_area':
+        parameters.append(str('BR' + row))
+        parameters.append(str('BV' + row))
+
     elif variable.lower() == 'non_gtgp_rice_mu':
-        parameters.append(str('BW' + row))
-        parameters.append(str('CA' + row))
+        parameters.append(str('BN' + row))
+        parameters.append(str('BN' + row))
+    elif variable.lower() == 'gtgp_rice_mu':
+        parameters.append(str('BP' + row))
+        parameters.append(str('BP' + row))
+    elif variable.lower() == 'non_gtgp_dry_mu':
+        parameters.append(str('BO' + row))
+        parameters.append(str('BO' + row))
+    elif variable.lower() == 'gtgp_dry_mu':
+        parameters.append(str('BQ' + row))
+        parameters.append(str('BQ' + row))
+
     elif variable.lower() == 'non_gtgp_plant_type':
         parameters.append(str('IB' + row))
         parameters.append(str('IF' + row))
@@ -106,13 +116,13 @@ def assign_sheet_parameters_2014(hh_row, variable):
         pass
     return parameters
 
-# def get_hh_row(hh_id):
-#     """Returns an Excel household row when given the ID"""
-#     column_counter = 0
-#     for CellObj in sheet['A']:
-#         column_counter += 1
-#         if CellObj.value == hh_id:
-#             return column_counter
+def get_hh_row_2014(hh_id):
+    """Returns an Excel household row when given the ID"""
+    column_counter = 0
+    for CellObj in sheet2014['A']:
+        column_counter += 1
+        if CellObj.value == hh_id:
+            return column_counter
 
 
 def initialize_labor_2014(hh_row):
@@ -129,7 +139,7 @@ def initialize_labor_2014(hh_row):
             #except:
             #    num_labor = 0
     else:
-        print(hh_row, 'except')
+        print(hh_row, 'except2014')
     return num_labor
 
 def initialize_migrants_2014(hh_row):
@@ -140,12 +150,27 @@ def initialize_migrants_2014(hh_row):
         num_mig = 0
     return num_mig
 
+def assign_variable_per_hh_2014(x, y):
+    """Adds value of a certain variable to that household's list"""
+    var = []
+    for Column in sheet2014[x:y]:
+            for CellObj in Column:
+                if x == y:
+                    if CellObj.value not in ['-1', '-3', '-4', -1, -3, -4, None]:
+                        # if the value is not null
+                        var = str(CellObj.value)
+                elif x != y:
+                    # in this case, var is a list, not a str, because it has multiple items
+                    if CellObj.value not in ['-1', '-3', '-4', -1, -3, -4, None]:
+                        var.append(CellObj.value)
+                        # var = str(CellObj.value)
+    return var
 
 def return_values_2014(hh_row, var):
     """Returns values given hh_id and variable (combines previous functions)"""
     # Example: return_values(1,'gender')
     hh_row_variable = assign_sheet_parameters_2014(hh_row, var)
-    variable_per_hh = assign_variable_per_hh(hh_row_variable[0], hh_row_variable[1])
+    variable_per_hh = assign_variable_per_hh_2014(hh_row_variable[0], hh_row_variable[1])
     # print(variable_per_hh) # Example: ['1', '2', '1'] for genders in a household
     if variable_per_hh != []:
         return variable_per_hh

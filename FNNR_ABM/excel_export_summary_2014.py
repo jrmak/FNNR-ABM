@@ -8,17 +8,18 @@ from model import *
 """
 Exports household-level aggregate data into Excel.
 """
-currentpath = str(inspect.getfile(inspect.currentframe()))[:-23]  # 'removes excel_import_summary.py' at end
-os.chdir(currentpath)
 
+currentpath2014 = str(inspect.getfile(inspect.currentframe()))[:-28]  # 'removes excel_import_summary_2014.py' at end
+os.chdir(currentpath2014)
 
-def save_summary(steps, show_cumulative_mig, show_num_mig, show_num_mig_per_year,
+def save_summary_2014(steps, show_cumulative_mig, show_num_mig, show_num_mig_per_year,
                  show_cumulative_re_mig, show_re_mig, show_re_mig_per_year, show_marriages,
                  show_births, show_deaths, show_num_labor, show_hh_size, show_income,
                  population, show_gtgp_per_hh, show_non_gtgp_per_hh):
+
     """Exports entries onto a .csv file"""
     try:
-        fnnr_export = open('FNNR-ABM_export_summary.csv', 'a+')  # a+ will create the file if it doesn't exist already
+        fnnr_export = open('FNNR-ABM_export_summary_2014.csv', 'a+')  # a+ will create the file if it doesn't exist already
         # a is also preferred to w here to append, rather than overwrite, values
     except IOError:
         print('Please close Excel and retry.')  # will not work if the .csv is already open
@@ -27,7 +28,7 @@ def save_summary(steps, show_cumulative_mig, show_num_mig, show_num_mig_per_year
         filewriter = csv.writer(fnnr_export)
         filewriter.writerow(
             ['Years Elapsed', 'Cumulative Out-Migrants', 'Instant Out-Migrants', 'Average Out-Migrants',
-             'Total Re-Migrants', 'Instant Re-Migrants', 'Average Re-Migrants',
+             'Total Re-Migrants', 'Instant Re-Migrants (WILL FIX)', 'Average Re-Migrants',
              'Total Marriages', 'Total Births', 'Total Deaths', 'Average Laborers', 'Average Household Size',
              'Average Income',
              'Population', 'GTGP Parcels Per Household', 'Non-GTGP Parcels Per Household'])
@@ -67,9 +68,9 @@ def save_summary(steps, show_cumulative_mig, show_num_mig, show_num_mig_per_year
     fnnr_export.close()
 
 
-def erase_summary():
+def erase_summary_2014():
     try:
-        fnnr_export = open('FNNR-ABM_export_summary.csv', 'w+')  # a+ will create the file if it doesn't exist already
+        fnnr_export = open('FNNR-ABM_export_summary_2014.csv', 'w+')  # a+ will create the file if it doesn't exist already
         fnnr_export.truncate()
     except IOError:
         print('Please close Excel and retry.')  # will not work if the .csv is already open

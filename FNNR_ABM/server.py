@@ -2,8 +2,6 @@
 
 """
 This document runs the server and helps visualize the agents.
-Currently: the two example graphs for migration and marriage that pop up (static, 100 steps, made with matplotlib)
-are the same as the two graphs in the web browser simulation (dynamic number of steps, made with Mesa/Charts.js).
 """
 
 from mesa.visualization.ModularVisualization import ModularServer
@@ -11,11 +9,11 @@ from mesa.visualization.modules import ChartModule, TextElement
 from model import *
 from agents import *
 from excel_export_summary import *
+from excel_export_summary_2014 import *
 from excel_export_household import *
 from excel_export_household_2014 import *
 from SimpleContinuousModule import SimpleCanvas
 import matplotlib.pyplot as plt
-import inspect
 
 
 def agent_draw(agent):
@@ -72,53 +70,84 @@ chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
 model = ABM(100, 10, 10)
 erase_summary()
 erase_household()
-initialize_household()
 erase_household_2014()
+erase_summary_2014()
+initialize_household()
 initialize_household_2014()
 global i_counter
-for i in range(100):  # sets up model to run for 80 steps
+for i in range(81):  # sets up model to run for 80 steps
     model.step()
     i_counter = i
-    save_summary(i_counter, show_num_mig(model), show_num_mig_per_year(model), show_re_mig(model),                     \
+    save_summary(i_counter, show_cumulative_mig(model), show_num_mig(model), show_num_mig_per_year(model),
+                 show_cumulative_re_mig(model), show_re_mig(model),                     \
                  show_re_mig_per_year(model), show_marriages(model), show_births(model), len(death_list),
                  show_num_labor(model), show_hh_size(model), show_income(model),
                  show_pop(model), show_gtgp_per_hh(model), show_non_gtgp_per_hh(model))
+    save_summary_2014(i_counter, show_cumulative_mig_2014(model), show_num_mig_2014(model),
+                      show_num_mig_per_year_2014(model), show_cumulative_re_mig_2014(model), show_re_mig_2014(model), \
+                      show_re_mig_per_year_2014(model), show_marriages_2014(model),
+                      show_births_2014(model), len(death_list_2014), show_num_labor_2014(model),
+                      show_hh_size_2014(model), show_income_2014(model), show_pop_2014(model),
+                      show_gtgp_per_hh_2014(model), show_non_gtgp_per_hh_2014(model))
+
 # 1 at the end of the variable name means that it's per year instead of accumulative
+c_mig_plot = model.datacollector8.get_model_vars_dataframe()  # see model.py
 mig_plot = model.datacollector.get_model_vars_dataframe()  # see model.py
-re_mig_plot = model.datacollector2.get_model_vars_dataframe()
-mig_plot1 = model.datacollector3.get_model_vars_dataframe()  # see model.py
+c_re_mig_plot = model.datacollector2.get_model_vars_dataframe()
+re_mig_plot = model.datacollector9.get_model_vars_dataframe()
+mig_plot1 = model.datacollector3.get_model_vars_dataframe()
 re_mig_plot1 = model.datacollector4.get_model_vars_dataframe()
 mar_plot = model.datacollector5.get_model_vars_dataframe()
 bir_plot = model.datacollector6.get_model_vars_dataframe()
 dea_plot = model.datacollector7.get_model_vars_dataframe()
-mar_plot1 = model.datacollector8.get_model_vars_dataframe()
-bir_plot1 = model.datacollector9.get_model_vars_dataframe()
-dea_plot1 = model.datacollector10.get_model_vars_dataframe()
+# mar_plot1 = model.datacollector8.get_model_vars_dataframe()
+# bir_plot1 = model.datacollector9.get_model_vars_dataframe()
+# dea_plot1 = model.datacollector10.get_model_vars_dataframe()
 pop_plot = model.datacollector11.get_model_vars_dataframe()
 gtgp_plot = model.datacollector12.get_model_vars_dataframe()
 non_gtgp_plot = model.datacollector13.get_model_vars_dataframe()
 hh_size_plot = model.datacollector14.get_model_vars_dataframe()
 num_labor_plot = model.datacollector15.get_model_vars_dataframe()
+income_plot = model.datacollector16.get_model_vars_dataframe()
+
+mig_plot_2014 = model.datacollector17.get_model_vars_dataframe()
+re_mig_plot_2014 = model.datacollector18.get_model_vars_dataframe()
+mig_plot1_2014 = model.datacollector19.get_model_vars_dataframe()
+re_mig_plot1_2014 = model.datacollector20.get_model_vars_dataframe()
+mar_plot_2014 = model.datacollector21.get_model_vars_dataframe()
+bir_plot_2014 = model.datacollector22.get_model_vars_dataframe()
+dea_plot_2014 = model.datacollector23.get_model_vars_dataframe()
+pop_plot_2014 = model.datacollector24.get_model_vars_dataframe()
+gtgp_plot_2014 = model.datacollector25.get_model_vars_dataframe()
+non_gtgp_plot_2014 = model.datacollector26.get_model_vars_dataframe()
+hh_size_plot_2014 = model.datacollector27.get_model_vars_dataframe()
+num_labor_plot_2014 = model.datacollector28.get_model_vars_dataframe()
+income_plot_2014 = model.datacollector29.get_model_vars_dataframe()
 
 mig_plot.plot()
 plt.title('Instant # of Out-Migrants in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Migrants')
 
-re_mig_plot.plot()
+c_re_mig_plot.plot()
 plt.title('Cumulative # of Re-migrants in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Re-migrants')
+
+# re_mig_plot.plot()
+# plt.title('Instant # of Re-migrants in the Reserve')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Re-migrants')
 
 mig_plot1.plot()
 plt.title('Average Number of Out-Migrants Per Household')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Migrants')
-#
-# re_mig_plot1.plot()
-# plt.title('Average Number of Re-Migrants Per Household')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Re-migrants')
+
+re_mig_plot1.plot()
+plt.title('Average Number of Re-Migrants Per Household')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Re-migrants')
 
 mar_plot.plot()
 plt.title('Total # of Marriages in the Reserve')
@@ -134,21 +163,6 @@ dea_plot.plot()
 plt.title('Total # of Deaths in the Reserve')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Deaths')
-
-# mar_plot1.plot()
-# plt.title('Marriages in the Reserve, Per Year')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Marriages')
-#
-# bir_plot1.plot()
-# plt.title('Births in the Reserve, Per Year')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Births')
-#
-# dea_plot1.plot()
-# plt.title('Deaths in the Reserve, Per Year')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Deaths')
 
 pop_plot.plot()
 plt.title('Total Population in the Reserve')
@@ -175,6 +189,77 @@ plt.title('Average # of Laborers in Household')
 plt.xlabel('Years (Steps)')
 plt.ylabel('# of Laborers in Household')
 
+income_plot.plot()
+plt.title('Average Yearly Household Income')
+plt.xlabel('Years (Steps)')
+plt.ylabel('Income (Yuan)')
+
+# 2014
+
+# mig_plot_2014.plot()
+# plt.title('Instant # of Out-Migrants in the Reserve (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Migrants')
+#
+# re_mig_plot_2014.plot()
+# plt.title('Cumulative # of Re-migrants in the Reserve (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Re-migrants')
+#
+# mig_plot1_2014.plot()
+# plt.title('Average Number of Out-Migrants Per Household (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Migrants')
+#
+# re_mig_plot1_2014.plot()
+# plt.title('Average Number of Re-Migrants Per Household (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Re-migrants')
+#
+# mar_plot_2014.plot()
+# plt.title('Total # of Marriages in the Reserve (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Marriages')
+#
+# bir_plot_2014.plot()
+# plt.title('Total # of Births in the Reserve (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Births')
+#
+# dea_plot_2014.plot()
+# plt.title('Total # of Deaths in the Reserve (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Deaths')
+#
+# pop_plot_2014.plot()
+# plt.title('Total Population in the Reserve (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('Population')
+#
+# gtgp_plot_2014.plot()
+# plt.title('Average # of GTGP Parcels Per Household (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('GTGP Parcels')
+#
+# non_gtgp_plot_2014.plot()
+# plt.title('Average # of Non-GTGP Parcels Per Household (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('Non-GTGP Parcels')
+
+# hh_size_plot_2014.plot()
+# plt.title('Average Household Size (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of People in Household')
+
+# num_labor_plot_2014.plot()
+# plt.title('Average # of Laborers in Household (2014 data)')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('# of Laborers in Household')
+#
+income_plot_2014.plot()
+plt.title('Average Yearly Household Income (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('Income (Yuan)')
 
 plt.show() # comment or uncomment this line to see or hide the graphs
 
@@ -194,37 +279,11 @@ class MapLegend(TextElement):
                 + " | Step: " + str(i_counter)
                 + "<br><br></h3>")
 
-#+ "<h3>Average # of Migrants per Household
-
-class Migrants(TextElement):
-    # not used below
-    def __init__(self):
-        pass
-
-    def render(self, model):
-        return ("X-axis: migrants | Y-axis: steps (years) | ",
-                "Average # of Migrants per Household: " + str(show_num_mig(model))
-                + "<br><br>"
-                + "<h3>Total # of Marriages in the Reserve</h3>")
-
-
-class Marriages(TextElement):
-    # not used below
-    def __init__(self):
-        pass
-
-    def render(self, model):
-        return ("X-axis: marriages | Y-axis: steps (years) | ",
-                "Total # of Marriages in the Reserve: " + str(show_marriages(model))
-                )
-
-text0 = MapLegend()
-text1 = Migrants()  # not used below
-text2 = Marriages()  # not used
-
+# text0 = MapLegend()
+#
 # server = ModularServer(ABM, [agent_canvas, text0],
-#                        "GTGP Enrollment of Land Over Time", 100, 10, 10)
-
+#                         "GTGP Enrollment of Land Over Time", 100, 10, 10)
+#
 # if __name__ == "__main__":
-# server.port = 8521  # default
-# server.launch()  # actual run line
+#     server.port = 8521  # default
+#     server.launch()  # actual run line
