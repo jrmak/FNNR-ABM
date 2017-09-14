@@ -285,7 +285,7 @@ class LandParcelAgent(Agent):
             household_income[self.hh_row - 1] = (household_income[self.hh_row - 1]
                                               + self.land_income - old_land_income)
         elif self.landpos == 0 and self.hh_row < 22:
-            household_income_2014[self.hh_row - 1] = (household_income_2014[self.hh_row - 1]
+            household_income_2014[self.hh_row - 3] = (household_income_2014[self.hh_row - 3]
                                                         + self.land_income - old_land_income)
         self.land_step_counter += 1
 

@@ -124,138 +124,138 @@ hh_size_plot_2014 = model.datacollector27.get_model_vars_dataframe()
 num_labor_plot_2014 = model.datacollector28.get_model_vars_dataframe()
 income_plot_2014 = model.datacollector29.get_model_vars_dataframe()
 
-mig_plot.plot()
-plt.title('Instant # of Out-Migrants in the Reserve')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Migrants')
-
-c_re_mig_plot.plot()
-plt.title('Cumulative # of Re-migrants in the Reserve')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Re-migrants')
-
-# re_mig_plot.plot()
-# plt.title('Instant # of Re-migrants in the Reserve')
-# plt.xlabel('Years (Steps)')
-# plt.ylabel('# of Re-migrants')
-
-mig_plot1.plot()
-plt.title('Average Number of Out-Migrants Per Household')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Migrants')
-
-re_mig_plot1.plot()
-plt.title('Average Number of Re-Migrants Per Household')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Re-migrants')
-
-mar_plot.plot()
-plt.title('Total # of Marriages in the Reserve')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Marriages')
-
-bir_plot.plot()
-plt.title('Total # of Births in the Reserve')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Births')
-
-dea_plot.plot()
-plt.title('Total # of Deaths in the Reserve')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Deaths')
-
-pop_plot.plot()
-plt.title('Total Population in the Reserve')
-plt.xlabel('Years (Steps)')
-plt.ylabel('Population')
-
-gtgp_plot.plot()
-plt.title('Average # of GTGP Parcels Per Household')
-plt.xlabel('Years (Steps)')
-plt.ylabel('GTGP Parcels')
-
-non_gtgp_plot.plot()
-plt.title('Average # of Non-GTGP Parcels Per Household')
-plt.xlabel('Years (Steps)')
-plt.ylabel('Non-GTGP Parcels')
-
-hh_size_plot.plot()
-plt.title('Average Household Size')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of People in Household')
-
-num_labor_plot.plot()
-plt.title('Average # of Laborers in Household')
-plt.xlabel('Years (Steps)')
-plt.ylabel('# of Laborers in Household')
-
-income_plot.plot()
-plt.title('Average Yearly Household Income')
-plt.xlabel('Years (Steps)')
-plt.ylabel('Income (Yuan)')
-
-# 2014
-
-# mig_plot_2014.plot()
-# plt.title('Instant # of Out-Migrants in the Reserve (2014 data)')
+# mig_plot.plot()
+# plt.title('Instant # of Out-Migrants in the Reserve')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Migrants')
 #
-# re_mig_plot_2014.plot()
-# plt.title('Cumulative # of Re-migrants in the Reserve (2014 data)')
+# c_re_mig_plot.plot()
+# plt.title('Cumulative # of Re-migrants in the Reserve')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Re-migrants')
-#
-# mig_plot1_2014.plot()
-# plt.title('Average Number of Out-Migrants Per Household (2014 data)')
+
+re_mig_plot.plot()
+plt.title('Instant # of Re-migrants in the Reserve')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Re-migrants')
+
+# mig_plot1.plot()
+# plt.title('Average Number of Out-Migrants Per Household')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Migrants')
-#
-# re_mig_plot1_2014.plot()
-# plt.title('Average Number of Re-Migrants Per Household (2014 data)')
+
+# re_mig_plot1.plot()
+# plt.title('Average Number of Re-Migrants Per Household')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Re-migrants')
-#
-# mar_plot_2014.plot()
-# plt.title('Total # of Marriages in the Reserve (2014 data)')
+
+# mar_plot.plot()
+# plt.title('Total # of Marriages in the Reserve')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Marriages')
 #
-# bir_plot_2014.plot()
-# plt.title('Total # of Births in the Reserve (2014 data)')
+# bir_plot.plot()
+# plt.title('Total # of Births in the Reserve')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Births')
 #
-# dea_plot_2014.plot()
-# plt.title('Total # of Deaths in the Reserve (2014 data)')
+# dea_plot.plot()
+# plt.title('Total # of Deaths in the Reserve')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Deaths')
 #
-# pop_plot_2014.plot()
-# plt.title('Total Population in the Reserve (2014 data)')
+# pop_plot.plot()
+# plt.title('Total Population in the Reserve')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('Population')
 #
-# gtgp_plot_2014.plot()
-# plt.title('Average # of GTGP Parcels Per Household (2014 data)')
+# gtgp_plot.plot()
+# plt.title('Average # of GTGP Parcels Per Household')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('GTGP Parcels')
 #
-# non_gtgp_plot_2014.plot()
-# plt.title('Average # of Non-GTGP Parcels Per Household (2014 data)')
+# non_gtgp_plot.plot()
+# plt.title('Average # of Non-GTGP Parcels Per Household')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('Non-GTGP Parcels')
-
-# hh_size_plot_2014.plot()
-# plt.title('Average Household Size (2014 data)')
+#
+# hh_size_plot.plot()
+# plt.title('Average Household Size')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of People in Household')
-
-# num_labor_plot_2014.plot()
-# plt.title('Average # of Laborers in Household (2014 data)')
+#
+# num_labor_plot.plot()
+# plt.title('Average # of Laborers in Household')
 # plt.xlabel('Years (Steps)')
 # plt.ylabel('# of Laborers in Household')
 #
+# income_plot.plot()
+# plt.title('Average Yearly Household Income')
+# plt.xlabel('Years (Steps)')
+# plt.ylabel('Income (Yuan)')
+
+# 2014
+
+mig_plot_2014.plot()
+plt.title('Instant # of Out-Migrants in the Reserve (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Migrants')
+
+re_mig_plot_2014.plot()
+plt.title('Cumulative # of Re-migrants in the Reserve (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Re-migrants')
+
+mig_plot1_2014.plot()
+plt.title('Average Number of Out-Migrants Per Household (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Migrants')
+
+re_mig_plot1_2014.plot()
+plt.title('Average Number of Re-Migrants Per Household (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Re-migrants')
+
+mar_plot_2014.plot()
+plt.title('Total # of Marriages in the Reserve (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Marriages')
+
+bir_plot_2014.plot()
+plt.title('Total # of Births in the Reserve (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Births')
+
+dea_plot_2014.plot()
+plt.title('Total # of Deaths in the Reserve (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Deaths')
+
+pop_plot_2014.plot()
+plt.title('Total Population in the Reserve (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('Population')
+
+gtgp_plot_2014.plot()
+plt.title('Average # of GTGP Parcels Per Household (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('GTGP Parcels')
+
+non_gtgp_plot_2014.plot()
+plt.title('Average # of Non-GTGP Parcels Per Household (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('Non-GTGP Parcels')
+
+hh_size_plot_2014.plot()
+plt.title('Average Household Size (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of People in Household')
+
+num_labor_plot_2014.plot()
+plt.title('Average # of Laborers in Household (2014 data)')
+plt.xlabel('Years (Steps)')
+plt.ylabel('# of Laborers in Household')
+
 income_plot_2014.plot()
 plt.title('Average Yearly Household Income (2014 data)')
 plt.xlabel('Years (Steps)')

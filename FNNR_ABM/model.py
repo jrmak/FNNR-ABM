@@ -676,11 +676,12 @@ class ABM(Model):
             genderlist = return_values_2014(hh_row, 'gender')
             marriagelist = return_values_2014(hh_row, 'marriage')
             educationlist = return_values_2014(hh_row, 'education')
-            try:
-                self.non_gtgp_area = sum(return_values_2014(self.hh_row, 'non_gtgp_area'))
-            except:
-                pass
+
             if individual_id_list is not None and individual_id_list is not []:
+                try:
+                    self.non_gtgp_area = sum(return_values_2014(self.hh_row, 'non_gtgp_area'))
+                except:
+                    pass
                 for i in range(len(individual_id_list)):
                     self.individual_id = str(self.hh_id) + str(individual_id_list[i]) + '_' + '2014'  # example: 2c
                     self.age = agelist[i]
@@ -703,24 +704,25 @@ class ABM(Model):
 
         # add non-gtgp
         for hh_row in range(2, 22):  # from excel_import
-            hh_id = return_values_2014(hh_row, 'hh_id')
-            self.total_rice = return_values_2014(hh_row, 'non_gtgp_rice_mu')
-            if self.total_rice in ['-3', '-4', -3, None]:
-                self.total_rice = 0
-            self.total_dry = return_values_2014(hh_row, 'non_gtgp_dry_mu')
-            if self.total_dry in ['-3', '-4', -3, None]:
-                self.total_dry = 0
-            self.gtgp_rice = return_values_2014(hh_row, 'gtgp_rice_mu')
-            if self.gtgp_rice in ['-3', '-4', -3, None]:
-                self.total_rice = 0
-            self.gtgp_dry = return_values_2014(hh_row, 'gtgp_dry_mu')
-            if self.gtgp_dry in ['-3', '-4', -3, None]:
-                self.gtgp_dry = 0
-            self.age_1 = return_values_2014(hh_row, 'age')[0]
-            self.gender_1 = return_values_2014(hh_row, 'gender')[0]
-            self.education_1 = return_values_2014(hh_row, 'education')[0]
+
             try:
                 for i in range(len(return_values_2014(hh_row, 'non_gtgp_output'))):
+                    hh_id = return_values_2014(hh_row, 'hh_id')
+                    self.total_rice = return_values_2014(hh_row, 'non_gtgp_rice_mu')
+                    if self.total_rice in ['-3', '-4', -3, None]:
+                        self.total_rice = 0
+                    self.total_dry = return_values_2014(hh_row, 'non_gtgp_dry_mu')
+                    if self.total_dry in ['-3', '-4', -3, None]:
+                        self.total_dry = 0
+                    self.gtgp_rice = return_values_2014(hh_row, 'gtgp_rice_mu')
+                    if self.gtgp_rice in ['-3', '-4', -3, None]:
+                        self.total_rice = 0
+                    self.gtgp_dry = return_values_2014(hh_row, 'gtgp_dry_mu')
+                    if self.gtgp_dry in ['-3', '-4', -3, None]:
+                        self.gtgp_dry = 0
+                    self.age_1 = return_values_2014(hh_row, 'age')[0]
+                    self.gender_1 = return_values_2014(hh_row, 'gender')[0]
+                    self.education_1 = return_values_2014(hh_row, 'education')[0]
                     try:
                         self.land_area = return_values_2014(hh_row, 'gtgp_area')[i]
                     except:
@@ -745,41 +747,44 @@ class ABM(Model):
                         self.land_type = return_values_2014(hh_row, 'non_gtgp_land_type')[i]
                     except:
                         pass
+                    self.hh_size = len(return_values_2014(hh_row, 'age'))
+                    landpos = 0
+                    self.gtgp_enrolled = 0
+                    nongtgplist_2014.append(self)
+                    self.hh_row = hh_row
+                    lp2014 = LandParcelAgent(hh_id, self, hh_id, self.hh_row, landpos, self.gtgp_enrolled,
+                                             self.age_1, self.gender_1, self.education_1,
+                                             self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
+                                             self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
+                                             self.pre_gtgp_output)
+
+                    self.schedule.add(lp2014)
             except TypeError:  # NoneType
                 pass
-                self.hh_size = len(return_values_2014(hh_row, 'age'))
-                landpos = 0
-                self.gtgp_enrolled = 0
-                nongtgplist_2014.append(self)
-                lp2014 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
-                                         self.age_1, self.gender_1, self.education_1,
-                                         self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
-                                         self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
-                                         self.pre_gtgp_output)
 
-                self.schedule.add(lp2014)
 
         # add gtgp
         for hh_row in range(2, 22):  # from excel_import
-            hh_id = return_values_2014(hh_row, 'hh_id')
-            self.hh_id = hh_id
-            self.total_rice = return_values_2014(hh_row, 'non_gtgp_rice_mu')
-            if self.total_rice in ['-3', '-4', -3, None]:
-                self.total_rice = 0
-            self.total_dry = return_values_2014(hh_row, 'non_gtgp_dry_mu')
-            if self.total_dry in ['-3', '-4', -3, None]:
-                self.total_dry = 0
-            self.gtgp_rice = return_values_2014(hh_row, 'gtgp_rice_mu')
-            if self.gtgp_rice in ['-3', '-4', -3, None]:
-                self.total_rice = 0
-            self.gtgp_dry = return_values_2014(hh_row, 'gtgp_dry_mu')
-            if self.gtgp_dry in ['-3', '-4', -3, None]:
-                self.gtgp_dry = 0
-            self.age_1 = return_values_2014(hh_row, 'age')[0]
-            self.gender_1 = return_values_2014(hh_row, 'gender')[0]
-            self.education_1 = return_values_2014(hh_row, 'education')[0]
+
             try:
                 for i in range(len(return_values_2014(hh_row, 'pre_gtgp_output'))):
+                    hh_id = return_values_2014(hh_row, 'hh_id')
+                    self.hh_id = hh_id
+                    self.total_rice = return_values_2014(hh_row, 'non_gtgp_rice_mu')
+                    if self.total_rice in ['-3', '-4', -3, None]:
+                        self.total_rice = 0
+                    self.total_dry = return_values_2014(hh_row, 'non_gtgp_dry_mu')
+                    if self.total_dry in ['-3', '-4', -3, None]:
+                        self.total_dry = 0
+                    self.gtgp_rice = return_values_2014(hh_row, 'gtgp_rice_mu')
+                    if self.gtgp_rice in ['-3', '-4', -3, None]:
+                        self.total_rice = 0
+                    self.gtgp_dry = return_values_2014(hh_row, 'gtgp_dry_mu')
+                    if self.gtgp_dry in ['-3', '-4', -3, None]:
+                        self.gtgp_dry = 0
+                    self.age_1 = return_values_2014(hh_row, 'age')[0]
+                    self.gender_1 = return_values_2014(hh_row, 'gender')[0]
+                    self.education_1 = return_values_2014(hh_row, 'education')[0]
                     try:
                         self.land_area = return_values_2014(hh_row, 'gtgp_area')[i]
                     except:
@@ -802,17 +807,21 @@ class ABM(Model):
                         self.land_type = return_values_2014(hh_row, 'non_gtgp_land_type')[i]
                     except:
                         pass
+                    self.hh_size = len(return_values_2014(hh_row, 'age'))
+                    # gtgplist_2014.append(self)
+                    self.gtgp_enrolled = 1
+                    self.hh_row = hh_row
+                    lp2014_gtgp = LandParcelAgent(hh_id, self, self.hh_id, self.hh_row, landpos, self.gtgp_enrolled,
+                                                  self.age_1, self.gender_1, self.education_1,
+                                                  self.gtgp_rice, self.total_dry, self.gtgp_dry, self.total_rice,
+                                                  self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
+                                                  self.pre_gtgp_output)
+                    #print(self.hh_id, self.hh_row, self.age_1, self.total_dry, self.land_time, self.pre_gtgp_output)
+                    self.schedule.add(lp2014_gtgp)
             except TypeError:  # None
+                print(self.hh_row)
                 pass
-                self.hh_size = len(return_values_2014(hh_row, 'age'))
-                #gtgplist_2014.append(self)
-                self.gtgp_enrolled = 1
-                lp2014_gtgp = LandParcelAgent(hh_id, self, self.hh_id, hh_row, landpos, self.gtgp_enrolled,
-                                              self.age_1, self.gender_1, self.education_1,
-                                              self.gtgp_rice, self.total_dry, self.gtgp_dry, self.total_rice,
-                                              self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
-                                              self.pre_gtgp_output)
-                self.schedule.add(lp2014_gtgp)
+
 
     def step(self):
         """Advance the model by one step"""
