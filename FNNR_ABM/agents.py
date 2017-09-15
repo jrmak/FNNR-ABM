@@ -344,7 +344,11 @@ class IndividualAgent(Agent):
                 self.hh_row = get_hh_row(int(self.hh_id))
 
         elif '2014' in self.individual_id:
-            self.hh_row = get_hh_row_2014(int(self.hh_id)) - 2
+            try:
+                self.hh_row = get_hh_row_2014(int(self.hh_id)) - 2
+            except ValueError:
+                self.hh_id = self.hh_id[:-6]
+                self.hh_row = get_hh_row_2014(int(self.hh_id)) - 2
         self.step_counter = 0
 
         if '2014' not in self.individual_id and self.hh_row <= 94:
@@ -448,16 +452,15 @@ class IndividualAgent(Agent):
         if random() < self.marriage_rate:
             marriage_flag_list.append(1)  #
 
-        if self.age > 20 and self.gender == 2 and self.marriage != 1:
-            if '2014' in self.individual_id:
-                print('blah')
+        # if self.gender == 2 and '2014' in self.individual_id:
+            # print(self.age, self.marriage)
+
+        if int(self.age) > 20 and int(self.gender) == 2 and int(self.marriage) != 1:
             if 'j' not in self.individual_id  \
                 and self.individual_id not in out_migrants_list \
                     and self.individual_id not in out_migrants_list_2014 and marriage_flag_list != []:
                     # if person is a previously-unmarried, non-migrated woman,
 
-                    if '2014' in self.individual_id:
-                        print(self.individual_id, 'testx')
 
                     self.past_individual_id = self.individual_id
                     self.past_hh_id = self.hh_id
@@ -481,14 +484,12 @@ class IndividualAgent(Agent):
                                 single_male_list.remove(male)
                                 marriage_flag_list.remove(1)
                     elif '2014' in self.individual_id:
-                        print('test1')
                         for male in single_male_list_2014:
                             if random() < float(self.match_prob) and self.marriage_flag == 0:
-                                print('test2')
                                 married_male_list_2014.append(male)
                                 self.husband_id = male
                                 if 'k' not in male:
-                                    self.hh_id = male.strip(male[-1])
+                                    self.hh_id = male.strip(male[-6])
                                     self.individual_id = self.hh_id + 'j'
                                     new_married_list_2014.append(self.individual_id)
                                 else:
@@ -572,7 +573,7 @@ class IndividualAgent(Agent):
         """Removes an object from reference"""
         if random() < self.death_rate:
             death_flag_list.append(1)
-        if self.age > 65 and self.individual_id not in out_migrants_list and death_flag_list != []:
+        if int(self.age) > 65 and self.individual_id not in out_migrants_list and death_flag_list != []:
                 self.hh_id = 'Dead'
                 if '2014' not in self.individual_id:
                     death_list.append(self.individual_id)
@@ -593,7 +594,7 @@ class IndividualAgent(Agent):
 
     def youth_education(self):
         """Assigns student working status to those who are young"""
-        if 7 < self.age < 19:
+        if 7 < int(self.age) < 19:
             self.workstatus = 5
             # what about after they turn 20?
 
@@ -711,7 +712,7 @@ class IndividualAgent(Agent):
                         self.num_mig += 1
 
 
-                        if 15 < self.age < 65 and self.num_labor > 1:
+                        if 15 < int(self.age) < 65 and self.num_labor > 1:
                             self.mig_flag = 1
                             self.num_labor -= 1
                             if '2014' not in self.individual_id:
@@ -746,7 +747,7 @@ class IndividualAgent(Agent):
                 and self.hh_id in household_migrants_list:
             self.mig_years += 1
 
-            prob = exp(-1.2 + 0.06 * self.age - 0.08 * self.mig_years)
+            prob = exp(-1.2 + 0.06 * float(self.age) - 0.08 * self.mig_years)
             re_mig_prob = prob / (prob + 1)
             if random() < re_mig_prob:
                 if '2014' not in self.individual_id:
@@ -799,7 +800,7 @@ class IndividualAgent(Agent):
                 elif self.hh_id in household_migrants_list_2014:
                     household_migrants_list_2014.remove(self.hh_id)
 
-                if 15 < self.age < 65:
+                if 15 < int(self.age) < 65:
                     self.num_labor += 1
                     if '2014' not in self.individual_id:
                         num_labor_list[self.hh_row - 1] += 1
@@ -817,6 +818,7 @@ class IndividualAgent(Agent):
             self.out_migration()
         if self.hh_id != 'Dead':
             self.re_migration()
+            self.age = int(self.age)
             self.age += 1
 
         if self.step_counter == 0 and '2014' not in self.individual_id:

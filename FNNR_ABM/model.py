@@ -10,6 +10,7 @@ from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 from agents import *
 from excel_import import *
+from random import choice
 
 
 hh_list_2014 = ['11', '16', '31', '39', '41', '57', '72', '91', '101', '104', '108',
@@ -652,9 +653,9 @@ class ABM(Model):
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
                     self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
-                    self.age = agelist[i]
+                    self.age = int(agelist[i])
                     # if genderlist is not None and genderlist is not []:
-                    self.gender = genderlist[i]
+                    self.gender = int(genderlist[i])
                     try:
                         self.education = educationlist[i]
                     except:
@@ -670,12 +671,14 @@ class ABM(Model):
     def make_individual_agents_2014(self):
         for hh_id in hh_list_2014:
             self.hh_id = hh_id
-            self.hh_row = range(2,22)
-            individual_id_list = return_values_2014(hh_row, 'name')
-            agelist = return_values_2014(hh_row, 'age')  # find the ages of people in hh
-            genderlist = return_values_2014(hh_row, 'gender')
-            marriagelist = return_values_2014(hh_row, 'marriage')
-            educationlist = return_values_2014(hh_row, 'education')
+            self.hh_row = get_hh_row_2014(int(self.hh_id))
+            print(self.hh_row)
+            individual_id_list = return_values_2014(self.hh_row, 'name')
+            agelist = return_values_2014(self.hh_row, 'age')  # find the ages of people in hh
+            genderlist = return_values_2014(self.hh_row, 'gender')
+            marriagelist = return_values_2014(self.hh_row, 'marriage')
+            # print(marriagelist)
+            educationlist = return_values_2014(self.hh_row, 'education')
 
             if individual_id_list is not None and individual_id_list is not []:
                 try:
@@ -685,13 +688,19 @@ class ABM(Model):
                 for i in range(len(individual_id_list)):
                     self.individual_id = str(self.hh_id) + str(individual_id_list[i]) + '_' + '2014'  # example: 2c
                     self.age = agelist[i]
-                    self.gender = genderlist[i]
+                    try:
+                        self.gender = genderlist[i]
+                    except:
+                        self.gender = choice([1,2])
                     try:
                         self.education = educationlist[i]
                     except:
                         self.education = 0
-                    self.marriage = marriagelist[i]
-                    IndividualAgent.create_initial_migrant_list(self, hh_row)
+                    try:
+                        self.marriage = marriagelist[i]
+                    except IndexError:
+                        self.marriage = 6
+                    IndividualAgent.create_initial_migrant_list(self, self.hh_row)
                     self.age_at_step_0 = self.age
                     ind = IndividualAgent(hh_id, self, self.hh_id, self.individual_id, self.age,
                                           self.gender, self.education, self.marriage,
@@ -731,10 +740,14 @@ class ABM(Model):
                         self.non_gtgp_output = return_values_2014(hh_row, 'non_gtgp_output')[i]
                     except:
                         pass
+                    if self.non_gtgp_output < 0:  # -2/-3/-4 values
+                        self.non_gtgp_output = 0
                     try:
                         self.pre_gtgp_output = return_values_2014(hh_row, 'pre_gtgp_output')[i]
                     except:
                         pass
+                    if self.pre_gtgp_output < 0:  # -2/-3/-4 values
+                        self.pre_gtgp_output = 0
                     try:
                         self.land_time = return_values_2014(hh_row, 'non_gtgp_travel_time')[i]
                     except:
@@ -758,6 +771,7 @@ class ABM(Model):
                                              self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
                                              self.pre_gtgp_output)
 
+                    # print(self.hh_id, self.hh_row, self.age_1, self.total_dry, self.land_time, self.pre_gtgp_output)
                     self.schedule.add(lp2014)
             except TypeError:  # NoneType
                 pass
@@ -816,10 +830,8 @@ class ABM(Model):
                                                   self.gtgp_rice, self.total_dry, self.gtgp_dry, self.total_rice,
                                                   self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
                                                   self.pre_gtgp_output)
-                    #print(self.hh_id, self.hh_row, self.age_1, self.total_dry, self.land_time, self.pre_gtgp_output)
                     self.schedule.add(lp2014_gtgp)
             except TypeError:  # None
-                print(self.hh_row)
                 pass
 
 
