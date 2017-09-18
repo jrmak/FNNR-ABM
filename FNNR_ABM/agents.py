@@ -34,6 +34,7 @@ hhlist = []
 
 # each index represents a household
 cumulative_mig_list = [0] * 94
+cumulative_re_mig_list = [0] * 94
 re_mig_list = [0] * 94
 out_mig_list = [0] * 94
 num_labor_list = [0] * 94
@@ -57,6 +58,7 @@ gtgplist_2014 = []
 hhlist_2014 = []
 
 cumulative_mig_list_2014 = [0] * 20
+cumulative_re_mig_list_2014 = [0] * 20
 re_mig_list_2014 = [0] * 20
 out_mig_list_2014 = [0] * 20
 num_labor_list_2014 = [0] * 20
@@ -378,6 +380,7 @@ class IndividualAgent(Agent):
                 if mig.individual_id not in initial_migrants_list and self.hh_id not in household_migrants_list:
                     initial_migrants_list.append(mig.individual_id)
                     out_migrants_list.append(mig.individual_id)
+                    out_mig_list[self.hh_row - 1] += 1
                     household_migrants_list.append(self.hh_id)
                     self.schedule.add(mig)
                     self.running = True
@@ -393,6 +396,7 @@ class IndividualAgent(Agent):
                 if mig.individual_id not in initial_migrants_list_2014 and self.hh_id not in household_migrants_list:
                     initial_migrants_list_2014.append(mig.individual_id)
                     out_migrants_list_2014.append(mig.individual_id)
+                    out_mig_list_2014[self.hh_row - 1] += 1
                     self.schedule.add(mig)
                     self.running = True
                 # household_migrants_list.append(self.hh_id)
@@ -568,6 +572,10 @@ class IndividualAgent(Agent):
                 if self.individual_id in re_migrants_list:
                     re_migrants_list.remove(self.individual_id)
                     re_mig_list[self.hh_row - 1] -= 1
+                elif self.individual_id in re_migrants_list_2014:
+                    re_migrants_list_2014.remove(self.individual_id)
+                    re_mig_list_2014[self.hh_row - 1] -= 1
+
 
     def youth_education(self):
         """Assigns student working status to those who are young"""
@@ -729,8 +737,9 @@ class IndividualAgent(Agent):
             self.mig_remittances = household_income_list[self.hh_row - 1]
             # else:
             #     self.mig_remittances = household_income_list[self.hh_row - 1]
-        if (self.individual_id in out_migrants_list or self.individual_id in out_migrants_list_2014)  \
-            and (self.hh_id in household_migrants_list or self.hh_id in household_migrants_list_2014):
+#        if (self.individual_id in out_migrants_list or self.individual_id in out_migrants_list_2014)  \
+#            and (self.hh_id in household_migrants_list or self.hh_id in household_migrants_list_2014):
+        if self.hh_id == 'Migrated':
                 self.mig_years += 1
 
                 prob = exp(-1.2 + 0.06 * float(self.age) - 0.08 * self.mig_years)
@@ -758,8 +767,7 @@ class IndividualAgent(Agent):
                         else:
                             household_income_list_2014[self.hh_row - 1] = household_income_list_2014[self.hh_row - 1] \
                                                                 - self.remittance
-                    if self.hh_id == 'Migrated':
-                        self.hh_id = self.past_hh_id
+                    self.hh_id = self.past_hh_id
                     self.workstatus = 1
                     if self.individual_id in out_migrants_list:
                         out_migrants_list.remove(self.individual_id)
@@ -768,9 +776,11 @@ class IndividualAgent(Agent):
                     if self.individual_id not in re_migrants_list and '2014' not in self.individual_id:
                         re_migrants_list.append(self.individual_id)
                         re_mig_list[self.hh_row - 1] += 1
+                        cumulative_re_mig_list[self.hh_row - 1] += 1
                     elif self.individual_id not in re_migrants_list_2014 and '2014' in self.individual_id:
                         re_migrants_list_2014.append(self.individual_id)
                         re_mig_list_2014[self.hh_row - 1] += 1
+                        cumulative_re_mig_list_2014[self.hh_row -1] += 1
 
                     self.hh_size += 1
                     self.out_mig -= 1
@@ -778,11 +788,9 @@ class IndividualAgent(Agent):
                     if '2014' not in self.individual_id:
                         hh_size_list[self.hh_row - 1] += 1
                         out_mig_list[self.hh_row - 1] -= 1
-                        # cumulative_mig_list[self.hh_row - 1] -= 1
                     elif '2014' in self.individual_id and self.hh_row < 22:
                         hh_size_list_2014[self.hh_row - 1] += 1
                         out_mig_list_2014[self.hh_row - 1] -= 1
-                        # cumulative_mig_list_2014[self.hh_row - 1] -= 1
 
                     if self.hh_id in household_migrants_list:
                         household_migrants_list.remove(self.hh_id)

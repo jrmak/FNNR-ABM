@@ -18,7 +18,7 @@ hh_list_2014 = ['11', '16', '31', '39', '41', '57', '72', '91', '101', '104', '1
 
 def show_cumulative_mig(model):
     """Returns the cumulative # of out-migrants from the reserve at any given time"""
-    return len(cumulative_mig_list)
+    return sum(cumulative_mig_list)
 
 def show_instant_mig(model):
     """Returns the 'instant' # of out-migrants from the reserve at any given time"""
@@ -30,14 +30,14 @@ def show_instant_mig_per_hh(model):
 
 def show_cumulative_re_mig(model):
     """Returns the cumulative # of re-migrants"""
-    return len(re_migrants_list)
+    return sum(cumulative_re_mig_list)
 
 def show_instant_re_mig(model):
     """Returns the 'instant' # of out-migrants from the reserve at any given time"""
-    return sum(re_mig_list)
+    return len(re_migrants_list)
 
 def show_instant_re_mig_per_hh(model):
-    """Returns the average cumulative # of re-migrants for each household"""
+    """Returns the average # of re-migrants for each household"""
     return len(re_migrants_list) / 94
 
 def show_marriages(model):
@@ -98,12 +98,12 @@ def show_instant_mig_per_hh_2014(model):
 
 def show_cumulative_re_mig_2014(model):
     """Returns the cumulative # of re-migrants"""
-    return len(re_migrants_list_2014)
+    return len(cumulative_re_mig_list_2014)
 
 
 def show_instant_re_mig_2014(model):
-    """Returns the cumulative # of re-migrants"""
-    return sum(re_mig_list_2014)
+    """Returns the instant # of re-migrants"""
+    return len(re_migrants_list_2014)
 
 
 def show_instant_re_mig_per_hh_2014(model):
