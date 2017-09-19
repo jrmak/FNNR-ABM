@@ -98,7 +98,7 @@ def show_instant_mig_per_hh_2014(model):
 
 def show_cumulative_re_mig_2014(model):
     """Returns the cumulative # of re-migrants"""
-    return len(cumulative_re_mig_list_2014)
+    return sum(cumulative_re_mig_list_2014)
 
 
 def show_instant_re_mig_2014(model):
