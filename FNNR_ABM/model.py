@@ -16,53 +16,66 @@ from random import choice
 hh_list_2014 = ['11', '16', '31', '39', '41', '57', '72', '91', '101', '104', '108',
                 '109', '113', '120', '123', '148', '149', '153', '161', '166']
 
+
 def show_cumulative_mig(model):
     """Returns the cumulative # of out-migrants from the reserve at any given time"""
     return sum(cumulative_mig_list)
+
 
 def show_instant_mig(model):
     """Returns the 'instant' # of out-migrants from the reserve at any given time"""
     return len(out_migrants_list)
 
+
 def show_instant_mig_per_hh(model):
     """Returns the average # of migrants from each household at a given time"""
     return len(out_migrants_list) / 94
+
 
 def show_cumulative_re_mig(model):
     """Returns the cumulative # of re-migrants"""
     return sum(cumulative_re_mig_list)
 
+
 def show_instant_re_mig(model):
     """Returns the 'instant' # of out-migrants from the reserve at any given time"""
     return len(re_migrants_list)
+
 
 def show_instant_re_mig_per_hh(model):
     """Returns the average # of re-migrants for each household"""
     return len(re_migrants_list) / 94
 
+
 def show_marriages(model):
     """Returns the total # of marriages in the reserve"""
     return float(len(new_married_list))
+
 
 def show_births(model):
     """Returns the total # of births in the reserve"""
     return len(birth_list)
 
+
 def show_deaths(model):
     """Returns the total # of deaths in the reserve"""
     return len(death_list)
+
 
 def show_hh_size(model):
     """Returns the average household size in the reserve"""
     return sum(hh_size_list) / 94
 
+
 def show_num_labor(model):
     """Returns the average # of laborers per household in the reserve"""
     return sum(num_labor_list) / 94
 
+
 def show_income(model):
     """Returns the average household income in the reserve"""
     return sum(household_income_list) / 94
+
 
 def show_pop(model):
     """Returns the population for each year in the reserve"""
@@ -71,15 +84,19 @@ def show_pop(model):
     # out_migrants_list at step 0 includes initial migrants
     return individuals
 
+
 def show_gtgp_per_hh(model):
     """Returns the average # of GTGP land parcels per household"""
     return len(gtgplist) / 94
+
 
 def show_non_gtgp_per_hh(model):
     """Returns the average # of non-GTGP land parcels per household"""
     return len(nongtgplist) / 94
 
+
 # 2014
+
 
 def show_cumulative_mig_2014(model):
     """Returns the cumulative # of migrants"""
@@ -148,9 +165,11 @@ def show_pop_2014(model):
     # out_migrants_list at step 0 includes initial migrants
     return individuals
 
+
 def show_gtgp_per_hh_2014(model):
     """Returns the average # of GTGP land parcels per household"""
     return len(gtgplist_2014) / 20
+
 
 def show_non_gtgp_per_hh_2014(model):
     """Returns the average # of non-GTGP land parcels per household"""
@@ -220,11 +239,7 @@ class ABM(Model):
         self.non_gtgp_area = 0
         self.step_counter = 0
 
-
-
         self.space = ContinuousSpace(width, height, True, grid_width = 10, grid_height = 10)
-        # class space.ContinuousSpace(x_max, y_max, torus, x_min=0, y_min=0, grid_width=100, grid_height=100)
-        # methods: get_distance, get_neighbors, move_agent, out_of_bounds, place_agent
         self.schedule = StagedActivation(self)
 
         self.make_hh_agents_2016()
@@ -296,12 +311,6 @@ class ABM(Model):
         self.datacollector17 = DataCollector(
             model_reporters={'Instant # of Re-migrants': show_instant_re_mig_2014})
 
-        # self.datacollector19 = DataCollector(
-        #     model_reporters={'Cumulative Migrants Per Household': show_instant_mig_per_hh_2014})
-        #
-        # self.datacollector20 = DataCollector(
-        #     model_reporters={'Instant Re-migrants Per Household': show_instant_re_mig_per_hh_2014})
-
         self.datacollector18 = DataCollector(
             model_reporters = {'Total # of Marriages in the Reserve': show_marriages_2014})
 
@@ -328,12 +337,6 @@ class ABM(Model):
 
         self.datacollector26 = DataCollector(
             model_reporters = {'Average Household Income': show_income_2014})
-
-        # self.datacollector30 = DataCollector(
-        #     model_reporters = {'# of Out-Migrants': show_cumulative_mig_2014})
-
-        # self.datacollector31 = DataCollector(
-        #     model_reporters = {'# of Re-Migrants': show_cumulative_re_mig_2014})
 
     def make_birth_agents(self, ind):
         self.schedule = StagedActivation(self)
@@ -456,7 +459,6 @@ class ABM(Model):
             a2014 = HouseholdAgent(hh_row, self, self.hh_id, self.admin_village)
             self.schedule.add(a2014)
 
-
     def make_land_agents_2016(self):
         """Create the land agents on the map; adding output and time later"""
         # add non-gtgp
@@ -510,7 +512,7 @@ class ABM(Model):
                                      self.pre_gtgp_output)
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
-                #except:
+                # except:
                 #    pass
 
         # add gtgp
@@ -558,10 +560,10 @@ class ABM(Model):
                 if self.gtgp_enrolled == 1 and self not in gtgplist:
                     gtgplist.append(self)
                 lp_gtgp = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
-                                     self.age_1, self.gender_1, self.education_1,
-                                     self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
-                                     self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
-                                     self.pre_gtgp_output)
+                                        self.age_1, self.gender_1, self.education_1,
+                                        self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
+                                        self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
+                                        self.pre_gtgp_output)
                 self.space.place_agent(lp_gtgp, landpos)
                 self.schedule.add(lp_gtgp)
 
@@ -781,7 +783,6 @@ class ABM(Model):
             except TypeError:  # None
                 pass
 
-
     def step(self):
         """Advance the model by one step"""
         self.datacollector.collect(self)
@@ -811,9 +812,4 @@ class ABM(Model):
         self.datacollector24.collect(self)
         self.datacollector25.collect(self)
         self.datacollector26.collect(self)
-        # self.datacollector27.collect(self)
-        # self.datacollector28.collect(self)
-        # self.datacollector29.collect(self)
-        # self.datacollector30.collect(self)
-        # self.datacollector31.collect(self)
         self.schedule.step()
