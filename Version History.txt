@@ -1,6 +1,12 @@
 Version History:
 Pseudocode Version 11 (0814)
-*Debugging formulas
+v1.913 - 9/19/2017 - Debugging on income(?)
+v1.912 - 9/16 - 9/17/2017 - Debugging on migration and land parcel variables on both 2016 and 2014 models
+v1.910 - v1.911 - 9/11 - 9/14/2017 - Final debugging on base population variables (marriage/death/births) on 2016 model
+v1.94 - v1.99 - 9/2 - 9/10/2017- Continued adding 2014 component to model, created output files for exporting 2014 data
+v1.93 - 9/1/2017 - Imported additional variables related to gtgp output that were estimated before
+v1.92 - 8/28/17 - Started incorporating 2014 data
+v1.91 - 8/27/17 - Fixed initial outmigrants
 
 Pseudocode Version 10 (0726)
 v1.812 - 8/24/2017 - Changes to income calculations, comment addition and code cleanup
