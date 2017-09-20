@@ -459,7 +459,7 @@ class ABM(Model):
 
     def make_land_agents_2016(self):
         """Create the land agents on the map; adding output and time later"""
-        # add non-gtgp rice paddies
+        # add non-gtgp
         for hh_row in agents:  # from excel_import
             hh_id = return_values(hh_row, 'hh_id')
             self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
@@ -485,6 +485,7 @@ class ABM(Model):
                     self.pre_gtgp_output = return_values(hh_row, 'pre_gtgp_output')[landposlist.index(landpos)]
                 except:
                     pass
+
                 try:
                     self.non_gtgp_output = return_values(hh_row, 'pre_gtgp_output')[landposlist.index(landpos)]
                 except:
@@ -512,62 +513,7 @@ class ABM(Model):
                 #except:
                 #    pass
 
-        # add non-gtgp dry parcels
-        for hh_row in agents:  # from excel_import
-            hh_id = return_values(hh_row, 'hh_id')
-            self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
-            if self.total_rice in ['-3', '-4', -3, None]:
-                self.total_rice = 0
-            self.total_dry = return_values(hh_row, 'non_gtgp_dry_mu')
-            if self.total_dry in ['-3', '-4', -3, None]:
-                self.total_dry = 0
-            self.gtgp_rice = return_values(hh_row, 'gtgp_rice_mu')
-            if self.gtgp_rice in ['-3', '-4', -3, None]:
-                self.total_rice = 0
-            self.gtgp_dry = return_values(hh_row, 'gtgp_dry_mu')
-            if self.gtgp_dry in ['-3', '-4', -3, None]:
-                self.gtgp_dry = 0
-            landposlist = self.determine_landpos(hh_row, 'non_gtgp_latitude', 'non_gtgp_longitude')
-            self.age_1 = return_values(hh_row, 'age')[0]
-            self.gender_1 = return_values(hh_row, 'gender')[0]
-            self.education_1 = return_values(hh_row, 'education')[0]
-            for landpos in landposlist:
-                try:
-                    self.land_area = return_values(hh_row, 'non_gtgp_rice_mu')[0]
-                except:
-                    pass
-                if self.land_area != 0:
-                    self.land_type = 0
-                try:
-                    self.pre_gtgp_output = return_values(hh_row, 'pre_gtgp_output')[landposlist.index(landpos)]
-                except:
-                    pass
-                try:
-                    self.non_gtgp_output = return_values(hh_row, 'pre_gtgp_output')[landposlist.index(landpos)]
-                except:
-                    pass
-                self.land_time = return_values(hh_row, 'non_gtgp_travel_time')[landposlist.index(landpos)]
-                try:
-                    self.plant_type = return_values(hh_row, 'non_gtgp_plant_type')[landposlist.index(landpos)]
-                except:
-                    pass
-                try:
-                    self.land_type = return_values(hh_row, 'non_gtgp_land_type')[landposlist.index(landpos)]
-                except:
-                    pass
-                self.hh_size = len(return_values(hh_row, 'age'))
-                self.gtgp_enrolled = 0
-                if self.gtgp_enrolled == 0 and self not in nongtgplist and self not in gtgplist:
-                    nongtgplist.append(self)
-                lp2 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
-                                     self.age_1, self.gender_1, self.education_1,
-                                     self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
-                                     self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
-                                     self.pre_gtgp_output)
-                self.space.place_agent(lp2, landpos)
-                self.schedule.add(lp2)
-
-        # add gtgp land parcels
+        # add gtgp
         for hh_row in agents:  # from excel_import
             hh_id = return_values(hh_row, 'hh_id')
             self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
@@ -587,12 +533,6 @@ class ABM(Model):
             self.gender_1 = return_values(hh_row, 'gender')[0]
             self.education_1 = return_values(hh_row, 'education')[0]
             for landpos in landposlist:
-                try:
-                    self.land_area = return_values(hh_row, 'gtgp_rice_mu')[0]
-                except:
-                    pass
-                if self.land_area != 0:
-                    self.land_type = 0
                 try:
                     self.pre_gtgp_output = return_values(hh_row, 'pre_gtgp_output')[landposlist.index(landpos)]
                 except:
@@ -617,71 +557,13 @@ class ABM(Model):
                 self.gtgp_enrolled = 1
                 if self.gtgp_enrolled == 1 and self not in gtgplist:
                     gtgplist.append(self)
-                lp3 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
+                lp_gtgp = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
                                      self.age_1, self.gender_1, self.education_1,
                                      self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
                                      self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
                                      self.pre_gtgp_output)
-                self.space.place_agent(lp3, landpos)
-                self.schedule.add(lp3)
-
-        # add gtgp land parcels
-        for hh_row in agents:  # from excel_import
-            hh_id = return_values(hh_row, 'hh_id')
-            self.total_rice = return_values(hh_row, 'non_gtgp_rice_mu')
-            if self.total_rice in ['-3', '-4', -3, None]:
-                self.total_rice = 0
-            self.total_dry = return_values(hh_row, 'non_gtgp_dry_mu')
-            if self.total_dry in ['-3', '-4', -3, None]:
-                self.total_dry = 0
-            self.gtgp_rice = return_values(hh_row, 'gtgp_rice_mu')
-            if self.gtgp_rice in ['-3', '-4', -3, None]:
-                self.total_rice = 0
-            self.gtgp_dry = return_values(hh_row, 'gtgp_dry_mu')
-            if self.gtgp_dry in ['-3', '-4', -3, None]:
-                self.gtgp_dry = 0
-            landposlist = self.determine_landpos(hh_row, 'gtgp_latitude', 'gtgp_longitude')
-            self.age_1 = return_values(hh_row, 'age')[0]
-            self.gender_1 = return_values(hh_row, 'gender')[0]
-            self.education_1 = return_values(hh_row, 'education')[0]
-            for landpos in landposlist:
-                try:
-                    self.land_area = return_values(hh_row, 'gtgp_rice_mu')[0]
-                except:
-                    pass
-                if self.land_area != 0:
-                    self.land_type = 0
-                try:
-                    self.pre_gtgp_output = return_values(hh_row, 'pre_gtgp_output')[landposlist.index(landpos)]
-                except:
-                    pass
-                try:
-                    self.non_gtgp_output = return_values(hh_row, 'pre_gtgp_output')[landposlist.index(landpos)]
-                except:
-                    pass
-                try:
-                    self.land_time = return_values(hh_row, 'gtgp_travel_time')[landposlist.index(landpos)]
-                except:
-                    pass
-                try:
-                    self.plant_type = return_values(hh_row, 'pre_gtgp_plant_type')[landposlist.index(landpos)]
-                except:
-                    pass
-                try:
-                    self.land_type = return_values(hh_row, 'pre_gtgp_land_type')[landposlist.index(landpos)]
-                except:
-                    pass
-                self.hh_size = len(return_values(hh_row, 'age'))
-                self.gtgp_enrolled = 1
-                if self.gtgp_enrolled == 1 and self not in gtgplist:
-                    gtgplist.append(self)
-                lp4 = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
-                                     self.age_1, self.gender_1, self.education_1,
-                                     self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
-                                     self.land_type, self.land_time, self.plant_type, self.non_gtgp_output,
-                                     self.pre_gtgp_output)
-                self.space.place_agent(lp4, landpos)
-                self.schedule.add(lp4)
+                self.space.place_agent(lp_gtgp, landpos)
+                self.schedule.add(lp_gtgp)
 
     def make_individual_agents_2016(self):
         """Create the individual agents"""
@@ -693,6 +575,8 @@ class ABM(Model):
             genderlist = return_values(hh_row, 'gender')
             marriagelist = return_values(hh_row, 'marriage')
             educationlist = return_values(hh_row, 'education')
+            income_local_off_farm = float(return_values(hh_row, 'income_local_off_farm'))
+            household_income_list[hh_row - 1] = household_income_list[hh_row - 1] + income_local_off_farm
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
                     self.individual_id = str(self.hh_id) + str(individual_id_list[i])  # example: 2c
@@ -721,6 +605,20 @@ class ABM(Model):
             genderlist = return_values_2014(self.hh_row, 'gender')
             marriagelist = return_values_2014(self.hh_row, 'marriage')
             educationlist = return_values_2014(self.hh_row, 'education')
+
+            if self.hh_id == 31:
+                income_local_off_farm = (float(7500))
+            elif self.hh_id == 39:
+                income_local_off_farm = (float(12000))
+            elif self.hh_id == 57:
+                income_local_off_farm = (float(18000))
+            elif self.hh_id == 148:
+                income_local_off_farm = (float(9600))
+            elif self.hh_id == 153:
+                income_local_off_farm = (float(600))
+            else:
+                income_local_off_farm = 0
+            household_income_list_2014[self.hh_row - 2] = household_income_list_2014[self.hh_row - 2] + income_local_off_farm
 
             if individual_id_list is not None and individual_id_list is not []:
                 try:

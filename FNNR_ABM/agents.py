@@ -86,18 +86,12 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
             else:
                 self.hh_id = self.hh_id[:-1]
             self.hh_row = get_hh_row(int(self.hh_id)) - 2
-        # if self.hh_row <= 94:
-        #     self.out_mig = initialize_migrants(self.hh_row)  # how many migrants the hh has
-        #     self.num_labor = initialize_labor(self.hh_row) # how many laborers the hh has
-#        if self.hh_row <= 94:
-#             self.mig_remittances = return_values(self.hh_row, 'mig_remittances') # remittances of initial migrant
+        if self.hh_row <= 94:
+             self.out_mig = initialize_migrants(self.hh_row)  # how many migrants the hh has
+             self.num_labor = initialize_labor(self.hh_row) # how many laborers the hh has
 
         self.first_step_flag = 0
         self.hh_step_counter = 0
-
-        # self.hh_size = len(return_values(self.hh_row, 'age'))
-        # else:
-        #     self.hh_size = 0
 
     def return_labor(self):
         #return self.num_labor
@@ -105,11 +99,6 @@ class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
 
     def step(self):
         """Step behavior for household agents; see pseudo-code document"""
- #       if self.mig_remittances is not None and int(self.mig_remittances) > 0   \
- #           and self.hh_step_counter == 0:
-#                household_income_list[self.hh_row - 1] = int(self.mig_remittances)
-        # print(self.hh_step_counter, household_income_list)
-        self.hh_step_counter += 1
         if self.hh_id in hhlist:  # used for Excel file import later in this document
             hhlist.remove(self.hh_id) # resets list every step
 
@@ -190,7 +179,13 @@ class LandParcelAgent(Agent):
         comp_amount = self.land_area * unit_comp
         self.gtgp_net_income = comp_amount - crop_income
         self.land_income = comp_amount + crop_income
-
+        # self.landpos = 0 if data is 2014 data
+        if self.landpos != 0 and self.land_step_counter == 0:
+            household_income_list[self.hh_row - 1] = (household_income_list[self.hh_row - 1]
+                                                      + self.land_income)
+        elif self.landpos == 0 and self.hh_row < 22 and self.land_step_counter == 0:
+            household_income_list_2014[self.hh_row - 3] = (household_income_list_2014[self.hh_row - 3]
+                                                           + self.land_income)
 
     def gtgp_participation(self):
         """Initializes labor and determines non-GTGP and GTGP status"""
@@ -218,7 +213,6 @@ class LandParcelAgent(Agent):
         if random() < gtgp_part_prob:
             self.gtgp_enrolled = 1
             if self.hh_id not in gtgp_part_list:
-                # print(len(gtgp_part_list))
                 gtgp_part_list.append(self.hh_id)
         return self.gtgp_enrolled
 
@@ -246,14 +240,13 @@ class LandParcelAgent(Agent):
 
     def step(self):
         """Step behavior for LandParcelAgent"""
-        old_land_income = self.land_income  # resets yearly?
+        old_land_income = self.land_income  # resets yearly
         self.non_gtgp_count(nongtgplist, gtgplist)
         self.gtgp_count(nongtgplist, gtgplist)
         self.non_gtgp_count_2014(nongtgplist_2014, gtgplist_2014)
         self.gtgp_count_2014(nongtgplist_2014, gtgplist_2014)
         self.output()
         self.gtgp_participation()
-        # print(self.land_step_counter, self.hh_row, self.landpos, self.land_income, old_land_income)
         if self.landpos != 0:
             household_income_list[self.hh_row - 1] = (household_income_list[self.hh_row - 1]
                                               + self.land_income - old_land_income)
@@ -733,8 +726,8 @@ class IndividualAgent(Agent):
 
     def re_migration(self):
         """Describes re-migration process and probability following out-migration"""
-        if self.step_counter == 0 and '2014' in self.individual_id:
-            self.mig_remittances = household_income_list[self.hh_row - 1]
+        # if self.step_counter == 0 and '2014' in self.individual_id:
+        #     self.mig_remittances = household_income_list[self.hh_row - 1]
             # else:
             #     self.mig_remittances = household_income_list[self.hh_row - 1]
 #        if (self.individual_id in out_migrants_list or self.individual_id in out_migrants_list_2014)  \
@@ -758,7 +751,7 @@ class IndividualAgent(Agent):
 
                     elif '2014' in self.individual_id and self.hh_row < 22:
                         if 'm' in self.individual_id:
-                            self.mig_remittances = return_values(self.hh_row,
+                            self.mig_remittances = return_values_2014(self.hh_row + 1,
                                                                  'mig_remittances')
                             if self.mig_remittances is None:
                                 self.mig_remittances = 0
@@ -780,7 +773,7 @@ class IndividualAgent(Agent):
                     elif self.individual_id not in re_migrants_list_2014 and '2014' in self.individual_id:
                         re_migrants_list_2014.append(self.individual_id)
                         re_mig_list_2014[self.hh_row - 1] += 1
-                        cumulative_re_mig_list_2014[self.hh_row -1] += 1
+                        cumulative_re_mig_list_2014[self.hh_row - 1] += 1
 
                     self.hh_size += 1
                     self.out_mig -= 1
@@ -817,10 +810,10 @@ class IndividualAgent(Agent):
             self.re_migration()
             self.age = float(self.age)
             self.age += 1
-        if self.step_counter == 0 and '2014' not in self.individual_id:
-            household_income_list[self.hh_row - 1] = household_income_list[self.hh_row - 1] + self.income_local_off_farm
-        elif self.step_counter == 0 and '2014' in self.individual_id:
-            household_income_list_2014[self.hh_row - 1] = household_income_list_2014[self.hh_row - 1] + self.income_local_off_farm
+        # if self.step_counter == 0 and '2014' not in self.individual_id:
+        #     household_income_list[self.hh_row - 1] = household_income_list[self.hh_row - 1] + self.income_local_off_farm
+        # elif self.step_counter == 0 and '2014' in self.individual_id:
+        #     household_income_list_2014[self.hh_row - 1] = household_income_list_2014[self.hh_row - 1] + self.income_local_off_farm
 
 
         # self.step_counter = int(self.step_counter)
