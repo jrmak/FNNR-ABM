@@ -6,8 +6,8 @@ This document runs the server and helps visualize the agents.
 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule, TextElement
-from model import *
-from agents import *
+# from model import *
+# from agents import *
 from excel_export_summary import *
 from excel_export_summary_2014 import *
 from excel_export_household import *
@@ -59,12 +59,12 @@ agent_canvas = SimpleCanvas(agent_draw, 700, 700)  # create simulation window
 
 # create line graph
 chart = ChartModule([{"Label": 'Average Number of Migrants',
-                     "Color": "Black"}], canvas_height = 250, canvas_width = 700,
-                     data_collector_name = 'datacollector')
+                        "Color": "Black"}], canvas_height = 250, canvas_width = 700,
+                        data_collector_name = 'datacollector')
 
 chart2 = ChartModule([{"Label": 'Total # of Marriages in the Reserve',
-                     "Color": "Black"}], canvas_height = 250, canvas_width = 700,
-                     data_collector_name = 'datacollector2')
+                        "Color": "Black"}], canvas_height = 250, canvas_width = 700,
+                        data_collector_name = 'datacollector2')
 
 
 model = ABM(100, 10, 10)
@@ -74,16 +74,14 @@ erase_household_2014()
 erase_summary_2014()
 initialize_household()
 initialize_household_2014()
-global i_counter
 for i in range(81):  # sets up model to run for 80 steps
     model.step()
-    i_counter = i
-    save_summary(i_counter, show_cumulative_mig(model), show_instant_mig(model), show_instant_mig_per_hh(model),
+    save_summary(i, show_cumulative_mig(model), show_instant_mig(model), show_instant_mig_per_hh(model),
                  show_cumulative_re_mig(model), show_instant_re_mig(model),                     \
                  show_instant_re_mig_per_hh(model), show_marriages(model), show_births(model), len(death_list),
                  show_num_labor(model), show_hh_size(model), show_income(model),
                  show_pop(model), show_gtgp_per_hh(model), show_non_gtgp_per_hh(model))
-    save_summary_2014(i_counter, show_cumulative_mig_2014(model), show_instant_mig_2014(model),
+    save_summary_2014(i, show_cumulative_mig_2014(model), show_instant_mig_2014(model),
                       show_instant_mig_per_hh_2014(model), show_cumulative_re_mig_2014(model),
                       show_instant_re_mig_2014(model), show_instant_re_mig_per_hh_2014(model),
                       show_marriages_2014(model), show_births_2014(model), len(death_list_2014),
@@ -266,7 +264,7 @@ plt.title('Average Yearly Household Income (2014 data)')
 plt.xlabel('Years (Steps)')
 plt.ylabel('Income (Yuan)')
 
-plt.show() # comment or uncomment this line to see or hide the graphs
+plt.show()  # comment or uncomment this line to see or hide the graphs
 
 # The text elements below update with every step.
 
@@ -281,7 +279,7 @@ class MapLegend(TextElement):
                 + "Non-GTGP Land Parcels: " + str(len(nongtgplist))
                 + " | GTGP Land Parcels: " + str(len(gtgplist))
                 + " | Total Land Parcels: " + str(len(nongtgplist) + len(gtgplist))
-                + " | Step: " + str(i_counter)
+                + " | Step: " + str(i)
                 + "<br><br></h3>")
 
 # text0 = MapLegend()
