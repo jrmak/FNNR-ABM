@@ -419,6 +419,7 @@ class ABM(Model):
             if mig_remittances is None:
                 mig_remittances = 0
             household_income_list[hh_row - 1] = int(mig_remittances)
+            household_remittances_list[hh_row - 1] = int(mig_remittances)
 
             if return_values(hh_row, 'initial_migrants') is not None:
                 out_mig_list[hh_row - 1] = 1
@@ -440,6 +441,7 @@ class ABM(Model):
                                  (17, 36000), (19, 5000), (20, 2000)]
         for (x, y) in hardcoded_remittances:
             household_income_list_2014[x - 2] = y
+            household_remittances_list_2014[x - 2] = y
 
         for hh_row in range(2, 22):  # agents is a list of ints 1-97 from excel_import
             self.hh_id = return_values(hh_row, 'hh_id')
@@ -578,6 +580,7 @@ class ABM(Model):
             marriagelist = return_values(hh_row, 'marriage')
             educationlist = return_values(hh_row, 'education')
             income_local_off_farm = float(return_values(hh_row, 'income_local_off_farm'))
+            income_local_off_farm_list[hh_row - 1] = income_local_off_farm
             household_income_list[hh_row - 1] = household_income_list[hh_row - 1] + income_local_off_farm
             if individual_id_list is not None and individual_id_list is not []:
                 for i in range(len(individual_id_list)):
@@ -608,20 +611,20 @@ class ABM(Model):
             marriagelist = return_values_2014(self.hh_row, 'marriage')
             educationlist = return_values_2014(self.hh_row, 'education')
 
-            if self.hh_id == 31:
+            if self.hh_id == '31':
                 income_local_off_farm = (float(7500))
-            elif self.hh_id == 39:
+            elif self.hh_id == '39':
                 income_local_off_farm = (float(12000))
-            elif self.hh_id == 57:
+            elif self.hh_id == '57':
                 income_local_off_farm = (float(18000))
-            elif self.hh_id == 148:
+            elif self.hh_id == '148':
                 income_local_off_farm = (float(9600))
-            elif self.hh_id == 153:
+            elif self.hh_id == '153':
                 income_local_off_farm = (float(600))
             else:
                 income_local_off_farm = 0
             household_income_list_2014[self.hh_row - 2] = household_income_list_2014[self.hh_row - 2] + income_local_off_farm
-
+            income_local_off_farm_list_2014[self.hh_row - 2] = income_local_off_farm
             if individual_id_list is not None and individual_id_list is not []:
                 try:
                     self.non_gtgp_area = sum(return_values_2014(self.hh_row, 'non_gtgp_area'))

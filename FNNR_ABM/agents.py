@@ -40,6 +40,9 @@ out_mig_list = [0] * 94
 num_labor_list = [0] * 94
 hh_size_list = [0] * 94
 household_income_list = [0] * 94
+income_local_off_farm_list = [0] * 94
+land_income_list = [0] * 94
+household_remittances_list = [0] * 94
 
 single_male_list_2014 = []
 married_male_list_2014 = []
@@ -64,7 +67,9 @@ out_mig_list_2014 = [0] * 20
 num_labor_list_2014 = [0] * 20
 hh_size_list_2014 = [0] * 20
 household_income_list_2014 = [0] * 20
-
+income_local_off_farm_list_2014 = [0] * 20
+land_income_list_2014 = [0] * 20
+household_remittances_list_2014 = [0] * 20
 
 class HouseholdAgent(Agent):  # child class of Mesa's generic Agent class
     """Sets household data, including initial values"""
@@ -178,15 +183,17 @@ class LandParcelAgent(Agent):
                 self.total_dry = 0
         self.land_area = float(self.total_dry) + float(self.total_rice)
         comp_amount = self.land_area * unit_comp
+
         self.gtgp_net_income = comp_amount - crop_income
         self.land_income = comp_amount + crop_income
+
         # self.landpos = 0 if data is 2014 data
         if self.landpos != 0 and self.land_step_counter == 0:
-            household_income_list[self.hh_row - 1] = (household_income_list[self.hh_row - 1]
-                                                      + self.land_income)
+            household_income_list[self.hh_row - 1] += self.land_income
+            land_income_list[self.hh_row - 1] += self.land_income
         elif self.landpos == 0 and self.hh_row < 22 and self.land_step_counter == 0:
-            household_income_list_2014[self.hh_row - 3] = (household_income_list_2014[self.hh_row - 3]
-                                                           + self.land_income)
+            household_income_list_2014[self.hh_row - 3] += self.land_income
+            land_income_list_2014[self.hh_row - 3] += self.land_income
 
     def gtgp_participation(self):
         """Initializes labor and determines non-GTGP and GTGP status"""
@@ -252,9 +259,14 @@ class LandParcelAgent(Agent):
         if self.landpos != 0:
             household_income_list[self.hh_row - 1] = (household_income_list[self.hh_row - 1]
                                               + self.land_income - old_land_income)
+            land_income_list[self.hh_row - 1] = (land_income_list[self.hh_row - 1]
+                                                      + self.land_income - old_land_income)
         elif self.landpos == 0 and self.hh_row < 22:
             household_income_list_2014[self.hh_row - 3] = (household_income_list_2014[self.hh_row - 3]
                                                         + self.land_income - old_land_income)
+            land_income_list_2014[self.hh_row - 3] = (land_income_list_2014[self.hh_row - 3]
+                                                        + self.land_income - old_land_income)
+
         self.land_step_counter += 1
 
 
@@ -681,6 +693,8 @@ class IndividualAgent(Agent):
                             # print(self.step_counter, self.hh_row, self.hh_id, self.individual_id, self.remittance)
                             household_income_list[self.hh_row - 1] = (household_income_list[self.hh_row - 1]
                                                                  + self.remittance)
+                            household_remittances_list[self.hh_row - 1] = household_remittances_list[self.hh_row - 1] \
+                                                                + self.remittance
                             out_mig_list[self.hh_row - 1] += 1
                             cumulative_mig_list[self.hh_row - 1] += 1
                             hh_size_list[self.hh_row - 1] -= 1
@@ -689,6 +703,8 @@ class IndividualAgent(Agent):
                             # print(self.step_counter, self.hh_row, self.hh_id, self.individual_id, self.remittance)
                             household_income_list_2014[self.hh_row - 1] = (household_income_list_2014[self.hh_row - 1]
                                                                       + self.remittance)
+                            household_remittances_list_2014[self.hh_row - 1] = household_remittances_list_2014[self.hh_row - 1] \
+                                                                      + self.remittance
                             out_mig_list_2014[self.hh_row - 1] += 1
                             cumulative_mig_list_2014[self.hh_row - 1] += 1
                             hh_size_list_2014[self.hh_row - 1] -= 1
@@ -744,8 +760,12 @@ class IndividualAgent(Agent):
                                                                  'mig_remittances')  # remittances of initial migrant
                             household_income_list[self.hh_row - 1] = household_income_list[self.hh_row - 1] \
                                                                 - float(self.mig_remittances)
+                            household_remittances_list[hh_row - 1] = household_remittances_list[hh_row - 1] \
+                                                                - float(self.mig_remittances)
                         else:
                             household_income_list[self.hh_row - 1] = household_income_list[self.hh_row - 1]\
+                                                                - self.remittance
+                            household_remittances_list[self.hh_row - 1] = household_remittances_list[self.hh_row - 1] \
                                                                 - self.remittance
 
                     elif '2014' in self.individual_id and self.hh_row < 22:
@@ -756,9 +776,15 @@ class IndividualAgent(Agent):
                                 self.mig_remittances = 0
                             household_income_list_2014[self.hh_row - 1] = household_income_list_2014[self.hh_row] \
                                                             - float(self.mig_remittances)
+                            household_remittances_list_2014[self.hh_row - 1] = household_remittances_list_2014[self.hh_row - 1] \
+                                                                - float(self.mig_remittances)
+
                         else:
                             household_income_list_2014[self.hh_row - 1] = household_income_list_2014[self.hh_row - 1] \
                                                                 - self.remittance
+                            household_remittances_list_2014[self.hh_row - 1] = \
+                                household_remittances_list_2014[self.hh_row - 1] - self.remittance
+
                     self.hh_id = self.past_hh_id
                     self.workstatus = 1
                     if self.individual_id in out_migrants_list:
@@ -824,27 +850,36 @@ class IndividualAgent(Agent):
                         if '2014' not in self.individual_id:
                             save(self.step_counter, self.current_year, self.hh_id,
                                  num_labor_list[self.hh_row - 1], out_mig_list[self.hh_row - 1],
-                                 hh_size_list[self.hh_row - 1], household_income_list[self.hh_row - 1])
+                                 hh_size_list[self.hh_row - 1], household_income_list[self.hh_row - 1],
+                                 income_local_off_farm_list[self.hh_row - 1], household_remittances_list[self.hh_row - 1],
+                                 land_income_list[self.hh_row - 1])
             elif str(self.individual_id)[-1] == 'b' and self.hh_id != 'Dead'  \
                 and (self.gender == 1 or self.marriage == 0) \
                     and self.hh_id != 'Migrated' and self.hh_id not in hhlist:
                         hhlist.append(self.hh_id)
                         save(self.step_counter, self.current_year, self.hh_id,
                              num_labor_list[self.hh_row - 1], out_mig_list[self.hh_row - 1],
-                             hh_size_list[self.hh_row - 1], household_income_list[self.hh_row - 1])
+                             hh_size_list[self.hh_row - 1], household_income_list[self.hh_row - 1],
+                                 income_local_off_farm_list[self.hh_row - 1], household_remittances_list[self.hh_row - 1],
+                                 land_income_list[self.hh_row - 1])
             elif str(self.individual_id)[-1] == 'c' and self.hh_id != 'Dead' \
                 and (self.gender == 1 or self.marriage == 0) \
                     and self.hh_id != 'Migrated' and self.hh_id not in hhlist:
                         hhlist.append(self.hh_id)
                         save(self.step_counter, self.current_year, self.hh_id,
                              num_labor_list[self.hh_row - 1], out_mig_list[self.hh_row - 1],
-                             hh_size_list[self.hh_row - 1], household_income_list[self.hh_row - 1])
+                             hh_size_list[self.hh_row - 1], household_income_list[self.hh_row - 1],
+                                 income_local_off_farm_list[self.hh_row - 1], household_remittances_list[self.hh_row - 1],
+                                 land_income_list[self.hh_row - 1])
             elif '2014' in self.individual_id and self.hh_id != 'Dead' \
                 and (self.gender == 1 or self.marriage == 0) \
                     and self.hh_id != 'Migrated':
                         save_2014(self.step_counter, self.current_year, self.hh_id,
                                 num_labor_list_2014[self.hh_row], out_mig_list_2014[self.hh_row],
-                                hh_size_list_2014[self.hh_row], household_income_list_2014[self.hh_row])
+                                hh_size_list_2014[self.hh_row], household_income_list_2014[self.hh_row],
+                                income_local_off_farm_list_2014[self.hh_row - 1],
+                                household_remittances_list_2014[self.hh_row - 1],
+                                land_income_list_2014[self.hh_row - 1])
 
         self.current_year += 1
         self.step_counter += 1

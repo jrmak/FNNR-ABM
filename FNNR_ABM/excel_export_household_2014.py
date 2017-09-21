@@ -16,11 +16,13 @@ except IOError:
 def initialize_household_2014():
     filewriter = csv.writer(fnnr_export)
     filewriter.writerow(['Step', 'Current Year', 'Household ID', 'Laborers in Household',
-                        'Migrants from Household', 'Household Size', 'Household Income'])
+                        'Migrants from Household', 'Household Size', 'Total Income',
+                         'Local Off-Farm Income', 'Household Remittances', 'GTGP and non-GTGP Land Income'])
     fnnr_export.flush()  # flush memory
     fnnr_export.close()
 
-def save_2014(step_counter, current_year, hh_id, num_labor, num_mig, hh_size, income):
+def save_2014(step_counter, current_year, hh_id, num_labor, num_mig, hh_size, income, income_local_off_farm,
+         household_remittances, land_income):
     """Exports entries onto a .csv file"""
     try:
         fnnr_export = open('FNNR-ABM_export_household_2014.csv', 'a+')  # a+ will create the file if it doesn't exist already
@@ -41,6 +43,12 @@ def save_2014(step_counter, current_year, hh_id, num_labor, num_mig, hh_size, in
     fnnr_export.writelines(str(hh_size))
     fnnr_export.writelines(',')
     fnnr_export.writelines(str(income))
+    fnnr_export.writelines(',')
+    fnnr_export.writelines(str(income_local_off_farm))
+    fnnr_export.writelines(',')
+    fnnr_export.writelines(str(household_remittances))
+    fnnr_export.writelines(',')
+    fnnr_export.writelines(str(land_income))
     fnnr_export.writelines('\n')
 
     fnnr_export.flush()  # flush memory
