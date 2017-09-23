@@ -383,11 +383,10 @@ class IndividualAgent(Agent):
                     mig.remittance = 0
                 mig.past_hh_id = str(self.hh_id)
                 # m is the generic individual id letter for initial migrants in the household
-                if mig.individual_id not in initial_migrants_list and self.hh_id not in household_migrants_list:
+                if mig.individual_id not in initial_migrants_list:
                     initial_migrants_list.append(mig.individual_id)
                     out_migrants_list.append(mig.individual_id)
-                    out_mig_list[self.hh_row - 1] += 1
-                    household_migrants_list.append(self.hh_id)
+                    # out_mig_list[self.hh_row - 1] += 1
                     self.schedule.add(mig)
                     self.running = True
             else:
@@ -399,10 +398,11 @@ class IndividualAgent(Agent):
                 mig.individual_id = str(self.hh_id) + 'm' + '_' + '2014'
                 mig.past_hh_id = str(self.hh_id)
                 # m is the generic individual id letter for initial migrants in the household
-                if mig.individual_id not in initial_migrants_list_2014 and self.hh_id not in household_migrants_list:
+                if mig.individual_id not in initial_migrants_list_2014 and self.hh_id not in household_migrants_list_2014:
                     initial_migrants_list_2014.append(mig.individual_id)
                     out_migrants_list_2014.append(mig.individual_id)
-                    out_mig_list_2014[self.hh_row - 1] += 1
+                    # household_migrants_list_2014.append(self.hh_id)
+                    # out_mig_list_2014[self.hh_row - 1] += 1
                     self.schedule.add(mig)
                     self.running = True
                 # household_migrants_list.append(self.hh_id)
@@ -457,6 +457,7 @@ class IndividualAgent(Agent):
                                 self.marriage_flag = 1
                                 married_male_list.append(male)
                                 self.husband_id = male
+                                hh_size_list[self.hh_row - 1] -= 1
                                 if 'k' not in male:
                                     self.hh_id = male.strip(male[-1])
                                     if self.hh_id != 0:
@@ -468,14 +469,17 @@ class IndividualAgent(Agent):
                                     new_married_list.append(self.individual_id)
                                 single_male_list.remove(male)
                                 marriage_flag_list.remove(1)
+                                self.hh_row = get_hh_row(int(self.hh_id)) - 2
+                                hh_size_list[self.hh_row - 3] += 1
                     elif '2014' in self.individual_id:
                         for male in single_male_list_2014:
                             if random() < float(self.match_prob) and self.marriage_flag == 0:
                                 married_male_list_2014.append(male)
                                 self.husband_id = male
+                                hh_size_list_2014[self.hh_row - 1] -= 1
                                 if 'k' not in male:
-                                    self.hh_id = male.strip(male[-6])
-                                    self.individual_id = self.hh_id + 'j'
+                                    self.hh_id = male[:-6]
+                                    self.individual_id = self.hh_id + 'j' + '_2014'
                                     new_married_list_2014.append(self.individual_id)
                                 else:
                                     self.hh_id = male[:male.index('k')]
@@ -483,6 +487,8 @@ class IndividualAgent(Agent):
                                     new_married_list_2014.append(self.individual_id)
                                 single_male_list_2014.remove(male)
                                 marriage_flag_list_2014.remove(1)
+                                self.hh_row = get_hh_row_2014(int(self.hh_id))
+                                hh_size_list_2014[self.hh_row - 2] += 1
                                 self.marriage_flag = 1
 
     def immigration_marriage(self):
@@ -510,7 +516,7 @@ class IndividualAgent(Agent):
         """Adds a new IndividualAgent class object"""
         if random() < self.birth_rate:
             birth_flag_list.append(1)
-        if self.marriage == 1 and self.gender == 2 and self.age < 55    \
+        if float(self.marriage) == 1 and float(self.gender) == 2 and float(self.age) < 55    \
             and birth_flag_list != []:
                 if (float(self.step_counter) - float(self.last_birth_time)) > float(self.birth_interval):
                     self.last_birth_time = self.step_counter
@@ -662,10 +668,16 @@ class IndividualAgent(Agent):
 
         elif '2014' in self.individual_id and self.hh_row <= 94:
             non_gtgp_area = self.non_gtgp_area
-            if num_labor_list_2014[self.hh_row - 1] != 0:
-                non_gtgp_land_per_labor = non_gtgp_area / num_labor_list_2014[self.hh_row - 1]
-            else:
-                non_gtgp_land_per_labor = 0
+            try:
+                if num_labor_list_2014[self.hh_row - 1] != 0:
+                    non_gtgp_land_per_labor = non_gtgp_area / num_labor_list_2014[self.hh_row - 1]
+                else:
+                    non_gtgp_land_per_labor = 0
+            except:
+                if num_labor_list_2014[self.hh_row - 3] != 0:
+                    non_gtgp_land_per_labor = non_gtgp_area / num_labor_list_2014[self.hh_row - 1]
+                else:
+                    non_gtgp_land_per_labor = 0
 
         else:
             non_gtgp_area = 0
@@ -840,7 +852,7 @@ class IndividualAgent(Agent):
         #     household_income_list_2014[self.hh_row - 1] = household_income_list_2014[self.hh_row - 1] + self.income_local_off_farm
 
         # self.step_counter = int(self.step_counter)
-        if int(self.step_counter) < 5:
+        if 1 <= int(self.step_counter) <= 6:
             # can change 5 to any number of steps, but code will take longer to run
             # selects one individual to represent the household in calculating hh size, etc.
             if str(self.individual_id)[-1] == 'a' and self.hh_id != 'Dead'  \

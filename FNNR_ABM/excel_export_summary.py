@@ -18,7 +18,7 @@ def save_summary(steps, show_cumulative_mig, show_num_mig, show_num_mig_per_year
                  population, show_gtgp_per_hh, show_non_gtgp_per_hh):
     """Exports entries onto a .csv file"""
     try:
-        fnnr_export = open('FNNR-ABM_export_summary.csv', 'a+')  # a+ will create the file if it doesn't exist already
+        fnnr_export = open('FNNR-ABM_export_summary_2016.csv', 'a+')  # a+ will create the file if it doesn't exist already
         # a is also preferred to w here to append, rather than overwrite, values
     except IOError:
         print('Please close Excel and retry.')  # will not work if the .csv is already open

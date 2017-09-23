@@ -423,11 +423,9 @@ class ABM(Model):
 
             if return_values(hh_row, 'initial_migrants') is not None:
                 out_mig_list[hh_row - 1] = 1
+                household_migrants_list.append(self.hh_id)
                 cumulative_mig_list[hh_row - 1] = 1
 
-            else:
-                out_mig_list[hh_row - 1] = 0
-                cumulative_mig_list[hh_row - 1] = 0
             num_labor_list[hh_row - 1] = initialize_labor(hh_row)
             hh_size_list[hh_row - 1] = len(return_values(hh_row, 'age'))
 
@@ -450,10 +448,8 @@ class ABM(Model):
             # 2014
             if return_values_2014(hh_row, 'initial_migrants') is not None:
                 out_mig_list_2014[hh_row - 2] = 1
+                household_migrants_list_2014.append(self.hh_id)
                 cumulative_mig_list_2014[hh_row - 2] = 1
-            else:
-                out_mig_list_2014[hh_row - 2] = 0
-                cumulative_mig_list_2014[hh_row - 2] = 0
 
             num_labor_list_2014[hh_row - 2] = initialize_labor_2014(hh_row)
             hh_size_list_2014[hh_row - 2] = len(return_values_2014(hh_row, 'age'))

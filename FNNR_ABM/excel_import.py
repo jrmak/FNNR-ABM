@@ -70,11 +70,6 @@ def assign_sheet_parameters(hh_row, variable):
     elif variable.lower() == 'non_gtgp_latitude':
         parameters.append(str('JP' + row))
         parameters.append(str('JT' + row))
-
-    # elif variable.lower() == 'num_mig':
-    #     parameters.append(str('ZV' + row))
-    #     parameters.append(str('ZZ' + row))
-
     elif variable.lower() == 'migration_network':
         parameters.append(str('AIP' + row))
         parameters.append(str('AIP' + row))
@@ -161,8 +156,6 @@ def initialize_labor(hh_row):
                 num_labor += 1  # defines number of laborers as people aged 15 < x < 59
             #except:
             #    num_labor = 0
-    else:
-        print(hh_row, 'except')
     return num_labor
 
 def initialize_migrants(hh_row):
