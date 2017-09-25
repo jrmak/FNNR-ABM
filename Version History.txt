@@ -1,6 +1,7 @@
 Version History:
 Pseudocode Version 11 (0814)
-v2.01 -9/22/2017 - Code cleanup, output format fix, and minor changes to formula for displaying out-migrants
+v2.02 - 9/23/2017 - Fixed miscellaneous indexing bugs and simulation; simulation still needs work
+v2.01 - 9/22/2017 - Code cleanup, output format fix, and minor changes to formula for displaying out-migrants
 v1.914 - 9/20/2017 - Added output household columns for income breakdown (local off-farm income + land income, including GTGP compensation and non-GTGP farm output + migrant remittances)
 v1.913 - 9/19/2017 - Attempts to debug income, ended up simplifying code, but no changes in output
 v1.912 - 9/16 - 9/17/2017 - Debugging on migration and land parcel variables on both 2016 and 2014 models
