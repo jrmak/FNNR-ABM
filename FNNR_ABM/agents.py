@@ -675,7 +675,7 @@ class IndividualAgent(Agent):
                     non_gtgp_land_per_labor = 0
             except:
                 if num_labor_list_2014[self.hh_row - 3] != 0:
-                    non_gtgp_land_per_labor = non_gtgp_area / num_labor_list_2014[self.hh_row - 1]
+                    non_gtgp_land_per_labor = non_gtgp_area / num_labor_list_2014[self.hh_row - 3]
                 else:
                     non_gtgp_land_per_labor = 0
 
