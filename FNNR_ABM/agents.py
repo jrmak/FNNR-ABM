@@ -713,13 +713,32 @@ class IndividualAgent(Agent):
 
                         elif '2014' in self.individual_id and self.hh_row < 22:
                             # print(self.step_counter, self.hh_row, self.hh_id, self.individual_id, self.remittance)
-                            household_income_list_2014[self.hh_row - 1] = (household_income_list_2014[self.hh_row - 1]
-                                                                      + self.remittance)
-                            household_remittances_list_2014[self.hh_row - 1] = household_remittances_list_2014[self.hh_row - 1] \
+                            try:
+                                household_income_list_2014[self.hh_row - 1] = (household_income_list_2014[self.hh_row - 1]
+                                                                          + self.remittance)
+                            except:
+                                household_income_list_2014[self.hh_row - 3] = (household_income_list_2014[self.hh_row - 3]
+                                                                                + self.remittance)
+
+                            try:
+                                household_remittances_list_2014[self.hh_row - 1] = household_remittances_list_2014[self.hh_row - 1] \
                                                                       + self.remittance
-                            out_mig_list_2014[self.hh_row - 1] += 1
-                            cumulative_mig_list_2014[self.hh_row - 1] += 1
-                            hh_size_list_2014[self.hh_row - 1] -= 1
+                            except:
+                                household_remittances_list_2014[self.hh_row - 3] = household_remittances_list_2014[
+                                                                                       self.hh_row - 3] \
+                                                                                   + self.remittance
+                            try:
+                                out_mig_list_2014[self.hh_row - 1] += 1
+                            except:
+                                out_mig_list_2014[self.hh_row - 3] += 1
+                            try:
+                                cumulative_mig_list_2014[self.hh_row - 1] += 1
+                            except:
+                                cumulative_mig_list_2014[self.hh_row - 3] += 1
+                            try:
+                                hh_size_list_2014[self.hh_row - 1] -= 1
+                            except:
+                                hh_size_list_2014[self.hh_row -3] -= 1
                         self.hh_size -= 1
 
                         self.past_hh_id = self.hh_id
@@ -732,7 +751,10 @@ class IndividualAgent(Agent):
                             if '2014' not in self.individual_id:
                                 num_labor_list[self.hh_row - 1] -= 1
                             elif '2014' in self.individual_id:
-                                num_labor_list_2014[self.hh_row - 1] -= 1
+                                try:
+                                    num_labor_list_2014[self.hh_row - 1] -= 1
+                                except:
+                                    num_labor_list_2014[self.hh_row - 3] -= 1
 
                         if '2014' not in self.individual_id:
                             household_migrants_list.append(self.hh_id)
