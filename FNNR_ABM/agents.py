@@ -668,7 +668,6 @@ class IndividualAgent(Agent):
 
         elif '2014' in self.individual_id and self.hh_row <= 22:
             non_gtgp_area = self.non_gtgp_area
-            print(self.hh_row)
             try:
                 if num_labor_list_2014[self.hh_row - 1] != 0:
                     non_gtgp_land_per_labor = non_gtgp_area / num_labor_list_2014[self.hh_row - 1]
