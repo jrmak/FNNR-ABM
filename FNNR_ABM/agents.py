@@ -250,12 +250,12 @@ class LandParcelAgent(Agent):
     def step(self):
         """Step behavior for LandParcelAgent"""
         old_land_income = self.land_income  # resets yearly
+        self.non_gtgp_count_2014(nongtgplist_2014, gtgplist_2014)
+        self.gtgp_count_2014(nongtgplist_2014, gtgplist_2014)
         self.output()
         self.gtgp_participation()
         self.non_gtgp_count(nongtgplist, gtgplist)
         self.gtgp_count(nongtgplist, gtgplist)
-        self.non_gtgp_count_2014(nongtgplist_2014, gtgplist_2014)
-        self.gtgp_count_2014(nongtgplist_2014, gtgplist_2014)
         if self.landpos != 0:
             household_income_list[self.hh_row - 1] = (household_income_list[self.hh_row - 1]
                                               + self.land_income - old_land_income)
