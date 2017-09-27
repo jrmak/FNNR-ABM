@@ -501,8 +501,6 @@ class ABM(Model):
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
                 self.gtgp_enrolled = 0
-                if self.gtgp_enrolled == 0 and self not in nongtgplist and self not in gtgplist:
-                    nongtgplist.append(self)
                 lp = LandParcelAgent(hh_row, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
                                      self.age_1, self.gender_1, self.education_1,
                                      self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
@@ -510,6 +508,8 @@ class ABM(Model):
                                      self.pre_gtgp_output)
                 self.space.place_agent(lp, landpos)
                 self.schedule.add(lp)
+                if self.gtgp_enrolled == 0 and landpos not in nongtgplist and landpos not in gtgplist:
+                    nongtgplist.append(landpos)
                 # except:
                 #    pass
 
@@ -555,8 +555,7 @@ class ABM(Model):
                     pass
                 self.hh_size = len(return_values(hh_row, 'age'))
                 self.gtgp_enrolled = 1
-                if self.gtgp_enrolled == 1 and self not in gtgplist:
-                    gtgplist.append(self)
+
                 lp_gtgp = LandParcelAgent(hh_id, self, hh_id, hh_row, landpos, self.gtgp_enrolled,
                                         self.age_1, self.gender_1, self.education_1,
                                         self.gtgp_dry, self.gtgp_rice, self.total_dry, self.total_rice,
@@ -564,6 +563,9 @@ class ABM(Model):
                                         self.pre_gtgp_output)
                 self.space.place_agent(lp_gtgp, landpos)
                 self.schedule.add(lp_gtgp)
+                if self.gtgp_enrolled == 1 and landpos not in gtgplist and landpos in nongtgplist:
+                    gtgplist.append(landpos)
+
 
     def make_individual_agents_2016(self):
         """Create the individual agents"""
@@ -769,7 +771,7 @@ class ABM(Model):
                     except:
                         pass
                     self.hh_size = len(return_values_2014(hh_row, 'age'))
-                    if self not in nongtgplist_2014 and self not in gtgplist2014:
+                    if self not in nongtgplist_2014 and self not in gtgplist_2014:
                         gtgplist_2014.append(self)
                     self.gtgp_enrolled = 1
                     self.hh_row = hh_row
