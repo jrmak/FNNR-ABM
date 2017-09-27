@@ -471,7 +471,7 @@ class IndividualAgent(Agent):
                                 marriage_flag_list.remove(1)
                                 self.hh_row = get_hh_row(int(self.hh_id)) - 2
                                 hh_size_list[self.hh_row - 3] += 1
-                    elif '2014' in self.individual_id:
+                    elif '2014' in self.individual_id and marriage_flag_list_2014 != []:
                         for male in single_male_list_2014:
                             if random() < float(self.match_prob) and self.marriage_flag == 0:
                                 married_male_list_2014.append(male)
