@@ -1,14 +1,16 @@
 # CHES-ABM
 
-Welcome to the FNNR-ABM project! This project demonstrates an agent-based model's web-based simulation of Green-to-Grain program enrollment in the Mt. Fanjingshan National Nature Reserve in Guizhou, China. I will edit this read-me with more information soon.
+Welcome to the FNNR-ABM project! This project demonstrates an agent-based model's web-based simulation of Green-to-Grain program enrollment in the Mt. Fanjingshan National Nature Reserve in Guizhou, China.
 
 ## Dependencies
 
 Python 3.0+ - any version of Python 3.X.X will work, since Mesa requires Python 3 or higher. The code was built on Python 3.6.1.
 
-Mesa - An ABM framework for Python 3.0+.
+Mesa - An ABM framework for Python 3.0+. Download Mesa 0.8.3. If using pip, the command is "pip install mesa==0.8.3".
 
-Openpyxl - Helps import data values into Python code from Excel files
+Openpyxl - Helps import data values into Python code from Excel files. Download the latest version.
+
+Tornado - An asynchronous web app that hosts a local server to run the simulation on. Download Tornado 4.5.3. If using pip, the command is "pip install tornado==4.5.3".
 
 ## Files
 
