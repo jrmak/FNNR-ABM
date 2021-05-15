@@ -29,7 +29,6 @@ Tornado - An asynchronous web app that hosts a local server to run the simulatio
 * FNNR-ABM_export_household_XXXX.py: Exports (creates) an output file with the simulation results for each household.
 * FNNR-ABM_export_summary_XXXX.py: Exports (creates) an output file with averaged simulation results for the reserve.
 * [FNNR_ABM/server.py](FNNR_ABM/server.py): Sets up the visualization; *run this file to execute the code.*
-* [FNNR_ABM/server.py](FNNR_ABM/server.py): Sets up the visualization; *run this file to execute the code.*
 
 ## Quickstart
 
