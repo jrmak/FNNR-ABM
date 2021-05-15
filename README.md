@@ -2,6 +2,8 @@
 
 Welcome to the FNNR-ABM project! This project demonstrates an agent-based model's web-based simulation of Green-to-Grain program enrollment in the Mt. Fanjingshan National Nature Reserve in Guizhou, China.
 
+NOTE: This project is now outdated - please visit the FNNR-ABM-Primate repository instead. Thank you.
+
 ## Dependencies
 
 Python 3.0+ - any version of Python 3.X.X will work, since Mesa requires Python 3 or higher. The code was built on Python 3.6.1.
